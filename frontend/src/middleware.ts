@@ -1,37 +1,35 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+// middleware.ts
+import {NextResponse} from 'next/server'
+import type {NextRequest} from 'next/server'
+import jwt from 'jsonwebtoken'
 
-// Define routes that require authentication
-const protectedRoutes = ['/dashboard', '/settings', '/admin', '/items']
+export function middleware(req: NextRequest) {
+  const token = req.cookies.get('access_token')?.value
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  
-  // Check if the current route is protected
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route)
-  )
-  
-  // For protected routes, let the client-side handle auth checks
-  // This avoids server-side localStorage access issues
-  if (isProtectedRoute) {
-    // Let the ProtectedRoute component handle the auth logic
-    return NextResponse.next()
+  // If no token → redirect to login
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', req.url))
   }
-  
+
+  // If it's a JWT, decode & check expiry
+  try {
+    const decoded = jwt.decode(token) as {exp?: number}
+    if (decoded?.exp && decoded.exp * 1000 < Date.now()) {
+      // Token is expired → clear cookie & redirect
+      const res = NextResponse.redirect(new URL('/login', req.url))
+      res.cookies.delete('access_token')
+      return res
+    }
+  } catch (e) {
+    console.error('[middleware error]', e)
+    const res = NextResponse.redirect(new URL('/login', req.url))
+    res.cookies.delete('access_token')
+    return res
+  }
+
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder files
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
-  ],
+  matcher: ['/dashboard/:path*', '/account/:path*'],
 }
