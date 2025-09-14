@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {User, ChevronUp, Plus, Gitlab, ChevronsDown} from 'react-feather'
+import {User, ChevronUp, Plus, Zap} from 'react-feather'
 
 import {
   Sidebar,
@@ -8,6 +8,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -40,7 +41,7 @@ export function AppSidebar({items, ...props}: {items: Item[]}) {
                   className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
                 >
                   <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
-                    <Gitlab className='size-4' />
+                    <Zap className='size-4' />
                   </div>
                   <div className='flex flex-col gap-0.5 leading-none'>
                     <span className='font-medium'>Study Companion</span>
@@ -53,6 +54,7 @@ export function AppSidebar({items, ...props}: {items: Item[]}) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupLabel>Projects</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
