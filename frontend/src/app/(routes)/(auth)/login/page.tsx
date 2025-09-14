@@ -1,11 +1,12 @@
 'use client'
 
-import {useActionState} from 'react'
+import {useActionState, useState} from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 
 import {authenticate} from '@/actions/auth'
 import {IAuthState} from '@/types/auth'
+import {validateField} from '@/lib/form'
 import PasswordInput from '@/components/ui/auth/PasswordInput'
 
 const AuthBackground = dynamic(
@@ -14,6 +15,8 @@ const AuthBackground = dynamic(
 )
 
 export default function Login() {
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
   const [state, formAction, isPending] = useActionState<
     IAuthState | undefined,
     FormData
@@ -21,6 +24,12 @@ export default function Login() {
     message: null,
     success: false,
   })
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const {name, value} = e.target
+    const fieldError = validateField(name, value)
+    setErrors((prev) => ({...prev, [name]: fieldError}))
+  }
 
   return (
     <div className='flex min-h-screen'>
@@ -40,14 +49,31 @@ export default function Login() {
                 placeholder='Enter your email'
                 required
                 className='w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500'
-                defaultValue='gichuru.gichia@gmail.com'
+                onBlur={handleBlur}
               />
+              {errors.email && (
+                <p className='mt-1 text-sm text-red-600'>{errors.email}</p>
+              )}
             </div>
 
-            <PasswordInput defaultValue="Pipowakwa1258@" />
-            {state && (
-              <div className='text-red-500 text-sm'>{state?.message}</div>
-            )}
+            <div>
+              <PasswordInput
+                onBlur={handleBlur}
+                error={errors?.password || null}
+              />
+              {state && state?.message && (
+                <div className='text-red-500 text-sm'>{state?.message}</div>
+              )}
+            </div>
+
+            <div className='flex items-center justify-between'>
+              <Link
+                href='/recover-password'
+                className='text-sm text-cyan-600 hover:text-cyan-500 hover:underline'
+              >
+                Forgot your password?
+              </Link>
+            </div>
 
             <button
               type='submit'

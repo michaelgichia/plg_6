@@ -71,3 +71,9 @@ export async function authenticate(
     }
   }
 }
+
+export async function logout() {
+  const cookieStore = await cookies()
+  cookieStore.delete('access_token')
+  redirect('/login')
+}

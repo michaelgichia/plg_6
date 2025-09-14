@@ -4,12 +4,12 @@ import {Eye, EyeOff} from 'react-feather'
 // Define the props for the PasswordInput component
 interface PasswordInputProps {
   className?: string
+  error?: string | null
 }
 
-const PasswordInput: React.FC<PasswordInputProps & React.InputHTMLAttributes<HTMLInputElement>> = ({
-  className,
-  ...props
-}) => {
+const PasswordInput: React.FC<
+  PasswordInputProps & React.InputHTMLAttributes<HTMLInputElement>
+> = ({className, error, ...props}) => {
   // State to manage the visibility of the password
   const [showPassword, setShowPassword] = useState(false)
 
@@ -28,7 +28,11 @@ const PasswordInput: React.FC<PasswordInputProps & React.InputHTMLAttributes<HTM
         type={showPassword ? 'text' : 'password'}
         placeholder='••••••••••'
         required
-        className='w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500'
+        className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 transition-colors ${
+          error
+            ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+            : 'border-zinc-300 focus:ring-cyan-500 focus:border-cyan-500'
+        }`}
       />
       <button
         type='button'
@@ -45,6 +49,7 @@ const PasswordInput: React.FC<PasswordInputProps & React.InputHTMLAttributes<HTM
           {showPassword ? 'Hide password' : 'Show password'}
         </span>
       </button>
+      {error && <p className='mt-1 text-sm text-red-600'>{error}</p>}
     </div>
   )
 }

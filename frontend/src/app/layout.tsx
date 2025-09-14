@@ -6,9 +6,7 @@ import {Toaster} from '@/components/ui/sonner'
 import {client} from '@/client/client.gen'
 // import {cookies} from 'next/headers'
 
-
 import Providers from './providers'
-
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -42,9 +40,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-            <main>
-              {children}
-            </main>
+          <main>{children}</main>
         </Providers>
         <Toaster />
       </body>

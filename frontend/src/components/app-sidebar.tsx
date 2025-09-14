@@ -1,7 +1,6 @@
 import React from 'react'
 
 import {User, ChevronUp, Plus, Zap} from 'react-feather'
-
 import {
   Sidebar,
   SidebarContent,
@@ -14,13 +13,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+
+import {logout} from '@/actions/auth'
 
 interface Item {
   title: string
@@ -96,11 +96,12 @@ export function AppSidebar({items, ...props}: {items: Item[]}) {
                 <DropdownMenuItem>
                   <span>Account</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Billing</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Sign out</span>
+                <DropdownMenuItem asChild>
+                  <form action={logout}>
+                    <button type='submit' className='w-full text-left cursor-pointer'>
+                      Sign out
+                    </button>
+                  </form>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
