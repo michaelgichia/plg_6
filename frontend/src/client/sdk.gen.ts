@@ -26,6 +26,7 @@ export class LoginService {
     public static postApiV1LoginAccessToken<ThrowOnError extends boolean = false>(options: Options<PostApiV1LoginAccessTokenData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1LoginAccessTokenResponses, PostApiV1LoginAccessTokenErrors, ThrowOnError>({
             ...urlSearchParamsBodySerializer,
+            responseType: 'json',
             url: '/api/v1/login/access-token',
             ...options,
             headers: {
@@ -41,6 +42,7 @@ export class LoginService {
      */
     public static postApiV1LoginTestToken<ThrowOnError extends boolean = false>(options?: Options<PostApiV1LoginTestTokenData, ThrowOnError>) {
         return (options?.client ?? client).post<PostApiV1LoginTestTokenResponses, unknown, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -58,6 +60,7 @@ export class LoginService {
      */
     public static postApiV1PasswordRecoveryByEmail<ThrowOnError extends boolean = false>(options: Options<PostApiV1PasswordRecoveryByEmailData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1PasswordRecoveryByEmailResponses, PostApiV1PasswordRecoveryByEmailErrors, ThrowOnError>({
+            responseType: 'json',
             url: '/api/v1/password-recovery/{email}',
             ...options
         });
@@ -69,6 +72,7 @@ export class LoginService {
      */
     public static postApiV1ResetPassword<ThrowOnError extends boolean = false>(options: Options<PostApiV1ResetPasswordData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1ResetPasswordResponses, PostApiV1ResetPasswordErrors, ThrowOnError>({
+            responseType: 'json',
             url: '/api/v1/reset-password/',
             ...options,
             headers: {
@@ -84,6 +88,7 @@ export class LoginService {
      */
     public static postApiV1PasswordRecoveryHtmlContentByEmail<ThrowOnError extends boolean = false>(options: Options<PostApiV1PasswordRecoveryHtmlContentByEmailData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1PasswordRecoveryHtmlContentByEmailResponses, PostApiV1PasswordRecoveryHtmlContentByEmailErrors, ThrowOnError>({
+            responseType: 'text',
             security: [
                 {
                     scheme: 'bearer',
@@ -103,6 +108,7 @@ export class UsersService {
      */
     public static getApiV1Users<ThrowOnError extends boolean = false>(options?: Options<GetApiV1UsersData, ThrowOnError>) {
         return (options?.client ?? client).get<GetApiV1UsersResponses, GetApiV1UsersErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -120,6 +126,7 @@ export class UsersService {
      */
     public static postApiV1Users<ThrowOnError extends boolean = false>(options: Options<PostApiV1UsersData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1UsersResponses, PostApiV1UsersErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -141,6 +148,7 @@ export class UsersService {
      */
     public static deleteApiV1UsersMe<ThrowOnError extends boolean = false>(options?: Options<DeleteApiV1UsersMeData, ThrowOnError>) {
         return (options?.client ?? client).delete<DeleteApiV1UsersMeResponses, unknown, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -158,6 +166,7 @@ export class UsersService {
      */
     public static getApiV1UsersMe<ThrowOnError extends boolean = false>(options?: Options<GetApiV1UsersMeData, ThrowOnError>) {
         return (options?.client ?? client).get<GetApiV1UsersMeResponses, unknown, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -175,6 +184,7 @@ export class UsersService {
      */
     public static patchApiV1UsersMe<ThrowOnError extends boolean = false>(options: Options<PatchApiV1UsersMeData, ThrowOnError>) {
         return (options.client ?? client).patch<PatchApiV1UsersMeResponses, PatchApiV1UsersMeErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -196,6 +206,7 @@ export class UsersService {
      */
     public static patchApiV1UsersMePassword<ThrowOnError extends boolean = false>(options: Options<PatchApiV1UsersMePasswordData, ThrowOnError>) {
         return (options.client ?? client).patch<PatchApiV1UsersMePasswordResponses, PatchApiV1UsersMePasswordErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -217,6 +228,7 @@ export class UsersService {
      */
     public static postApiV1UsersSignup<ThrowOnError extends boolean = false>(options: Options<PostApiV1UsersSignupData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1UsersSignupResponses, PostApiV1UsersSignupErrors, ThrowOnError>({
+            responseType: 'json',
             url: '/api/v1/users/signup',
             ...options,
             headers: {
@@ -232,6 +244,7 @@ export class UsersService {
      */
     public static deleteApiV1UsersByUserId<ThrowOnError extends boolean = false>(options: Options<DeleteApiV1UsersByUserIdData, ThrowOnError>) {
         return (options.client ?? client).delete<DeleteApiV1UsersByUserIdResponses, DeleteApiV1UsersByUserIdErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -249,6 +262,7 @@ export class UsersService {
      */
     public static getApiV1UsersByUserId<ThrowOnError extends boolean = false>(options: Options<GetApiV1UsersByUserIdData, ThrowOnError>) {
         return (options.client ?? client).get<GetApiV1UsersByUserIdResponses, GetApiV1UsersByUserIdErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -266,6 +280,7 @@ export class UsersService {
      */
     public static patchApiV1UsersByUserId<ThrowOnError extends boolean = false>(options: Options<PatchApiV1UsersByUserIdData, ThrowOnError>) {
         return (options.client ?? client).patch<PatchApiV1UsersByUserIdResponses, PatchApiV1UsersByUserIdErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -289,6 +304,7 @@ export class UtilsService {
      */
     public static postApiV1UtilsTestEmail<ThrowOnError extends boolean = false>(options: Options<PostApiV1UtilsTestEmailData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1UtilsTestEmailResponses, PostApiV1UtilsTestEmailErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -305,6 +321,7 @@ export class UtilsService {
      */
     public static getApiV1UtilsHealthCheck<ThrowOnError extends boolean = false>(options?: Options<GetApiV1UtilsHealthCheckData, ThrowOnError>) {
         return (options?.client ?? client).get<GetApiV1UtilsHealthCheckResponses, unknown, ThrowOnError>({
+            responseType: 'json',
             url: '/api/v1/utils/health-check/',
             ...options
         });
@@ -318,6 +335,7 @@ export class ItemsService {
      */
     public static getApiV1Items<ThrowOnError extends boolean = false>(options?: Options<GetApiV1ItemsData, ThrowOnError>) {
         return (options?.client ?? client).get<GetApiV1ItemsResponses, GetApiV1ItemsErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -335,6 +353,7 @@ export class ItemsService {
      */
     public static postApiV1Items<ThrowOnError extends boolean = false>(options: Options<PostApiV1ItemsData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1ItemsResponses, PostApiV1ItemsErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -356,6 +375,7 @@ export class ItemsService {
      */
     public static deleteApiV1ItemsById<ThrowOnError extends boolean = false>(options: Options<DeleteApiV1ItemsByIdData, ThrowOnError>) {
         return (options.client ?? client).delete<DeleteApiV1ItemsByIdResponses, DeleteApiV1ItemsByIdErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -373,6 +393,7 @@ export class ItemsService {
      */
     public static getApiV1ItemsById<ThrowOnError extends boolean = false>(options: Options<GetApiV1ItemsByIdData, ThrowOnError>) {
         return (options.client ?? client).get<GetApiV1ItemsByIdResponses, GetApiV1ItemsByIdErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -390,6 +411,7 @@ export class ItemsService {
      */
     public static putApiV1ItemsById<ThrowOnError extends boolean = false>(options: Options<PutApiV1ItemsByIdData, ThrowOnError>) {
         return (options.client ?? client).put<PutApiV1ItemsByIdResponses, PutApiV1ItemsByIdErrors, ThrowOnError>({
+            responseType: 'json',
             security: [
                 {
                     scheme: 'bearer',
@@ -413,6 +435,7 @@ export class PrivateService {
      */
     public static postApiV1PrivateUsers<ThrowOnError extends boolean = false>(options: Options<PostApiV1PrivateUsersData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1PrivateUsersResponses, PostApiV1PrivateUsersErrors, ThrowOnError>({
+            responseType: 'json',
             url: '/api/v1/private/users/',
             ...options,
             headers: {

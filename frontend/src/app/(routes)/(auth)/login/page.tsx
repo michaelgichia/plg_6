@@ -58,8 +58,11 @@ export default function Login() {
 
             <div>
               <PasswordInput
+                id='password'
+                name='password'
                 onBlur={handleBlur}
                 error={errors?.password || null}
+                label="Password"
               />
               {state && state?.message && (
                 <div className='text-red-500 text-sm'>{state?.message}</div>

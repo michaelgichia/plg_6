@@ -1,11 +1,12 @@
 'use server'
 
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+import {cookies} from 'next/headers'
+import {redirect} from 'next/navigation'
 
-import { IAuthState } from '@/types/auth'
-import { BodyLoginLoginAccessToken, LoginService } from '@/client'
-import { get } from '@/utils'
+import {IAuthState} from '@/types/auth'
+import {BodyLoginLoginAccessToken, LoginService, UsersService} from '@/client'
+import {get} from '@/utils'
+import {SignUpSchema} from '@/types/form'
 
 /**
  * Authenticates a user using the provided form data.
@@ -29,7 +30,7 @@ export async function authenticate(
       grant_type: 'password',
     }
 
-    const response = await LoginService.postApiV1LoginAccessToken({ body: data })
+    const response = await LoginService.postApiV1LoginAccessToken({body: data})
     const accessToken = get(response, 'data.access_token')
 
     if (accessToken) {
@@ -76,4 +77,32 @@ export async function logout() {
   const cookieStore = await cookies()
   cookieStore.delete('access_token')
   redirect('/login')
+}
+
+export async function register(formData: SignUpSchema): Promise<IAuthState> {
+  try {
+    const response = await UsersService.postApiV1UsersSignup({
+      body: formData,
+    })
+
+    if (response?.error) {
+      throw response.error
+    }
+
+    return {
+      message: 'Account created successfully! Please log in.',
+      success: true,
+    }
+  } catch (error) {
+    const errorMsg = get(
+      error as Record<string, never>,
+      'detail',
+      'Something went wrong.',
+    )
+
+    return {
+      message: errorMsg,
+      success: false,
+    }
+  }
 }

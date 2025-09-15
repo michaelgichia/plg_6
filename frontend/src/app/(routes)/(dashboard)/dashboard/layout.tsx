@@ -6,40 +6,21 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import AppSidebar from '@/components/app-sidebar'
-
-const items = [
-  {
-    title: 'Ancient Rome',
-    url: '#',
-    icon: FileText,
-  },
-  {
-    title: 'Calculus II',
-    url: '#',
-    icon: FileText,
-  },
-  {
-    title: 'Organic Chemistry',
-    url: '#',
-    icon: FileText,
-  },
-  {
-    title: 'Art History',
-    url: '#',
-    icon: FileText,
-  },
-  {
-    title: 'Settings',
-    url: '#',
-    icon: FileText,
-  },
-]
+import { getSidebarMenu } from '@/actions/items'
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const response = await getSidebarMenu();
+
+  const items = response?.map(({ title }) => ({
+    title,
+    url: '#',
+    icon: FileText,
+  }))
+
   return (
     <SidebarProvider>
       <AppSidebar items={items} />

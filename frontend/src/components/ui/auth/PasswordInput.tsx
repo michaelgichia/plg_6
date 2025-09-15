@@ -5,11 +5,12 @@ import {Eye, EyeOff} from 'react-feather'
 interface PasswordInputProps {
   className?: string
   error?: string | null
+  label: string
 }
 
 const PasswordInput: React.FC<
   PasswordInputProps & React.InputHTMLAttributes<HTMLInputElement>
-> = ({className, error, ...props}) => {
+> = ({className, error, label, ...props}) => {
   // State to manage the visibility of the password
   const [showPassword, setShowPassword] = useState(false)
 
@@ -17,14 +18,12 @@ const PasswordInput: React.FC<
     <div className={`relative ${className}`}>
       <label
         htmlFor='password'
-        className='block text-sm font-medium text-gray-700 mb-2'
+        className='block text-sm font-medium mb-2'
       >
-        Password
+        {label}
       </label>
       <input
         {...props}
-        id='password'
-        name='password'
         type={showPassword ? 'text' : 'password'}
         placeholder='••••••••••'
         required

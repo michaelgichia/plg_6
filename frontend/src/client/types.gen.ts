@@ -924,5 +924,5 @@ export type PostApiV1PrivateUsersResponses = {
 export type PostApiV1PrivateUsersResponse = PostApiV1PrivateUsersResponses[keyof PostApiV1PrivateUsersResponses];
 
 export type ClientOptions = {
-    baseUrl: `${string}://${string}` | (string & {});
+    baseURL: `${string}://${string}` | (string & {});
 };

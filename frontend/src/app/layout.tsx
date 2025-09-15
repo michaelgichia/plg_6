@@ -4,9 +4,15 @@ import type {Metadata} from 'next'
 import {Geist, Geist_Mono} from 'next/font/google'
 import {Toaster} from '@/components/ui/sonner'
 import {client} from '@/client/client.gen'
-// import {cookies} from 'next/headers'
+// import { OpenAPI, client } from "@/client"
+import {cookies} from 'next/headers'
 
 import Providers from './providers'
+
+// OpenAPI.BASE = import.meta.env.NEXT_PUBLIC_BACKEND_BASE_URL
+// OpenAPI.TOKEN = async () => {
+//   return localStorage.getItem("access_token") || ""
+// }
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -19,7 +25,7 @@ const geistMono = Geist_Mono({
 })
 
 client.setConfig({
-  baseUrl: 'http://localhost:8000',
+  baseURL: 'http://localhost:8000',
 })
 
 export const metadata: Metadata = {
@@ -32,8 +38,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // const cookieStore = await cookies()
-  // const defaultOpen = cookieStore.get('sidebar_state')?.value === 'true'
+  const cookieStore = await cookies()
+  const token = cookieStore.get('access_token')?.value
+
+  client.instance.interceptors.request.use((config) => {
+    config.headers.set('Authorization', `Bearer ${token}`)
+    return config
+  })
+
   return (
     <html lang='en'>
       <body
