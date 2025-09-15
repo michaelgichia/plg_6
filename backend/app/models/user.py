@@ -44,6 +44,8 @@ class User(UserBase, table=True): # type: ignore
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)  # noqa: F821
+    courses: list["Course"] = Relationship(back_populates="owner", cascade_delete=True)  # noqa: F821
+
 
 
 # Properties to return via API, id is always required

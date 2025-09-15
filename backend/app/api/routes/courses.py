@@ -65,8 +65,7 @@ def create_course(
     """
     Create new course.
     """
-    course = Course.from_orm(course_in)
-    course.owner_id = current_user.id  # type: ignore
+    course = Course.model_validate(course_in, update={"owner_id": current_user.id})
     session.add(course)
     session.commit()
     session.refresh(course)
