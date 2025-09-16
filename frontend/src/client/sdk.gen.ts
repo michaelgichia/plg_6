@@ -2,6 +2,7 @@
 
 import { type Options as ClientOptions, type Client, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import type { PostApiV1LoginAccessTokenData, PostApiV1LoginAccessTokenResponses, PostApiV1LoginAccessTokenErrors, PostApiV1LoginTestTokenData, PostApiV1LoginTestTokenResponses, PostApiV1PasswordRecoveryByEmailData, PostApiV1PasswordRecoveryByEmailResponses, PostApiV1PasswordRecoveryByEmailErrors, PostApiV1ResetPasswordData, PostApiV1ResetPasswordResponses, PostApiV1ResetPasswordErrors, PostApiV1PasswordRecoveryHtmlContentByEmailData, PostApiV1PasswordRecoveryHtmlContentByEmailResponses, PostApiV1PasswordRecoveryHtmlContentByEmailErrors, GetApiV1UsersData, GetApiV1UsersResponses, GetApiV1UsersErrors, PostApiV1UsersData, PostApiV1UsersResponses, PostApiV1UsersErrors, DeleteApiV1UsersMeData, DeleteApiV1UsersMeResponses, GetApiV1UsersMeData, GetApiV1UsersMeResponses, PatchApiV1UsersMeData, PatchApiV1UsersMeResponses, PatchApiV1UsersMeErrors, PatchApiV1UsersMePasswordData, PatchApiV1UsersMePasswordResponses, PatchApiV1UsersMePasswordErrors, PostApiV1UsersSignupData, PostApiV1UsersSignupResponses, PostApiV1UsersSignupErrors, DeleteApiV1UsersByUserIdData, DeleteApiV1UsersByUserIdResponses, DeleteApiV1UsersByUserIdErrors, GetApiV1UsersByUserIdData, GetApiV1UsersByUserIdResponses, GetApiV1UsersByUserIdErrors, PatchApiV1UsersByUserIdData, PatchApiV1UsersByUserIdResponses, PatchApiV1UsersByUserIdErrors, PostApiV1UtilsTestEmailData, PostApiV1UtilsTestEmailResponses, PostApiV1UtilsTestEmailErrors, GetApiV1UtilsHealthCheckData, GetApiV1UtilsHealthCheckResponses, GetApiV1ItemsData, GetApiV1ItemsResponses, GetApiV1ItemsErrors, PostApiV1ItemsData, PostApiV1ItemsResponses, PostApiV1ItemsErrors, DeleteApiV1ItemsByIdData, DeleteApiV1ItemsByIdResponses, DeleteApiV1ItemsByIdErrors, GetApiV1ItemsByIdData, GetApiV1ItemsByIdResponses, GetApiV1ItemsByIdErrors, PutApiV1ItemsByIdData, PutApiV1ItemsByIdResponses, PutApiV1ItemsByIdErrors, GetApiV1CoursesData, GetApiV1CoursesResponses, GetApiV1CoursesErrors, PostApiV1CoursesData, PostApiV1CoursesResponses, PostApiV1CoursesErrors, DeleteApiV1CoursesByIdData, DeleteApiV1CoursesByIdResponses, DeleteApiV1CoursesByIdErrors, GetApiV1CoursesByIdData, GetApiV1CoursesByIdResponses, GetApiV1CoursesByIdErrors, PutApiV1CoursesByIdData, PutApiV1CoursesByIdResponses, PutApiV1CoursesByIdErrors, PostApiV1PrivateUsersData, PostApiV1PrivateUsersResponses, PostApiV1PrivateUsersErrors } from './types.gen';
+import { zPostApiV1LoginAccessTokenData, zPostApiV1LoginAccessTokenResponse, zPostApiV1LoginTestTokenData, zPostApiV1LoginTestTokenResponse, zPostApiV1PasswordRecoveryByEmailData, zPostApiV1PasswordRecoveryByEmailResponse, zPostApiV1ResetPasswordData, zPostApiV1ResetPasswordResponse, zPostApiV1PasswordRecoveryHtmlContentByEmailData, zPostApiV1PasswordRecoveryHtmlContentByEmailResponse, zGetApiV1UsersData, zGetApiV1UsersResponse, zPostApiV1UsersData, zPostApiV1UsersResponse, zDeleteApiV1UsersMeData, zDeleteApiV1UsersMeResponse, zGetApiV1UsersMeData, zGetApiV1UsersMeResponse, zPatchApiV1UsersMeData, zPatchApiV1UsersMeResponse, zPatchApiV1UsersMePasswordData, zPatchApiV1UsersMePasswordResponse, zPostApiV1UsersSignupData, zPostApiV1UsersSignupResponse, zDeleteApiV1UsersByUserIdData, zDeleteApiV1UsersByUserIdResponse, zGetApiV1UsersByUserIdData, zGetApiV1UsersByUserIdResponse, zPatchApiV1UsersByUserIdData, zPatchApiV1UsersByUserIdResponse, zPostApiV1UtilsTestEmailData, zPostApiV1UtilsTestEmailResponse, zGetApiV1UtilsHealthCheckData, zGetApiV1UtilsHealthCheckResponse, zGetApiV1ItemsData, zGetApiV1ItemsResponse, zPostApiV1ItemsData, zPostApiV1ItemsResponse, zDeleteApiV1ItemsByIdData, zDeleteApiV1ItemsByIdResponse, zGetApiV1ItemsByIdData, zGetApiV1ItemsByIdResponse, zPutApiV1ItemsByIdData, zPutApiV1ItemsByIdResponse, zGetApiV1CoursesData, zGetApiV1CoursesResponse, zPostApiV1CoursesData, zPostApiV1CoursesResponse, zDeleteApiV1CoursesByIdData, zDeleteApiV1CoursesByIdResponse, zGetApiV1CoursesByIdData, zGetApiV1CoursesByIdResponse, zPutApiV1CoursesByIdData, zPutApiV1CoursesByIdResponse, zPostApiV1PrivateUsersData, zPostApiV1PrivateUsersResponse } from './zod.gen';
 import { client } from './client.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = ClientOptions<TData, ThrowOnError> & {
@@ -23,10 +24,16 @@ export class LoginService {
      * Login Access Token
      * OAuth2 compatible token login, get an access token for future requests
      */
-    public static postApiV1LoginAccessToken<ThrowOnError extends boolean = false>(options: Options<PostApiV1LoginAccessTokenData, ThrowOnError>) {
+    public static postApiV1LoginAccessToken<ThrowOnError extends boolean = true>(options: Options<PostApiV1LoginAccessTokenData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1LoginAccessTokenResponses, PostApiV1LoginAccessTokenErrors, ThrowOnError>({
             ...urlSearchParamsBodySerializer,
+            requestValidator: async (data) => {
+                return await zPostApiV1LoginAccessTokenData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1LoginAccessTokenResponse.parseAsync(data);
+            },
             url: '/api/v1/login/access-token',
             ...options,
             headers: {
@@ -40,9 +47,15 @@ export class LoginService {
      * Test Token
      * Test access token
      */
-    public static postApiV1LoginTestToken<ThrowOnError extends boolean = false>(options?: Options<PostApiV1LoginTestTokenData, ThrowOnError>) {
+    public static postApiV1LoginTestToken<ThrowOnError extends boolean = true>(options?: Options<PostApiV1LoginTestTokenData, ThrowOnError>) {
         return (options?.client ?? client).post<PostApiV1LoginTestTokenResponses, unknown, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1LoginTestTokenData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1LoginTestTokenResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -58,9 +71,15 @@ export class LoginService {
      * Recover Password
      * Password Recovery
      */
-    public static postApiV1PasswordRecoveryByEmail<ThrowOnError extends boolean = false>(options: Options<PostApiV1PasswordRecoveryByEmailData, ThrowOnError>) {
+    public static postApiV1PasswordRecoveryByEmail<ThrowOnError extends boolean = true>(options: Options<PostApiV1PasswordRecoveryByEmailData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1PasswordRecoveryByEmailResponses, PostApiV1PasswordRecoveryByEmailErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1PasswordRecoveryByEmailData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1PasswordRecoveryByEmailResponse.parseAsync(data);
+            },
             url: '/api/v1/password-recovery/{email}',
             ...options
         });
@@ -70,9 +89,15 @@ export class LoginService {
      * Reset Password
      * Reset password
      */
-    public static postApiV1ResetPassword<ThrowOnError extends boolean = false>(options: Options<PostApiV1ResetPasswordData, ThrowOnError>) {
+    public static postApiV1ResetPassword<ThrowOnError extends boolean = true>(options: Options<PostApiV1ResetPasswordData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1ResetPasswordResponses, PostApiV1ResetPasswordErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1ResetPasswordData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1ResetPasswordResponse.parseAsync(data);
+            },
             url: '/api/v1/reset-password/',
             ...options,
             headers: {
@@ -86,9 +111,15 @@ export class LoginService {
      * Recover Password Html Content
      * HTML Content for Password Recovery
      */
-    public static postApiV1PasswordRecoveryHtmlContentByEmail<ThrowOnError extends boolean = false>(options: Options<PostApiV1PasswordRecoveryHtmlContentByEmailData, ThrowOnError>) {
+    public static postApiV1PasswordRecoveryHtmlContentByEmail<ThrowOnError extends boolean = true>(options: Options<PostApiV1PasswordRecoveryHtmlContentByEmailData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1PasswordRecoveryHtmlContentByEmailResponses, PostApiV1PasswordRecoveryHtmlContentByEmailErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1PasswordRecoveryHtmlContentByEmailData.parseAsync(data);
+            },
             responseType: 'text',
+            responseValidator: async (data) => {
+                return await zPostApiV1PasswordRecoveryHtmlContentByEmailResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -106,9 +137,15 @@ export class UsersService {
      * Read Users
      * Retrieve users.
      */
-    public static getApiV1Users<ThrowOnError extends boolean = false>(options?: Options<GetApiV1UsersData, ThrowOnError>) {
+    public static getApiV1Users<ThrowOnError extends boolean = true>(options?: Options<GetApiV1UsersData, ThrowOnError>) {
         return (options?.client ?? client).get<GetApiV1UsersResponses, GetApiV1UsersErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1UsersData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1UsersResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -124,9 +161,15 @@ export class UsersService {
      * Create User
      * Create new user.
      */
-    public static postApiV1Users<ThrowOnError extends boolean = false>(options: Options<PostApiV1UsersData, ThrowOnError>) {
+    public static postApiV1Users<ThrowOnError extends boolean = true>(options: Options<PostApiV1UsersData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1UsersResponses, PostApiV1UsersErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1UsersData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1UsersResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -146,9 +189,15 @@ export class UsersService {
      * Delete User Me
      * Delete own user.
      */
-    public static deleteApiV1UsersMe<ThrowOnError extends boolean = false>(options?: Options<DeleteApiV1UsersMeData, ThrowOnError>) {
+    public static deleteApiV1UsersMe<ThrowOnError extends boolean = true>(options?: Options<DeleteApiV1UsersMeData, ThrowOnError>) {
         return (options?.client ?? client).delete<DeleteApiV1UsersMeResponses, unknown, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zDeleteApiV1UsersMeData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zDeleteApiV1UsersMeResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -164,9 +213,15 @@ export class UsersService {
      * Read User Me
      * Get current user.
      */
-    public static getApiV1UsersMe<ThrowOnError extends boolean = false>(options?: Options<GetApiV1UsersMeData, ThrowOnError>) {
+    public static getApiV1UsersMe<ThrowOnError extends boolean = true>(options?: Options<GetApiV1UsersMeData, ThrowOnError>) {
         return (options?.client ?? client).get<GetApiV1UsersMeResponses, unknown, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1UsersMeData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1UsersMeResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -182,9 +237,15 @@ export class UsersService {
      * Update User Me
      * Update own user.
      */
-    public static patchApiV1UsersMe<ThrowOnError extends boolean = false>(options: Options<PatchApiV1UsersMeData, ThrowOnError>) {
+    public static patchApiV1UsersMe<ThrowOnError extends boolean = true>(options: Options<PatchApiV1UsersMeData, ThrowOnError>) {
         return (options.client ?? client).patch<PatchApiV1UsersMeResponses, PatchApiV1UsersMeErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPatchApiV1UsersMeData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPatchApiV1UsersMeResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -204,9 +265,15 @@ export class UsersService {
      * Update Password Me
      * Update own password.
      */
-    public static patchApiV1UsersMePassword<ThrowOnError extends boolean = false>(options: Options<PatchApiV1UsersMePasswordData, ThrowOnError>) {
+    public static patchApiV1UsersMePassword<ThrowOnError extends boolean = true>(options: Options<PatchApiV1UsersMePasswordData, ThrowOnError>) {
         return (options.client ?? client).patch<PatchApiV1UsersMePasswordResponses, PatchApiV1UsersMePasswordErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPatchApiV1UsersMePasswordData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPatchApiV1UsersMePasswordResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -226,9 +293,15 @@ export class UsersService {
      * Register User
      * Create new user without the need to be logged in.
      */
-    public static postApiV1UsersSignup<ThrowOnError extends boolean = false>(options: Options<PostApiV1UsersSignupData, ThrowOnError>) {
+    public static postApiV1UsersSignup<ThrowOnError extends boolean = true>(options: Options<PostApiV1UsersSignupData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1UsersSignupResponses, PostApiV1UsersSignupErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1UsersSignupData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1UsersSignupResponse.parseAsync(data);
+            },
             url: '/api/v1/users/signup',
             ...options,
             headers: {
@@ -242,9 +315,15 @@ export class UsersService {
      * Delete User
      * Delete a user.
      */
-    public static deleteApiV1UsersByUserId<ThrowOnError extends boolean = false>(options: Options<DeleteApiV1UsersByUserIdData, ThrowOnError>) {
+    public static deleteApiV1UsersByUserId<ThrowOnError extends boolean = true>(options: Options<DeleteApiV1UsersByUserIdData, ThrowOnError>) {
         return (options.client ?? client).delete<DeleteApiV1UsersByUserIdResponses, DeleteApiV1UsersByUserIdErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zDeleteApiV1UsersByUserIdData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zDeleteApiV1UsersByUserIdResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -260,9 +339,15 @@ export class UsersService {
      * Read User By Id
      * Get a specific user by id.
      */
-    public static getApiV1UsersByUserId<ThrowOnError extends boolean = false>(options: Options<GetApiV1UsersByUserIdData, ThrowOnError>) {
+    public static getApiV1UsersByUserId<ThrowOnError extends boolean = true>(options: Options<GetApiV1UsersByUserIdData, ThrowOnError>) {
         return (options.client ?? client).get<GetApiV1UsersByUserIdResponses, GetApiV1UsersByUserIdErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1UsersByUserIdData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1UsersByUserIdResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -278,9 +363,15 @@ export class UsersService {
      * Update User
      * Update a user.
      */
-    public static patchApiV1UsersByUserId<ThrowOnError extends boolean = false>(options: Options<PatchApiV1UsersByUserIdData, ThrowOnError>) {
+    public static patchApiV1UsersByUserId<ThrowOnError extends boolean = true>(options: Options<PatchApiV1UsersByUserIdData, ThrowOnError>) {
         return (options.client ?? client).patch<PatchApiV1UsersByUserIdResponses, PatchApiV1UsersByUserIdErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPatchApiV1UsersByUserIdData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPatchApiV1UsersByUserIdResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -302,9 +393,15 @@ export class UtilsService {
      * Test Email
      * Test emails.
      */
-    public static postApiV1UtilsTestEmail<ThrowOnError extends boolean = false>(options: Options<PostApiV1UtilsTestEmailData, ThrowOnError>) {
+    public static postApiV1UtilsTestEmail<ThrowOnError extends boolean = true>(options: Options<PostApiV1UtilsTestEmailData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1UtilsTestEmailResponses, PostApiV1UtilsTestEmailErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1UtilsTestEmailData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1UtilsTestEmailResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -319,9 +416,15 @@ export class UtilsService {
     /**
      * Health Check
      */
-    public static getApiV1UtilsHealthCheck<ThrowOnError extends boolean = false>(options?: Options<GetApiV1UtilsHealthCheckData, ThrowOnError>) {
+    public static getApiV1UtilsHealthCheck<ThrowOnError extends boolean = true>(options?: Options<GetApiV1UtilsHealthCheckData, ThrowOnError>) {
         return (options?.client ?? client).get<GetApiV1UtilsHealthCheckResponses, unknown, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1UtilsHealthCheckData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1UtilsHealthCheckResponse.parseAsync(data);
+            },
             url: '/api/v1/utils/health-check/',
             ...options
         });
@@ -333,9 +436,15 @@ export class ItemsService {
      * Read Items
      * Retrieve items.
      */
-    public static getApiV1Items<ThrowOnError extends boolean = false>(options?: Options<GetApiV1ItemsData, ThrowOnError>) {
+    public static getApiV1Items<ThrowOnError extends boolean = true>(options?: Options<GetApiV1ItemsData, ThrowOnError>) {
         return (options?.client ?? client).get<GetApiV1ItemsResponses, GetApiV1ItemsErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1ItemsData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1ItemsResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -351,9 +460,15 @@ export class ItemsService {
      * Create Item
      * Create new item.
      */
-    public static postApiV1Items<ThrowOnError extends boolean = false>(options: Options<PostApiV1ItemsData, ThrowOnError>) {
+    public static postApiV1Items<ThrowOnError extends boolean = true>(options: Options<PostApiV1ItemsData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1ItemsResponses, PostApiV1ItemsErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1ItemsData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1ItemsResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -373,9 +488,15 @@ export class ItemsService {
      * Delete Item
      * Delete an item.
      */
-    public static deleteApiV1ItemsById<ThrowOnError extends boolean = false>(options: Options<DeleteApiV1ItemsByIdData, ThrowOnError>) {
+    public static deleteApiV1ItemsById<ThrowOnError extends boolean = true>(options: Options<DeleteApiV1ItemsByIdData, ThrowOnError>) {
         return (options.client ?? client).delete<DeleteApiV1ItemsByIdResponses, DeleteApiV1ItemsByIdErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zDeleteApiV1ItemsByIdData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zDeleteApiV1ItemsByIdResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -391,9 +512,15 @@ export class ItemsService {
      * Read Item
      * Get item by ID.
      */
-    public static getApiV1ItemsById<ThrowOnError extends boolean = false>(options: Options<GetApiV1ItemsByIdData, ThrowOnError>) {
+    public static getApiV1ItemsById<ThrowOnError extends boolean = true>(options: Options<GetApiV1ItemsByIdData, ThrowOnError>) {
         return (options.client ?? client).get<GetApiV1ItemsByIdResponses, GetApiV1ItemsByIdErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1ItemsByIdData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1ItemsByIdResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -409,9 +536,15 @@ export class ItemsService {
      * Update Item
      * Update an item.
      */
-    public static putApiV1ItemsById<ThrowOnError extends boolean = false>(options: Options<PutApiV1ItemsByIdData, ThrowOnError>) {
+    public static putApiV1ItemsById<ThrowOnError extends boolean = true>(options: Options<PutApiV1ItemsByIdData, ThrowOnError>) {
         return (options.client ?? client).put<PutApiV1ItemsByIdResponses, PutApiV1ItemsByIdErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPutApiV1ItemsByIdData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPutApiV1ItemsByIdResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -433,9 +566,15 @@ export class CoursesService {
      * Read Courses
      * Retrieve courses.
      */
-    public static getApiV1Courses<ThrowOnError extends boolean = false>(options?: Options<GetApiV1CoursesData, ThrowOnError>) {
+    public static getApiV1Courses<ThrowOnError extends boolean = true>(options?: Options<GetApiV1CoursesData, ThrowOnError>) {
         return (options?.client ?? client).get<GetApiV1CoursesResponses, GetApiV1CoursesErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1CoursesData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1CoursesResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -451,9 +590,15 @@ export class CoursesService {
      * Create Course
      * Create new course.
      */
-    public static postApiV1Courses<ThrowOnError extends boolean = false>(options: Options<PostApiV1CoursesData, ThrowOnError>) {
+    public static postApiV1Courses<ThrowOnError extends boolean = true>(options: Options<PostApiV1CoursesData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1CoursesResponses, PostApiV1CoursesErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1CoursesData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1CoursesResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -473,9 +618,15 @@ export class CoursesService {
      * Delete Course
      * Delete an course.
      */
-    public static deleteApiV1CoursesById<ThrowOnError extends boolean = false>(options: Options<DeleteApiV1CoursesByIdData, ThrowOnError>) {
+    public static deleteApiV1CoursesById<ThrowOnError extends boolean = true>(options: Options<DeleteApiV1CoursesByIdData, ThrowOnError>) {
         return (options.client ?? client).delete<DeleteApiV1CoursesByIdResponses, DeleteApiV1CoursesByIdErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zDeleteApiV1CoursesByIdData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zDeleteApiV1CoursesByIdResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -491,9 +642,15 @@ export class CoursesService {
      * Read Course
      * Get course by ID.
      */
-    public static getApiV1CoursesById<ThrowOnError extends boolean = false>(options: Options<GetApiV1CoursesByIdData, ThrowOnError>) {
+    public static getApiV1CoursesById<ThrowOnError extends boolean = true>(options: Options<GetApiV1CoursesByIdData, ThrowOnError>) {
         return (options.client ?? client).get<GetApiV1CoursesByIdResponses, GetApiV1CoursesByIdErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1CoursesByIdData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1CoursesByIdResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -509,9 +666,15 @@ export class CoursesService {
      * Update Course
      * Update an course.
      */
-    public static putApiV1CoursesById<ThrowOnError extends boolean = false>(options: Options<PutApiV1CoursesByIdData, ThrowOnError>) {
+    public static putApiV1CoursesById<ThrowOnError extends boolean = true>(options: Options<PutApiV1CoursesByIdData, ThrowOnError>) {
         return (options.client ?? client).put<PutApiV1CoursesByIdResponses, PutApiV1CoursesByIdErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPutApiV1CoursesByIdData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPutApiV1CoursesByIdResponse.parseAsync(data);
+            },
             security: [
                 {
                     scheme: 'bearer',
@@ -533,9 +696,15 @@ export class PrivateService {
      * Create User
      * Create a new user.
      */
-    public static postApiV1PrivateUsers<ThrowOnError extends boolean = false>(options: Options<PostApiV1PrivateUsersData, ThrowOnError>) {
+    public static postApiV1PrivateUsers<ThrowOnError extends boolean = true>(options: Options<PostApiV1PrivateUsersData, ThrowOnError>) {
         return (options.client ?? client).post<PostApiV1PrivateUsersResponses, PostApiV1PrivateUsersErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1PrivateUsersData.parseAsync(data);
+            },
             responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1PrivateUsersResponse.parseAsync(data);
+            },
             url: '/api/v1/private/users/',
             ...options,
             headers: {

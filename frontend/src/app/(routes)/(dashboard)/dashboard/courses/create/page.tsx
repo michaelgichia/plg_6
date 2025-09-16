@@ -21,14 +21,14 @@ export default function HomePage() {
   return (
     <div className='min-h-screen p-6'>
       <div className='mx-auto'>
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-9 items-start'>
-          <div className='row-span-8'>
+        <div className='grid grid-cols-9 gap-4 items-start'>
+          <div className='col-span-6'>
             <CreateProjectForm
               onCreateProject={handleCreateProject}
               onCancel={handleCancel}
             />
           </div>
-          <div className='row-span-4'>
+          <div className='col-span-3'>
             <ProjectSettings />
           </div>
         </div>

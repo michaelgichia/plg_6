@@ -5,6 +5,8 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import AppSidebar from '@/components/app-sidebar'
+import { client } from '@/client/client.gen'
+import { cookies } from 'next/headers'
 import { getCourses } from '@/actions/courses'
 
 export default async function DashboardLayout({
@@ -12,6 +14,15 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('access_token')?.value
+
+  // Configure axios client per request
+  client.setConfig({
+    baseURL: process.env.NEXT_INTERNAL_BACKEND_BASE_URL ?? 'http://localhost:8000',
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  })
+
   const courses = await getCourses();
 
   return (

@@ -1,4 +1,4 @@
-import {defineConfig} from '@hey-api/openapi-ts'
+import {defaultPlugins, defineConfig} from '@hey-api/openapi-ts'
 
 export default defineConfig({
   input: './openapi.json',
@@ -8,9 +8,12 @@ export default defineConfig({
     path: './src/client',
   },
   plugins: [
+    ...defaultPlugins,
+    'zod',
     {
       name: '@hey-api/client-axios',
       runtimeConfigPath: '../runtime-config',
+      throwOnError: true,
     },
     {
       name: "@hey-api/schemas",
@@ -21,6 +24,7 @@ export default defineConfig({
       asClass: true,
       operationId: false,
       classNameBuilder: '{{name}}Service',
+      validator: true,
     },
   ],
 })

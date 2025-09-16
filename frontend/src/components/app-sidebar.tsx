@@ -1,4 +1,7 @@
-import React from 'react'
+'use client'
+
+import React, {useEffect, useState} from 'react'
+import {getCourses} from '@/actions/courses'
 
 import {User, ChevronUp, Plus, Zap, FileText} from 'react-feather'
 
@@ -22,9 +25,20 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 import {logout} from '@/actions/auth'
-import { CoursePublic } from '@/client'
+import Link from 'next/link'
+import {CoursePublic} from '@/client/types.gen'
 
-export function AppSidebar({courses, ...props}: {courses?: CoursePublic[]}) {
+export function AppSidebar({...props}) {
+  const [courses, setCourses] = useState<CoursePublic[]>([])
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      const data = await getCourses()
+      if (data) setCourses(data)
+    }
+    fetchCourses()
+  }, [])
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -57,18 +71,26 @@ export function AppSidebar({courses, ...props}: {courses?: CoursePublic[]}) {
                 return (
                   <SidebarMenuItem key={course.name}>
                     <SidebarMenuButton asChild>
-                      <a href={`/dashboard/courses/${course.id}`}>
+                      <Link
+                        href={{
+                          pathname: '/dashboard/courses/[id]',
+                          query: {id: course.id, tab: 'quiz'},
+                        }}
+                        as={`/dashboard/courses/${course.id}?tab=quiz`}
+                      >
                         <FileText />
                         <span>{course.name}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )
               })}
             </SidebarMenu>
             <SidebarMenu>
-              <SidebarMenuButton>
-                <Plus /> <span>Add Project</span>
+              <SidebarMenuButton asChild>
+                <Link href='/dashboard/courses/create'>
+                  <Plus /> <span>Add Project</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -93,7 +115,10 @@ export function AppSidebar({courses, ...props}: {courses?: CoursePublic[]}) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <form action={logout}>
-                    <button type='submit' className='w-full text-left cursor-pointer'>
+                    <button
+                      type='submit'
+                      className='w-full text-left cursor-pointer'
+                    >
                       Sign out
                     </button>
                   </form>

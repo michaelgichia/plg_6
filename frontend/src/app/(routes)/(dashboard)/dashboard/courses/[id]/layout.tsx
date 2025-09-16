@@ -23,27 +23,7 @@ export default async function CourseLayout({
           <StyledTabList name='flashcard' />
           <StyledTabList name='podcast' />
         </TabsList>
-      <TabsContent value='qa' className='p-6'>
-        <div className='text-center text-slate-400 py-12'>
-          Q/A content will be displayed here
-        </div>
-      </TabsContent>
-
-      <TabsContent value='quiz' className='p-6'>
-        <QuizComponent />
-      </TabsContent>
-
-      <TabsContent value='flashcard' className='p-6'>
-        <div className='text-center text-slate-400 py-12'>
-          Flashcard content will be displayed here
-        </div>
-      </TabsContent>
-
-      <TabsContent value='podcast' className='p-6'>
-        <div className='text-center text-slate-400 py-12'>
-          Podcast content will be displayed here
-        </div>
-      </TabsContent>
+        {children}
       </Tabs>
     </div>
   )

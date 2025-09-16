@@ -6,15 +6,6 @@ import { get } from '@/utils'
 export async function getCourses(): Promise<CoursePublic[] | undefined> {
   try {
     const response = await CoursesService.getApiV1Courses()
-
-    if (response?.error) {
-      throw new Error(
-        typeof response.error?.detail === 'string'
-          ? response.error.detail
-          : 'API request failed'
-      )
-    }
-
     return response.data?.data ?? []
   } catch (error) {
     const errorMsg = get(
