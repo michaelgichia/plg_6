@@ -28,14 +28,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  // const cookieStore = await cookies()
-  // const token = cookieStore.get('access_token')?.value
-
-  // // Configure axios client per request
-  // client.setConfig({
-  //   baseURL: process.env.NEXT_INTERNAL_BACKEND_BASE_URL ?? 'http://localhost:8000',
-  //   headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  // })
 
   return (
     <html lang='en'>
