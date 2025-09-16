@@ -1,6 +1,7 @@
 import React from 'react'
 
-import {User, ChevronUp, Plus, Zap} from 'react-feather'
+import {User, ChevronUp, Plus, Zap, FileText} from 'react-feather'
+
 import {
   Sidebar,
   SidebarContent,
@@ -21,14 +22,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 import {logout} from '@/actions/auth'
+import { CoursePublic } from '@/client'
 
-interface Item {
-  title: string
-  url: string
-  icon: React.ElementType
-}
-
-export function AppSidebar({items, ...props}: {items: Item[]}) {
+export function AppSidebar({courses, ...props}: {courses?: CoursePublic[]}) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -57,14 +53,13 @@ export function AppSidebar({items, ...props}: {items: Item[]}) {
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => {
-                const Icon = item.icon
+              {courses?.map((course) => {
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem key={course.name}>
                     <SidebarMenuButton asChild>
-                      <a href={item.url}>
-                        <Icon />
-                        <span>{item.title}</span>
+                      <a href={`/dashboard/courses/${course.id}`}>
+                        <FileText />
+                        <span>{course.name}</span>
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

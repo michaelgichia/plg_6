@@ -1,4 +1,3 @@
-import {FileText} from 'react-feather'
 
 import {
   SidebarProvider,
@@ -6,24 +5,18 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import AppSidebar from '@/components/app-sidebar'
-import { getSidebarMenu } from '@/actions/items'
+import { getCourses } from '@/actions/courses'
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const response = await getSidebarMenu();
-
-  const items = response?.map(({ title }) => ({
-    title,
-    url: '#',
-    icon: FileText,
-  }))
+  const courses = await getCourses();
 
   return (
     <SidebarProvider>
-      <AppSidebar items={items} />
+      <AppSidebar courses={courses} />
       <SidebarInset>
         <header className='flex h-16 shrink-0 items-center gap-2 border-b px-4'>
           <SidebarTrigger className='-ml-1' />

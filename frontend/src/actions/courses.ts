@@ -1,11 +1,11 @@
 'use server'
 
-import { ItemPublic, ItemsService } from '@/client'
+import { CoursePublic, CoursesService } from '@/client'
 import { get } from '@/utils'
 
-export async function getSidebarMenu(): Promise<ItemPublic[] | undefined> {
+export async function getCourses(): Promise<CoursePublic[] | undefined> {
   try {
-    const response = await ItemsService.getApiV1Items()
+    const response = await CoursesService.getApiV1Courses()
 
     if (response?.error) {
       throw new Error(

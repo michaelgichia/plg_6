@@ -31,6 +31,70 @@ export type BodyLoginLoginAccessToken = {
 };
 
 /**
+ * CourseCreate
+ */
+export type CourseCreate = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+};
+
+/**
+ * CoursePublic
+ */
+export type CoursePublic = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Owner Id
+     */
+    owner_id: string;
+};
+
+/**
+ * CourseUpdate
+ */
+export type CourseUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+};
+
+/**
+ * CoursesPublic
+ */
+export type CoursesPublic = {
+    /**
+     * Data
+     */
+    data: Array<CoursePublic>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
  * HTTPValidationError
  */
 export type HttpValidationError = {
@@ -897,6 +961,155 @@ export type PutApiV1ItemsByIdResponses = {
 };
 
 export type PutApiV1ItemsByIdResponse = PutApiV1ItemsByIdResponses[keyof PutApiV1ItemsByIdResponses];
+
+export type GetApiV1CoursesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/courses/';
+};
+
+export type GetApiV1CoursesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1CoursesError = GetApiV1CoursesErrors[keyof GetApiV1CoursesErrors];
+
+export type GetApiV1CoursesResponses = {
+    /**
+     * Successful Response
+     */
+    200: CoursesPublic;
+};
+
+export type GetApiV1CoursesResponse = GetApiV1CoursesResponses[keyof GetApiV1CoursesResponses];
+
+export type PostApiV1CoursesData = {
+    body: CourseCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/courses/';
+};
+
+export type PostApiV1CoursesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostApiV1CoursesError = PostApiV1CoursesErrors[keyof PostApiV1CoursesErrors];
+
+export type PostApiV1CoursesResponses = {
+    /**
+     * Successful Response
+     */
+    200: CoursePublic;
+};
+
+export type PostApiV1CoursesResponse = PostApiV1CoursesResponses[keyof PostApiV1CoursesResponses];
+
+export type DeleteApiV1CoursesByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{id}';
+};
+
+export type DeleteApiV1CoursesByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteApiV1CoursesByIdError = DeleteApiV1CoursesByIdErrors[keyof DeleteApiV1CoursesByIdErrors];
+
+export type DeleteApiV1CoursesByIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type DeleteApiV1CoursesByIdResponse = DeleteApiV1CoursesByIdResponses[keyof DeleteApiV1CoursesByIdResponses];
+
+export type GetApiV1CoursesByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{id}';
+};
+
+export type GetApiV1CoursesByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1CoursesByIdError = GetApiV1CoursesByIdErrors[keyof GetApiV1CoursesByIdErrors];
+
+export type GetApiV1CoursesByIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: CoursePublic;
+};
+
+export type GetApiV1CoursesByIdResponse = GetApiV1CoursesByIdResponses[keyof GetApiV1CoursesByIdResponses];
+
+export type PutApiV1CoursesByIdData = {
+    body: CourseUpdate;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{id}';
+};
+
+export type PutApiV1CoursesByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PutApiV1CoursesByIdError = PutApiV1CoursesByIdErrors[keyof PutApiV1CoursesByIdErrors];
+
+export type PutApiV1CoursesByIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: CoursePublic;
+};
+
+export type PutApiV1CoursesByIdResponse = PutApiV1CoursesByIdResponses[keyof PutApiV1CoursesByIdResponses];
 
 export type PostApiV1PrivateUsersData = {
     body: PrivateUserCreate;
