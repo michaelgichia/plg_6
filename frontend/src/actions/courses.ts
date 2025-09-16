@@ -1,7 +1,8 @@
 'use server'
 
-import { CoursePublic, CoursesService } from '@/client'
-import { get } from '@/utils'
+import {CoursePublic, CoursesService} from '@/client'
+import {zCourseCreate} from '@/client/zod.gen'
+import {get} from '@/utils'
 
 export async function getCourses(): Promise<CoursePublic[] | undefined> {
   try {
@@ -11,9 +12,69 @@ export async function getCourses(): Promise<CoursePublic[] | undefined> {
     const errorMsg = get(
       error as Record<string, never>,
       'detail',
-      'API request failed'
+      'API request failed',
     )
 
     throw new Error(errorMsg)
+  }
+}
+
+export async function getCourse(id: string): Promise<CoursePublic | undefined> {
+  try {
+    const response = await CoursesService.getApiV1CoursesById({path: {id}})
+    return response.data
+  } catch (error) {
+    const errorMsg = get(
+      error as Record<string, never>,
+      'detail',
+      'API request failed',
+    )
+
+    throw new Error(errorMsg)
+  }
+}
+
+export type IState = {
+  errors?: {
+    name?: string[]
+    description?: string[]
+  }
+  message?: string | null
+  success: boolean | null
+  course?: CoursePublic
+}
+
+export async function createCourse(_state: IState, formData: FormData) {
+  try {
+    const payload = zCourseCreate.safeParse({
+      name: formData.get('name'),
+      description: formData.get('description'),
+    })
+
+    if (!payload.success) {
+      return {
+        success: false,
+        message: 'Validation failed',
+        errors: payload.error.flatten().fieldErrors,
+      }
+    }
+
+    const response = await CoursesService.postApiV1Courses({
+      body: payload.data,
+    })
+    return {
+      success: true,
+      message: 'Course created successfully',
+      course: response.data,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: get(
+        error as Record<string, never>,
+        'detail',
+        'API request failed',
+      ),
+    }
   }
 }

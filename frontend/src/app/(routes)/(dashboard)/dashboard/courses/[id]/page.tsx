@@ -1,11 +1,20 @@
 import {TabsContent} from '@/components/ui/tabs'
 import QuizComponent from '@/components/quiz'
+import { getCourse } from '@/actions/courses'
 
 export default async function Page(props: {params: Promise<{id: string}>}) {
   const params = await props.params
   const id = params.id
 
-  console.log('Course ID:', id)
+  const course = await getCourse(id)
+
+  if (!course) {
+    return (
+      <div className='text-center text-red-500 py-12'>
+        Course not found.
+      </div>
+    )
+  }
 
   return (
     <>
