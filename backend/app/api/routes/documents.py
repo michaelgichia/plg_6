@@ -13,20 +13,33 @@ index_name = "developer-quickstart-py"
 
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_ENV_NAME = os.getenv("PINECONE_ENV_NAME")
+EMBEDDING_MODEL = "text-embedding-3-small"
+EXPECTED_DIMENSION = 1536  # OpenAI text-embedding-3-small outputs 1536-dimensional vectors
 
 pc = Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENV_NAME)
 
 
-if not pc.has_index(index_name):
-    pc.delete_index(index_name)
-    pc.create_index(
-        name=index_name,
-        dimension=1536,
-        metric="cosine",
-        spec=ServerlessSpec(cloud="aws", region="us-east-1"),
-    )
+def ensure_index_exists():
+    """Ensure Pinecone index exists with the correct dimension, recreate if wrong."""
+    if pc.has_index(index_name):
+        existing = pc.describe_index(index_name)
+        if existing.dimension != EXPECTED_DIMENSION:
+            # Delete and recreate index with correct dimension
+            pc.delete_index(index_name)
+            pc.create_index(
+                name=index_name,
+                dimension=EXPECTED_DIMENSION,
+                metric="cosine",
+                spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+            )
+    else:
+        pc.create_index(
+            name=index_name,
+            dimension=EXPECTED_DIMENSION,
+            metric="cosine",
+            spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+        )
 
-index = pc.Index(index_name)
 
 def chunk_text(text: str):
     """Split long text into overlapping chunks for embeddings."""
@@ -37,31 +50,38 @@ def chunk_text(text: str):
     )
     return splitter.split_text(text)
 
-def embed_chunks(chunks: list[str]) -> list[list[float]]:
-    """Generate embeddings for each chunk using OpenAI."""
-    embeddings = []
-    for chunk in chunks:
-        response = openai.embeddings.create(
-            input=chunk,
-            model="text-embedding-3-small",
-        )
-        embeddings.append(response.data[0].embedding)
-    return embeddings
 
-def store_embeddings(chunks: list[str], embeddings: list[list[float]], course_id: str):
+def embed_chunks(chunks: list[str]) -> list[list[float]]:
+    """Generate embeddings for all chunks in a single OpenAI request."""
+    try:
+        response = openai.embeddings.create(
+            input=chunks,
+            model=EMBEDDING_MODEL,
+        )
+        return [item.embedding for item in response.data]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Embedding generation failed: {e}")
+
+
+def store_embeddings(chunks: list[str], embeddings: list[list[float]], course_id: str, index):
     """Store embeddings + metadata in Pinecone vector DB."""
-    vectors = []
-    for i, (chunk, embedding) in enumerate(zip(chunks, embeddings, strict=False)):
-        vectors.append({
-            "id": str(uuid.uuid4()),
-            "values": embedding,
-            "metadata": {
-                "course_id": course_id,
-                "text": chunk,
-                "chunk_index": i,
+    try:
+        vectors = [
+            {
+                "id": str(uuid.uuid4()),
+                "values": embedding,
+                "metadata": {
+                    "course_id": course_id,
+                    "text": chunk,
+                    "chunk_index": i,
+                }
             }
-        })
-    index.upsert(vectors)
+            for i, (chunk, embedding) in enumerate(zip(chunks, embeddings, strict=False))
+        ]
+        index.upsert(vectors)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Pinecone upsert failed: {e}")
+
 
 @router.post("/process")
 async def process_document(
@@ -74,6 +94,9 @@ async def process_document(
     if file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
 
+    ensure_index_exists()
+    index = pc.Index(index_name)
+
     try:
         pdf_bytes = await file.read()
         reader = PdfReader(io.BytesIO(pdf_bytes))
@@ -84,9 +107,11 @@ async def process_document(
 
         chunks = chunk_text(full_text)
         embeddings = embed_chunks(chunks)
-        store_embeddings(chunks, embeddings, course_id)
+        store_embeddings(chunks, embeddings, course_id, index)
 
         return {"status": "success", "chunks_stored": len(chunks)}
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process document: {e}")
