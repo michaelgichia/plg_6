@@ -3,15 +3,18 @@
 import {useSearchParams} from 'next/navigation'
 import {useEffect, useState} from 'react'
 
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import UploadDocuments from './upload-documents'
-import CreateCourseForm from './course-form'
+import CourseForm from './course-form'
+import { COURSE_ID, STEPS } from './constant'
 
-const COURSE_ID = 'courseId'
-const STEPS = {
-  CREATE_COURSE: 'create-course',
-  UPLOAD_DOCUMENTS: 'upload-documents',
-}
 
 export function CreateCourse() {
   const searchParams = useSearchParams()
@@ -26,25 +29,40 @@ export function CreateCourse() {
   }, [courseId, step])
 
   return (
-    <Card className='w-full'>
-      {step === STEPS.CREATE_COURSE ? (
-        <>
-          <CardHeader>
-            <CardTitle className='text-2xl font-semibold'>
-              Create a new project
-            </CardTitle>
-          </CardHeader>
+    <>
+      <Card className='w-full'>
+        <div className='pl-6 pr-6'>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbPage>Create</BreadcrumbPage>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Upload Documents</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+        <CardHeader>
+          <CardTitle className='text-2xl font-semibold'>
+            Create a new course
+          </CardTitle>
+        </CardHeader>
+        {step === STEPS.CREATE_COURSE ? (
+          <>
+            <CardContent className='space-y-6'>
+              <CourseForm />
+            </CardContent>
+          </>
+        ) : (
           <CardContent className='space-y-6'>
-            <CreateCourseForm />
+            <UploadDocuments />
           </CardContent>
-        </>
-      ) : (
-        <CardContent className='space-y-6'>
-          <UploadDocuments />
-        </CardContent>
-      )}
-    </Card>
+        )}
+      </Card>
+    </>
   )
 }
 
-export default CreateCourseForm
+export default CreateCourse

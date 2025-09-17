@@ -1,4 +1,5 @@
 import {useActionState} from 'react'
+import {useRouter} from 'next/navigation'
 
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
@@ -7,7 +8,7 @@ import {Label} from '@/components/ui/label'
 
 import {createCourse} from '@/actions/courses'
 
-export default function CreateCourseForm() {
+export function CourseForm() {
   const [state, formAction, isPending] = useActionState(createCourse, {
     message: '',
     success: false,
@@ -17,6 +18,11 @@ export default function CreateCourseForm() {
     },
     course: undefined,
   })
+  const router = useRouter()
+
+  function handleGoBack() {
+    router.back()
+  }
 
   return (
     <form action={formAction} className='space-y-6'>
@@ -31,12 +37,13 @@ export default function CreateCourseForm() {
         </div>
       )}
       <div className='space-y-2'>
-        <Label htmlFor='name'>Project Title</Label>
+        <Label htmlFor='name'>Course Title</Label>
         <Input
           id='name'
           name='name'
           placeholder="e.g., 'History of Ancient Rome'"
           className='w-full'
+          required
         />
       </div>
 
@@ -45,8 +52,9 @@ export default function CreateCourseForm() {
         <Textarea
           id='description'
           name='description'
-          placeholder='A brief summary of what this project is about.'
+          placeholder='A brief summary of what this course is about.'
           className='min-h-[120px] resize-none'
+          required
         />
       </div>
       <div className='flex gap-3 pt-4'>
@@ -55,13 +63,16 @@ export default function CreateCourseForm() {
           variant='secondary'
           className='flex-1'
           disabled={isPending}
+          onClick={handleGoBack}
         >
           Cancel
         </Button>
         <Button type='submit' className='flex-1' disabled={isPending}>
-          {isPending ? 'Creating...' : 'Create Project'}
+          {isPending ? 'Creating...' : 'Create Course'}
         </Button>
       </div>
     </form>
   )
 }
+
+export default CourseForm

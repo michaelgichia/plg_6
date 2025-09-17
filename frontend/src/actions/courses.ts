@@ -1,5 +1,7 @@
 'use server'
 
+import {redirect} from 'next/navigation'
+
 import {CoursePublic, CoursesService} from '@/client'
 import {zCourseCreate} from '@/client/zod.gen'
 import {get} from '@/utils'
@@ -45,12 +47,12 @@ export type IState = {
 }
 
 export async function createCourse(_state: IState, formData: FormData) {
+  let course: CoursePublic | undefined
   try {
     const payload = zCourseCreate.safeParse({
       name: formData.get('name'),
       description: formData.get('description'),
     })
-
     if (!payload.success) {
       return {
         success: false,
@@ -62,11 +64,7 @@ export async function createCourse(_state: IState, formData: FormData) {
     const response = await CoursesService.postApiV1Courses({
       body: payload.data,
     })
-    return {
-      success: true,
-      message: 'Course created successfully',
-      course: response.data,
-    }
+    course = response.data
   } catch (error) {
     return {
       success: false,
@@ -77,4 +75,6 @@ export async function createCourse(_state: IState, formData: FormData) {
       ),
     }
   }
+
+  redirect(`/dashboard/courses/create?courseId=${course?.id}`)
 }

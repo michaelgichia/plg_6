@@ -89,7 +89,7 @@ export function AppSidebar({...props}) {
             <SidebarMenu>
               <SidebarMenuButton asChild>
                 <Link href='/dashboard/courses/create'>
-                  <Plus /> <span>Add Project</span>
+                  <Plus /> <span>Add Course</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenu>
