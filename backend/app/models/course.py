@@ -22,7 +22,7 @@ class CourseUpdate(CourseBase):
 # Database model, database table inferred from class name
 class Course(CourseBase, table=True):
   id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-  owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
+  owner_id: uuid.UUID = Field(foreign_key="users.id", nullable=False, ondelete="CASCADE")
   owner: User | None = Relationship(back_populates="courses")
 
 class CoursePublic(CourseBase):
