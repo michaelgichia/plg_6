@@ -69,7 +69,7 @@ export function AppSidebar({...props}) {
             <SidebarMenu>
               {courses?.map((course) => {
                 return (
-                  <SidebarMenuItem key={course.name}>
+                  <SidebarMenuItem key={course.id}>
                     <SidebarMenuButton asChild>
                       <Link
                         href={{

@@ -87,6 +87,7 @@ def store_embeddings(
     ]
     index.upsert(vectors)
 
+
 async def process_pdf_task(
     file_path: str, document_id: uuid.UUID, course_id: str, session: SessionDep
 ):
@@ -138,6 +139,30 @@ async def process_pdf_task(
     finally:
         os.remove(file_path)
 
+@router.get("/{id}", response_model=Document)
+def read_document(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+    """
+    Get a document by its ID, ensuring the user has permissions.
+    """
+    statement = (
+        select(Document)
+        .join(Course)
+        .where(Document.id == id)
+        .where(Course.owner_id == current_user.id)
+    )
+
+    document = session.exec(statement).first()
+
+    if not document:
+        if session.get(Document, id) is None:
+            raise HTTPException(status_code=404, detail="Document not found")
+        else:
+            raise HTTPException(
+                status_code=403, detail="Not enough permissions to access this document"
+            )
+
+    return document
+
 
 @router.post("/process")
 async def process_document(
@@ -177,32 +202,8 @@ async def process_document(
 
     # 3. Launch the background task using the document's ID
     # The task now receives the document_id, which it can use to update the status
-    background_tasks.add_task(process_pdf_task, tmp_path, db_document.id, course_id, session)
-
-    return {"document_id": db_document.id, "status": db_document.status}
-
-@router.get("/{id}", response_model=Document)
-def read_document(
-    session: SessionDep,
-    current_user: CurrentUser,
-    id: uuid.UUID
-) -> Any:
-    """
-    Get a document by its ID, ensuring the user has permissions.
-    """
-    statement = (
-        select(Document)
-        .join(Course)
-        .where(Document.id == id)
-        .where(Course.owner_id == current_user.id)
+    background_tasks.add_task(
+        process_pdf_task, tmp_path, db_document.id, course_id, session
     )
 
-    document = session.exec(statement).first()
-
-    if not document:
-        if session.get(Document, id) is None:
-            raise HTTPException(status_code=404, detail="Document not found")
-        else:
-            raise HTTPException(status_code=403, detail="Not enough permissions to access this document")
-
-    return document
+    return {"document_id": db_document.id, "status": db_document.status}
