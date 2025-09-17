@@ -41,7 +41,7 @@ class UpdatePassword(SQLModel):
 
 # Database model, database table inferred from class name
 class User(UserBase, table=True): # type: ignore
-    __tablename__ = "users"  # Avoid reserved keyword and collisions
+    __tablename__ = "users"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
