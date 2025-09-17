@@ -23,7 +23,9 @@ class CourseUpdate(CourseBase):
 class Course(CourseBase, table=True):
   id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
   owner_id: uuid.UUID = Field(foreign_key="users.id", nullable=False, ondelete="CASCADE")
+
   owner: User | None = Relationship(back_populates="courses")
+  documents: list["Document"] = Relationship(back_populates="course")
 
 class CoursePublic(CourseBase):
   id: uuid.UUID

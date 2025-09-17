@@ -13,8 +13,10 @@ from app.models.course import (
     CoursesPublic,
     CourseUpdate,
 )
+from app.models.document import Document
 
 router = APIRouter(prefix="/courses", tags=["courses"])
+
 
 @router.get("/", response_model=CoursesPublic)
 def read_courses(
@@ -44,7 +46,8 @@ def read_courses(
         )
         courses = session.exec(statement).all()
 
-    return CoursesPublic(data=courses, count=count) # type: ignore
+    return CoursesPublic(data=courses, count=count)  # type: ignore
+
 
 @router.get("/{id}", response_model=CoursePublic)
 def read_course(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
@@ -58,6 +61,7 @@ def read_course(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -
         raise HTTPException(status_code=400, detail="Not enough permissions")
     return course
 
+
 @router.post("/", response_model=CoursePublic)
 def create_course(
     *, session: SessionDep, current_user: CurrentUser, course_in: CourseCreate
@@ -70,6 +74,7 @@ def create_course(
     session.commit()
     session.refresh(course)
     return course
+
 
 @router.put("/{id}", response_model=CoursePublic)
 def update_course(
@@ -95,6 +100,7 @@ def update_course(
     session.refresh(course)
     return course
 
+
 @router.delete("/{id}", response_model=Message)
 def delete_course(
     *, session: SessionDep, current_user: CurrentUser, id: uuid.UUID
@@ -110,3 +116,29 @@ def delete_course(
     session.delete(course)
     session.commit()
     return {"message": "Course deleted successfully"}
+
+
+@router.get("/{course_id}/documents", response_model=list[dict[str, Any]])
+async def list_documents(
+    course_id: str, session: SessionDep = SessionDep(), skip: int = 0, limit: int = 100
+) -> list[dict[str, Any]]:
+    """
+    List documents for a specific course.
+    """
+    statement = (
+        select(Document)
+        .where(Document.course_id == course_id)
+        .offset(skip)
+        .limit(limit)
+    )
+    documents = session.exec(statement).all()
+    return [
+        {
+            "id": str(doc.id),
+            "filename": doc.filename,
+            "chunk_count": doc.chunk_count,
+            "status": doc.status,
+            "uploaded_at": doc.uploaded_at.isoformat(),
+        }
+        for doc in documents
+    ]
