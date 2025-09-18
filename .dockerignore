@@ -1,0 +1,70 @@
+# Python
+__pycache__
+app.egg-info
+*.pyc
+.mypy_cache
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments (we install dependencies in container)
+.venv/
+env/
+venv/
+ENV/
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Logs & coverage
+*.log
+coverage/
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+.coverage
+.coverage.*
+.cache
+
+# Environment files (pass as secrets or env vars instead)
+.env
+.env.*.local
+
+# IDE / OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git / VCS
+.git
+.gitignore
+.gitattributes
+
+# Docs, examples, tests (not needed in production image)
+docs/
+examples/
+tests/
+
+# Docker compose overrides (if not needed inside container)
+docker-compose*.yml
