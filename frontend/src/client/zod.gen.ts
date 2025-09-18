@@ -3,6 +3,19 @@
 import { z } from 'zod';
 
 /**
+ * Body_documents-process_multiple_documents
+ */
+// export const zBodyDocumentsProcessMultipleDocuments = z.object({
+//     files: z.array(z.string()),
+//     course_id: z.uuid()
+// });
+
+export const zBodyDocumentsProcessMultipleDocuments = z.object({
+  files: z.array(z.instanceof(File)),
+  course_id: z.uuid(),
+});
+
+/**
  * Body_login-login_access_token
  */
 export const zBodyLoginLoginAccessToken = z.object({
@@ -62,11 +75,66 @@ export const zCourseUpdate = z.object({
 });
 
 /**
+ * DocumentStatus
+ */
+export const zDocumentStatus = z.enum([
+    'pending',
+    'processing',
+    'completed',
+    'failed'
+]);
+
+/**
+ * DocumentPublic
+ */
+export const zDocumentPublic = z.object({
+    title: z.string().min(1).max(255),
+    id: z.uuid(),
+    course_id: z.uuid(),
+    uploaded_at: z.iso.datetime(),
+    status: zDocumentStatus
+});
+
+/**
+ * CourseWithDocuments
+ */
+export const zCourseWithDocuments = z.object({
+    name: z.string().min(3).max(255),
+    description: z.optional(z.union([
+        z.string().max(1020),
+        z.null()
+    ])),
+    id: z.uuid(),
+    owner_id: z.uuid(),
+    documents: z.optional(z.array(zDocumentPublic)).default([])
+});
+
+/**
  * CoursesPublic
  */
 export const zCoursesPublic = z.object({
     data: z.array(zCoursePublic),
     count: z.int()
+});
+
+/**
+ * Document
+ */
+export const zDocument = z.object({
+    title: z.string().min(1).max(255),
+    id: z.optional(z.uuid()),
+    chunk_count: z.optional(z.union([
+        z.int(),
+        z.null()
+    ])),
+    course_id: z.uuid(),
+    embedding_namespace: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    filename: z.string(),
+    status: z.optional(zDocumentStatus),
+    uploaded_at: z.optional(z.iso.datetime())
 });
 
 /**
@@ -573,7 +641,7 @@ export const zGetApiV1CoursesByIdData = z.object({
 /**
  * Successful Response
  */
-export const zGetApiV1CoursesByIdResponse = zCoursePublic;
+export const zGetApiV1CoursesByIdResponse = zCourseWithDocuments;
 
 export const zPutApiV1CoursesByIdData = z.object({
     body: zCourseUpdate,
@@ -587,6 +655,42 @@ export const zPutApiV1CoursesByIdData = z.object({
  * Successful Response
  */
 export const zPutApiV1CoursesByIdResponse = zCoursePublic;
+
+export const zGetApiV1CoursesByCourseIdDocumentsData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        course_id: z.string()
+    }),
+    query: z.optional(z.object({
+        skip: z.optional(z.int()).default(0),
+        limit: z.optional(z.int()).default(100)
+    }))
+});
+
+/**
+ * Response Courses-List Documents
+ * Successful Response
+ */
+export const zGetApiV1CoursesByCourseIdDocumentsResponse = z.array(z.record(z.string(), z.unknown()));
+
+export const zPostApiV1DocumentsProcessData = z.object({
+    body: zBodyDocumentsProcessMultipleDocuments,
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+export const zGetApiV1DocumentsByIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zGetApiV1DocumentsByIdResponse = zDocument;
 
 export const zPostApiV1PrivateUsersData = z.object({
     body: zPrivateUserCreate,

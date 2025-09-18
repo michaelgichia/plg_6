@@ -57,7 +57,7 @@ export function CreateCourse() {
           </>
         ) : (
           <CardContent className='space-y-6'>
-            <UploadDocuments />
+            {courseId ? <UploadDocuments courseId={courseId}/> : <div>loading...</div>}
           </CardContent>
         )}
       </Card>

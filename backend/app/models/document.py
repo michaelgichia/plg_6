@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from enum import Enum
 
-from sqlalchemy import text  # <-- New Import
+from sqlalchemy import text
 from sqlmodel import Field, Relationship, SQLModel
 
 from app.models.course import Course
@@ -42,3 +42,4 @@ class DocumentPublic(DocumentBase):
     id: uuid.UUID
     course_id: uuid.UUID
     uploaded_at: datetime
+    status: DocumentStatus

@@ -11,6 +11,7 @@ export async function getCourses(): Promise<CoursePublic[] | undefined> {
     const response = await CoursesService.getApiV1Courses()
     return response.data?.data ?? []
   } catch (error) {
+    console.error(error)
     const errorMsg = get(
       error as Record<string, never>,
       'detail',

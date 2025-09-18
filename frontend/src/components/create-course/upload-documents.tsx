@@ -1,8 +1,15 @@
-import {Button} from '@/components/ui/button'
-import {Label} from '@/components/ui/label'
+'use client'
 
 import {Cloud} from 'react-feather'
 import {useDropzone} from 'react-dropzone'
+import {useState} from 'react'
+
+import {Button} from '@/components/ui/button'
+import {Label} from '@/components/ui/label'
+import {Separator} from '@/components/ui/separator'
+import {Document} from '@/client'
+import {uploadDocuments} from '@/lib/documents'
+import FileCard from '@/components/ui/file-card'
 
 const ACCEPTED_FILE_TYPES = {
   'application/pdf': ['.pdf'],
@@ -14,12 +21,15 @@ const ACCEPTED_FILE_TYPES = {
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
 
-export default function UploadDocuments() {
+export default function UploadDocuments({courseId}: {courseId: string}) {
+  const [files, setFiles] = useState<Document[]>([])
+
   const {getRootProps, getInputProps, isDragActive} = useDropzone({
     accept: ACCEPTED_FILE_TYPES,
     maxSize: MAX_FILE_SIZE,
-    onDrop: (acceptedFiles) => {
-      console.log({acceptedFiles})
+    onDrop: async (documents) => {
+      const response = await uploadDocuments(courseId, documents)
+      setFiles(response?.documents)
     },
   })
 
@@ -56,15 +66,14 @@ export default function UploadDocuments() {
           </Button>
         </div>
       </div>
-      {/* {files.length > 0 && (
-              <div className="mt-3 space-y-1">
-                {files.map((file, index) => (
-                  <p key={index} className="text-sm text-muted-foreground">
-                    {file.name} ({Math.round(file.size / 1024)}KB)
-                  </p>
-                ))}
-              </div>
-            )} */}
+      <Separator className='my-8' />
+      {files.length > 0 && (
+        <div className='space-y-1'>
+          {files.map((file) => (
+            <FileCard file={file} key={file.document_id} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

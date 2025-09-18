@@ -1,7 +1,6 @@
 'use client'
 
-import React, {useEffect, useState} from 'react'
-import {getCourses} from '@/actions/courses'
+import React from 'react'
 
 import {User, ChevronUp, Plus, Zap, FileText} from 'react-feather'
 
@@ -28,19 +27,9 @@ import {logout} from '@/actions/auth'
 import Link from 'next/link'
 import {CoursePublic} from '@/client/types.gen'
 
-export function AppSidebar({...props}) {
-  const [courses, setCourses] = useState<CoursePublic[]>([])
-
-  useEffect(() => {
-    const fetchCourses = async () => {
-      const data = await getCourses()
-      if (data) setCourses(data)
-    }
-    fetchCourses()
-  }, [])
-
+export function AppSidebar({courses}: {courses?: CoursePublic[]}) {
   return (
-    <Sidebar {...props}>
+    <Sidebar>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
