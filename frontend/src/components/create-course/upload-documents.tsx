@@ -1,15 +1,15 @@
 'use client'
 
-import {Cloud} from 'react-feather'
+import {ChevronRight, Cloud} from 'react-feather'
 import {useDropzone} from 'react-dropzone'
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 
 import {Button} from '@/components/ui/button'
-import {Label} from '@/components/ui/label'
 import {Separator} from '@/components/ui/separator'
-import {Document} from '@/client'
+import {CoursePublic} from '@/client'
 import {uploadDocuments} from '@/lib/documents'
 import FileCard from '@/components/ui/file-card'
+import {getCourse} from '@/lib/courses'
 
 const ACCEPTED_FILE_TYPES = {
   'application/pdf': ['.pdf'],
@@ -22,20 +22,39 @@ const ACCEPTED_FILE_TYPES = {
 const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
 
 export default function UploadDocuments({courseId}: {courseId: string}) {
-  const [files, setFiles] = useState<Document[]>([])
+  const [course, setCourse] = useState<CoursePublic>(null)
+
+  const fetchCourse = async (id) => {
+    try {
+      const courseData = await getCourse(id)
+      setCourse(courseData)
+    } catch (error) {
+      console.error('Failed to fetch course:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchCourse(courseId)
+
+    const intervalId = setInterval(() => {
+      fetchCourse(courseId)
+    }, 60000)
+
+    return () => clearInterval(intervalId)
+  }, [courseId])
 
   const {getRootProps, getInputProps, isDragActive} = useDropzone({
     accept: ACCEPTED_FILE_TYPES,
     maxSize: MAX_FILE_SIZE,
     onDrop: async (documents) => {
-      const response = await uploadDocuments(courseId, documents)
-      setFiles(response?.documents)
+      await uploadDocuments(courseId, documents)
     },
   })
 
   return (
     <div className='space-y-2'>
-      <Label>Upload Documents</Label>
+      {course && <p>Course Name: {course.name}</p>}
+
       <div
         {...getRootProps()}
         className={`
@@ -67,13 +86,19 @@ export default function UploadDocuments({courseId}: {courseId: string}) {
         </div>
       </div>
       <Separator className='my-8' />
-      {files.length > 0 && (
+      {course && course.documents.length > 0 && (
         <div className='space-y-1'>
-          {files.map((file) => (
+          {course.documents.map((file) => (
             <FileCard file={file} key={file.document_id} />
           ))}
         </div>
       )}
+
+      <div className='flex justify-end mt-8'>
+        <Button>
+          Complete <ChevronRight />
+        </Button>
+      </div>
     </div>
   )
 }

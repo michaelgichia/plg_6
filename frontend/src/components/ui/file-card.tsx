@@ -1,13 +1,13 @@
-import {FileText, X, Check, Loader, AlertCircle} from 'react-feather'
+import {FileText, X, Loader, AlertCircle} from 'react-feather'
 import {Document} from '@/client'
 
 export default function FileCard({file}: {file: Document}) {
-  const {filename, status} = file
+  const {title, status} = file
 
   const onRemove = () => {}
 
   return (
-    <div className='inset-ring-1 inset-ring-zinc-300 rounded-lg p-4 flex items-center gap-3 relative'>
+    <div className='inset-ring-1 inset-ring-zinc-300 rounded-lg p-4 flex items-center gap-3 relative mb-3'>
       {/* File Icon */}
       <div className='flex-shrink-0'>
         <FileText className='w-5 h-5 text-zinc-700' />
@@ -16,7 +16,7 @@ export default function FileCard({file}: {file: Document}) {
       {/* File Info */}
       <div className='flex-1 min-w-0'>
         <div className='text-zinc-900 text-sm font-medium truncate'>
-          {filename}
+          {title}
         </div>
 
         {/* Status and Progress */}
@@ -34,8 +34,8 @@ export default function FileCard({file}: {file: Document}) {
             </div>
             <div className='w-full bg-zinc-600 rounded-full h-1'>
               <div
-                className='bg-zinc-400 h-1 rounded-full transition-all duration-300'
-                style={{width: `70%`}}
+                className='bg-zinc-400 h-1 rounded-full transition-all duration-300 block'
+                style={{width: `60%`}}
               />
             </div>
           </div>
@@ -57,19 +57,6 @@ export default function FileCard({file}: {file: Document}) {
 
       {/* Status Icon */}
       <div className='flex-shrink-0 flex items-center gap-2'>
-        {status === 'completed' && (
-          <div className='w-6 h-6 bg-green-500 rounded-full flex items-center justify-center'>
-            <Check className='w-4 h-4 text-zinc-900' />
-          </div>
-        )}
-
-        {status === 'failed' && (
-          <div className='w-6 h-6 bg-red-500 rounded-full flex items-center justify-center'>
-            <AlertCircle className='w-4 h-4 text-zinc-900' />
-          </div>
-        )}
-
-        {/* Close Button */}
         <button
           onClick={onRemove}
           className='w-6 h-6 text-zinc-700 hover:text-zinc-900 transition-colors'

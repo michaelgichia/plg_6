@@ -1,6 +1,6 @@
 import type { CreateClientConfig } from './client/client.gen'
 
-export const createClientConfig: CreateClientConfig = (config) => {
+export const createClientConfig: CreateClientConfig =(config) => {
   const isServer = typeof window === 'undefined'
 
   const baseURL = isServer

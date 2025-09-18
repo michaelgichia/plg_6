@@ -42,7 +42,7 @@ export class LoginService {
             }
         });
     }
-    
+
     /**
      * Test Token
      * Test access token
@@ -66,7 +66,7 @@ export class LoginService {
             ...options
         });
     }
-    
+
     /**
      * Recover Password
      * Password Recovery
@@ -84,7 +84,7 @@ export class LoginService {
             ...options
         });
     }
-    
+
     /**
      * Reset Password
      * Reset password
@@ -106,7 +106,7 @@ export class LoginService {
             }
         });
     }
-    
+
     /**
      * Recover Password Html Content
      * HTML Content for Password Recovery
@@ -156,7 +156,7 @@ export class UsersService {
             ...options
         });
     }
-    
+
     /**
      * Create User
      * Create new user.
@@ -184,7 +184,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Delete User Me
      * Delete own user.
@@ -208,7 +208,7 @@ export class UsersService {
             ...options
         });
     }
-    
+
     /**
      * Read User Me
      * Get current user.
@@ -232,7 +232,7 @@ export class UsersService {
             ...options
         });
     }
-    
+
     /**
      * Update User Me
      * Update own user.
@@ -260,7 +260,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Update Password Me
      * Update own password.
@@ -288,7 +288,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Register User
      * Create new user without the need to be logged in.
@@ -310,7 +310,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Delete User
      * Delete a user.
@@ -334,7 +334,7 @@ export class UsersService {
             ...options
         });
     }
-    
+
     /**
      * Read User By Id
      * Get a specific user by id.
@@ -358,7 +358,7 @@ export class UsersService {
             ...options
         });
     }
-    
+
     /**
      * Update User
      * Update a user.
@@ -412,7 +412,7 @@ export class UtilsService {
             ...options
         });
     }
-    
+
     /**
      * Health Check
      */
@@ -455,7 +455,7 @@ export class ItemsService {
             ...options
         });
     }
-    
+
     /**
      * Create Item
      * Create new item.
@@ -483,7 +483,7 @@ export class ItemsService {
             }
         });
     }
-    
+
     /**
      * Delete Item
      * Delete an item.
@@ -507,7 +507,7 @@ export class ItemsService {
             ...options
         });
     }
-    
+
     /**
      * Read Item
      * Get item by ID.
@@ -531,7 +531,7 @@ export class ItemsService {
             ...options
         });
     }
-    
+
     /**
      * Update Item
      * Update an item.
@@ -585,7 +585,7 @@ export class CoursesService {
             ...options
         });
     }
-    
+
     /**
      * Create Course
      * Create new course.
@@ -613,7 +613,7 @@ export class CoursesService {
             }
         });
     }
-    
+
     /**
      * Delete Course
      * Delete an course.
@@ -637,7 +637,7 @@ export class CoursesService {
             ...options
         });
     }
-    
+
     /**
      * Read Course
      * Get course by ID, including its documents.
@@ -661,7 +661,7 @@ export class CoursesService {
             ...options
         });
     }
-    
+
     /**
      * Update Course
      * Update an course.
@@ -689,7 +689,7 @@ export class CoursesService {
             }
         });
     }
-    
+
     /**
      * List Documents
      * List documents for a specific course.
@@ -730,7 +730,7 @@ export class DocumentsService {
             }
         });
     }
-    
+
     /**
      * Read Document
      * Get a document by its ID, ensuring the user has permissions.

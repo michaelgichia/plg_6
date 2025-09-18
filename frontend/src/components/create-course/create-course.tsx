@@ -13,8 +13,7 @@ import {
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import UploadDocuments from './upload-documents'
 import CourseForm from './course-form'
-import { COURSE_ID, STEPS } from './constant'
-
+import {COURSE_ID, STEPS} from './constant'
 
 export function CreateCourse() {
   const searchParams = useSearchParams()
@@ -39,26 +38,33 @@ export function CreateCourse() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Upload Documents</BreadcrumbPage>
+                <BreadcrumbPage>Documents</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <CardHeader>
-          <CardTitle className='text-2xl font-semibold'>
-            Create a new course
-          </CardTitle>
-        </CardHeader>
         {step === STEPS.CREATE_COURSE ? (
           <>
+            <CardHeader>
+              <CardTitle className='text-2xl font-semibold'>
+                Create a new course
+              </CardTitle>
+            </CardHeader>
             <CardContent className='space-y-6'>
               <CourseForm />
             </CardContent>
           </>
         ) : (
-          <CardContent className='space-y-6'>
-            {courseId ? <UploadDocuments courseId={courseId}/> : <div>loading...</div>}
-          </CardContent>
+          <>
+            <CardHeader>
+              <CardTitle className='text-2xl font-semibold'>
+                Upload documents
+              </CardTitle>
+            </CardHeader>
+            <CardContent className='space-y-6'>
+              {courseId && <UploadDocuments courseId={courseId} />}
+            </CardContent>
+          </>
         )}
       </Card>
     </>

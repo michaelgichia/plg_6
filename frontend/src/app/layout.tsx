@@ -1,12 +1,8 @@
 import './globals.css'
 
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import { Toaster } from '@/components/ui/sonner'
-// import { client } from '@/client/client.gen'
-// import { cookies } from 'next/headers'
-
-import Providers from './providers'
+import type {Metadata} from 'next'
+import {Geist, Geist_Mono} from 'next/font/google'
+import {Toaster} from '@/components/ui/sonner'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,13 +24,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-
   return (
     <html lang='en'>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-          <main>{children}</main>
-        </Providers>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <main>{children}</main>
         <Toaster />
       </body>
     </html>

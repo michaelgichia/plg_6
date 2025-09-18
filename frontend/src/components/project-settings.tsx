@@ -1,11 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Settings } from "lucide-react"
+import { Settings } from "react-feather"
 
-interface ProjectSettingsProps {
-  selectedProject?: string | null
-}
-
-export function ProjectSettings({ selectedProject }: ProjectSettingsProps) {
+export function ProjectSettings() {
   return (
     <Card className="w-full h-fit">
       <CardHeader>
