@@ -1,37 +1,46 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import {NextResponse} from 'next/server'
+import type {NextRequest} from 'next/server'
+import jwt from 'jsonwebtoken'
+export function middleware(req: NextRequest) {
+  try {
+    const token = req.cookies.get('access_token')?.value
+    const {pathname} = req.nextUrl
 
-// Define routes that require authentication
-const protectedRoutes = ['/dashboard', '/settings', '/admin', '/items']
+    const isProtectedRoute =
+      pathname.startsWith('/dashboard') || pathname.startsWith('/account')
+    const isAuthRoute =
+      pathname.startsWith('/login') || pathname.startsWith('/register')
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  
-  // Check if the current route is protected
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route)
-  )
-  
-  // For protected routes, let the client-side handle auth checks
-  // This avoids server-side localStorage access issues
-  if (isProtectedRoute) {
-    // Let the ProtectedRoute component handle the auth logic
+    if (!token && isProtectedRoute) {
+      return NextResponse.redirect(new URL('/login', req.url))
+    }
+
+    if (token && isAuthRoute) {
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
+
+    if (token) {
+      try {
+        const decoded = jwt.decode(token) as {exp?: number}
+        if (decoded?.exp && decoded.exp * 1000 < Date.now()) {
+          const res = NextResponse.redirect(new URL('/login', req.url))
+          res.cookies.delete('access_token')
+          return res
+        }
+      } catch (e) {
+        console.error('[middleware error]', e)
+        const res = NextResponse.redirect(new URL('/login', req.url))
+        res.cookies.delete('access_token')
+        return res
+      }
+    }
+
     return NextResponse.next()
+  } catch {
+    return new Response('middleware error', {status: 500})
   }
-  
-  return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder files
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
-  ],
+  matcher: ['/dashboard/:path*', '/account/:path*', '/login', '/register'],
 }

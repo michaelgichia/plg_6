@@ -12,9 +12,10 @@ from app.api.deps import (
 )
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
-from app.models import (
-    Item,
-    Message,
+from app.models.common import Message
+from app.models.course import Course
+from app.models.item import Item
+from app.models.user import (
     UpdatePassword,
     User,
     UserCreate,
@@ -221,6 +222,8 @@ def delete_user(
         )
     statement = delete(Item).where(col(Item.owner_id) == user_id)
     session.exec(statement)  # type: ignore
+    statement = delete(Course)
+    session.execute(statement)  # type: ignore
     session.delete(user)
     session.commit()
     return Message(message="User deleted successfully")
