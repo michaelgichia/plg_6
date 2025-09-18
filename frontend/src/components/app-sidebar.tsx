@@ -39,12 +39,16 @@ export function AppSidebar({courses}: {courses?: CoursePublic[]}) {
                   size='lg'
                   className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
                 >
-                  <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg'>
-                    <Zap className='size-4' />
-                  </div>
-                  <div className='flex flex-col gap-0.5 leading-none'>
-                    <span className='font-medium'>Study Companion</span>
-                  </div>
+                  <Link href='/dashboard'>
+                    <div className='flex items-center'>
+                      <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg mr-4'>
+                        <Zap className='size-4' />
+                      </div>
+                      <div className='flex flex-col gap-0.5 leading-none'>
+                        <span className='font-medium'>Study Companion</span>
+                      </div>
+                    </div>
+                  </Link>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
             </DropdownMenu>

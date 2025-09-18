@@ -3,6 +3,7 @@
 import {ChevronRight, Cloud} from 'react-feather'
 import {useDropzone} from 'react-dropzone'
 import {useState, useEffect} from 'react'
+import {useRouter} from 'next/navigation'
 
 import {Button} from '@/components/ui/button'
 import {Separator} from '@/components/ui/separator'
@@ -22,9 +23,10 @@ const ACCEPTED_FILE_TYPES = {
 const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
 
 export default function UploadDocuments({courseId}: {courseId: string}) {
-  const [course, setCourse] = useState<CoursePublic>(null)
+  const [course, setCourse] = useState<CoursePublic>()
+  const router = useRouter()
 
-  const fetchCourse = async (id) => {
+  const fetchCourse = async (id: string) => {
     try {
       const courseData = await getCourse(id)
       setCourse(courseData)
@@ -38,7 +40,7 @@ export default function UploadDocuments({courseId}: {courseId: string}) {
 
     const intervalId = setInterval(() => {
       fetchCourse(courseId)
-    }, 60000)
+    }, 1000)
 
     return () => clearInterval(intervalId)
   }, [courseId])
@@ -50,6 +52,12 @@ export default function UploadDocuments({courseId}: {courseId: string}) {
       await uploadDocuments(courseId, documents)
     },
   })
+
+  function handleRedirect() {
+    router.replace(`/dashboard/courses/${courseId}?tab=quiz`)
+  }
+
+  const isDisabled = !(course?.documents ?? []).length
 
   return (
     <div className='space-y-2'>
@@ -95,7 +103,7 @@ export default function UploadDocuments({courseId}: {courseId: string}) {
       )}
 
       <div className='flex justify-end mt-8'>
-        <Button>
+        <Button onClick={handleRedirect} disabled={isDisabled}>
           Complete <ChevronRight />
         </Button>
       </div>

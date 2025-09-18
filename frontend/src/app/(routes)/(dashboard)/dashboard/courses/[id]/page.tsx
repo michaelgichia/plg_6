@@ -1,12 +1,14 @@
 import {TabsContent} from '@/components/ui/tabs'
 import QuizComponent from '@/components/quiz'
-import { getCourse } from '@/actions/courses'
+import { getCourse } from '@/lib/courses'
 
 export default async function Page(props: {params: Promise<{id: string}>}) {
   const params = await props.params
   const id = params.id
 
   const course = await getCourse(id)
+
+
 
   if (!course) {
     return (
