@@ -5,14 +5,9 @@ import { z } from 'zod';
 /**
  * Body_documents-process_multiple_documents
  */
-// export const zBodyDocumentsProcessMultipleDocuments = z.object({
-//     files: z.array(z.string()),
-//     course_id: z.uuid()
-// });
-
 export const zBodyDocumentsProcessMultipleDocuments = z.object({
-  files: z.array(z.instanceof(File)),
-  course_id: z.uuid(),
+    files: z.array(z.string()),
+    course_id: z.uuid()
 });
 
 /**
@@ -676,6 +671,14 @@ export const zGetApiV1CoursesByCourseIdDocumentsResponse = z.array(z.record(z.st
 export const zPostApiV1DocumentsProcessData = z.object({
     body: zBodyDocumentsProcessMultipleDocuments,
     path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+export const zDeleteApiV1DocumentsByIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        id: z.uuid()
+    }),
     query: z.optional(z.never())
 });
 

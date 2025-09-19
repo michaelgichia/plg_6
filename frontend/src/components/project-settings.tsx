@@ -1,7 +1,7 @@
 'use client'
 
 import {FileText, X} from 'react-feather'
-import {useEffect, useState} from 'react'
+import {useActionState, useEffect, useState} from 'react'
 import {useParams} from 'next/navigation'
 
 import {Button} from '@/components/ui/button'
@@ -12,18 +12,46 @@ import {Textarea} from '@/components/ui/textarea'
 import {CoursePublic} from '@/client'
 import {getCourse} from '@/lib/courses'
 import {deleteDocument} from '@/actions/documents'
+import {IState} from '@/types/common'
 
 export function ProjectSettings() {
-  const params = useParams()
-  const courseId = params.id as string
+  const [isLoading, setIsLoading] = useState(false)
   const [course, setCourse] = useState<CoursePublic>()
 
+  const handleOnSubmit = (_state: IState, formData: FormData) => {
+    deleteDocument(_state, formData)
+      .then(() => {
+        if (course?.id) {
+          getCourse(course.id).then((updatedCourse) => {
+            setCourse(updatedCourse)
+          })
+        }
+      })
+      .catch((error) => {
+        console.error('Error deleting document', error)
+      })
+  }
+
+  const [_state, formAction, isPending] = useActionState<IState>(
+    handleOnSubmit,
+    {
+      message: null,
+      success: false,
+    },
+  )
+
+  const params = useParams()
+  const courseId = params.id as string
+
   const fetchCourse = async (id: string) => {
+    setIsLoading(true)
     try {
       const courseData = await getCourse(id)
       setCourse(courseData)
     } catch (error) {
       console.error('Failed to fetch course:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -31,15 +59,18 @@ export function ProjectSettings() {
     fetchCourse(courseId)
   }, [courseId])
 
-  if (!course) {
+  if (isLoading) {
     return (
       <div className='p-4'>
-        <p className='text-red-500'>Course not found.</p>
+        <p>Loading...</p>
       </div>
     )
   }
 
-  console.log({course})
+  if (!isLoading && !course) {
+    return null
+  }
+
   return (
     <div className='p-4 bg-background text-foreground'>
       <h1 className='text-xl font-semibold mb-6'>Project Settings</h1>
@@ -101,14 +132,15 @@ export function ProjectSettings() {
                     </div>
                   </div>
                 </div>
-                <form action={deleteDocument}>
+                <form action={formAction}>
                   <input type='hidden' name='documentId' value={doc.id} />
                   <Button
                     variant='ghost'
                     size='sm'
                     className='h-6 w-6 p-0 text-muted-foreground hover:text-foreground'
+                    disabled={isPending}
                   >
-                    <X className='h-4 w-4' />
+                    {isPending ? '...' : <X className='h-4 w-4' />}
                   </Button>
                 </form>
               </div>
