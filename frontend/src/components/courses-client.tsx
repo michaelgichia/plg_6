@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import {Search} from 'react-feather'
+import {Search, Plus} from 'react-feather'
 
 import {CoursePublic} from '@/client'
 import {Input} from '@/components/ui/input'
@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {Calendar} from '@/components/ui/calendar'
+import Link from 'next/link'
 
 type CourseWithOptionalDate = CoursePublic & {created_at?: string | null}
 
@@ -133,11 +134,26 @@ export default function CoursesClient({
         </div>
       )}
 
-      <div className='grid auto-rows-min gap-6 md:grid-cols-3 sm:grid-cols-3 lg:grid-cols-4'>
-        {filtered.map((course) => (
-          <CourseCard key={course.id} course={course} />
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <div className='flex flex-col items-center justify-center py-12 w-full h-full'>
+          <p className='mb-4 text-lg text-muted-foreground'>
+            No courses found.
+          </p>
+          <Link
+            className='px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition flex'
+            href='/dashboard/courses/create'
+          >
+            <Plus className='text-white text-sm' />
+            <span className='text-white pl-6'>Add Course</span>
+          </Link>
+        </div>
+      ) : (
+        <div className='grid auto-rows-min gap-6 md:grid-cols-3 sm:grid-cols-3 lg:grid-cols-4'>
+          {filtered.map((course) => (
+            <CourseCard key={course.id} course={course} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
