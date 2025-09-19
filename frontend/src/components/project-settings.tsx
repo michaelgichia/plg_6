@@ -11,6 +11,7 @@ import {Textarea} from '@/components/ui/textarea'
 
 import {CoursePublic} from '@/client'
 import {getCourse} from '@/lib/courses'
+import {deleteDocument} from '@/actions/documents'
 
 export function ProjectSettings() {
   const params = useParams()
@@ -100,13 +101,16 @@ export function ProjectSettings() {
                     </div>
                   </div>
                 </div>
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  className='h-6 w-6 p-0 text-muted-foreground hover:text-foreground'
-                >
-                  <X className='h-4 w-4' />
-                </Button>
+                <form action={deleteDocument}>
+                  <input type='hidden' name='documentId' value={doc.id} />
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='h-6 w-6 p-0 text-muted-foreground hover:text-foreground'
+                  >
+                    <X className='h-4 w-4' />
+                  </Button>
+                </form>
               </div>
             ))}
           </div>
