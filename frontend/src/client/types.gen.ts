@@ -1279,6 +1279,35 @@ export type PostApiV1DocumentsProcessResponses = {
     200: unknown;
 };
 
+export type DeleteApiV1DocumentsByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/documents/{id}';
+};
+
+export type DeleteApiV1DocumentsByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteApiV1DocumentsByIdError = DeleteApiV1DocumentsByIdErrors[keyof DeleteApiV1DocumentsByIdErrors];
+
+export type DeleteApiV1DocumentsByIdResponses = {
+    /**
+     * Response Documents-Delete Document
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type GetApiV1DocumentsByIdData = {
     body?: never;
     path: {

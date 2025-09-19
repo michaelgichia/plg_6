@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import {User, ChevronUp, Plus, Zap, FileText} from 'react-feather'
+import {User, ChevronUp, Zap, Home, Settings} from 'react-feather'
 
 import {
   Sidebar,
@@ -25,9 +25,7 @@ import {
 
 import {logout} from '@/actions/auth'
 import Link from 'next/link'
-import {CoursePublic} from '@/client/types.gen'
-
-export function AppSidebar({courses}: {courses?: CoursePublic[]}) {
+export function AppSidebar({displayName = 'User'}: {displayName?: string}) {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -57,34 +55,25 @@ export function AppSidebar({courses}: {courses?: CoursePublic[]}) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Projects</SidebarGroupLabel>
+          <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {courses?.map((course) => {
-                return (
-                  <SidebarMenuItem key={course.id}>
-                    <SidebarMenuButton asChild>
-                      <Link
-                        href={{
-                          pathname: '/dashboard/courses/[id]',
-                          query: {id: course.id, tab: 'quiz'},
-                        }}
-                        as={`/dashboard/courses/${course.id}?tab=quiz`}
-                      >
-                        <FileText />
-                        <span>{course.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-            <SidebarMenu>
-              <SidebarMenuButton asChild>
-                <Link href='/dashboard/courses/create'>
-                  <Plus /> <span>Add Course</span>
-                </Link>
-              </SidebarMenuButton>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href='/dashboard'>
+                    <Home />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href='/dashboard/user-settings'>
+                    <Settings />
+                    <span>User Settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -95,7 +84,7 @@ export function AppSidebar({courses}: {courses?: CoursePublic[]}) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User /> Username
+                  <User /> {displayName}
                   <ChevronUp className='ml-auto' />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -104,7 +93,9 @@ export function AppSidebar({courses}: {courses?: CoursePublic[]}) {
                 className='w-[--radix-popper-anchor-width]'
               >
                 <DropdownMenuItem>
-                  <span>Account</span>
+                  <Link href='/dashboard/user-settings'>
+                    <span>Account</span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <form action={logout}>

@@ -34,7 +34,7 @@ export async function authenticate(
     const accessToken = get(response, 'data.access_token')
 
     if (accessToken) {
-      const cookieStore = cookies()
+      const cookieStore = await cookies()
       cookieStore.set('access_token', accessToken, {
         httpOnly: true,
         secure: true,
