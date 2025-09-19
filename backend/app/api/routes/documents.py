@@ -292,44 +292,6 @@ def delete_embeddings_task(document_id: uuid.UUID):
         logger.error(f"Failed to delete embeddings for document {document_id}: {e}")
 
 
-# @router.delete("/{id}")
-# def delete_document(
-#     session: SessionDep, current_user: CurrentUser, id: uuid.UUID
-# ) -> Any:
-#     """Delete a document by its ID, ensuring the user has permissions."""
-
-#     document = session.exec(
-#         select(Document).where(Document.id == id).options(selectinload(Document.course)) # type: ignore
-#     ).first()
-
-#     if not document:
-#         raise HTTPException(
-#             status_code=404,
-#             detail="Document not found or you do not have permission to delete it.",
-#         )
-
-#     if not current_user.is_superuser and (document.course.owner_id != current_user.id):
-#         raise HTTPException(
-#             status_code=403,
-#             detail="Not enough permissions to delete this document.",
-#         )
-
-#     try:
-#         if pc.has_index(index_name):
-#             index = pc.Index(index_name)
-
-#             # Use a filter on the metadata to delete all vectors with this document_id
-#             index.delete(filter={"document_id": str(id)})
-
-#     except Exception as e:
-#         logger.error(f"Failed to delete embeddings from Pinecone: {e}")
-
-#     session.delete(document)
-#     session.commit()
-
-#     return Message(message="Document and associated embeddings deleted successfully")
-
-
 @router.delete("/{id}")
 def delete_document(
     session: SessionDep,

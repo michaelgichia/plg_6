@@ -1,5 +1,5 @@
 import {getCourses} from '@/actions/courses'
-import CoursesClient from './courses-client'
+import CoursesClient from '@/components/courses-client'
 
 export default async function DashboardPage() {
   const courses = await getCourses()
