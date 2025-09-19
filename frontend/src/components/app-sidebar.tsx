@@ -25,7 +25,7 @@ import {
 
 import {logout} from '@/actions/auth'
 import Link from 'next/link'
-export function AppSidebar() {
+export function AppSidebar({displayName = 'User'}: {displayName?: string}) {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -84,7 +84,7 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User /> Username
+                  <User /> {displayName}
                   <ChevronUp className='ml-auto' />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -93,7 +93,9 @@ export function AppSidebar() {
                 className='w-[--radix-popper-anchor-width]'
               >
                 <DropdownMenuItem>
-                  <span>Account</span>
+                  <Link href='/dashboard/user-settings'>
+                    <span>Account</span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <form action={logout}>
