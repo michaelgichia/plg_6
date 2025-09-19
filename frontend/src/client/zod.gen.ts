@@ -6,8 +6,8 @@ import { z } from 'zod';
  * Body_documents-process_multiple_documents
  */
 export const zBodyDocumentsProcessMultipleDocuments = z.object({
-    files: z.array(z.string()),
-    course_id: z.uuid()
+  files: z.array(z.instanceof(File)),
+  course_id: z.uuid(),
 });
 
 /**

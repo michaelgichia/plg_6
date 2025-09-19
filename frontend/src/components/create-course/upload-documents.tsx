@@ -40,7 +40,7 @@ export default function UploadDocuments({courseId}: {courseId: string}) {
 
     const intervalId = setInterval(() => {
       fetchCourse(courseId)
-    }, 1000)
+    }, 5000)
 
     return () => clearInterval(intervalId)
   }, [courseId])
