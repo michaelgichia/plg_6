@@ -3,3 +3,4 @@ htmlcov
 .env
 *.env
 .env*
+frontend/.*
