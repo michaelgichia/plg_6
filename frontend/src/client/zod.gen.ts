@@ -137,6 +137,14 @@ export const zDocument = z.object({
     uploaded_at: z.optional(z.iso.datetime())
 });
 
+/*
+ * Flashcard
+ */
+export const zFlashcard = z.object({
+    question: z.string(),
+    answer: z.string(),
+})
+
 /**
  * ValidationError
  */
@@ -691,6 +699,19 @@ export const zGetApiV1DocumentsByIdData = z.object({
  * Successful Response
  */
 export const zGetApiV1DocumentsByIdResponse = zDocument;
+
+export const zGetApiV1FlashcardsByCourseIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zGetApiV1FlashcardsByCourseIdResponse = zFlashcard;
 
 export const zPostApiV1PrivateUsersData = z.object({
     body: zPrivateUserCreate,
