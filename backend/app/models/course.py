@@ -34,4 +34,3 @@ class CoursePublic(CourseBase):
 class CoursesPublic(SQLModel):
   data: list[CoursePublic]
   count: int
-  documents: list["Document"] = []
