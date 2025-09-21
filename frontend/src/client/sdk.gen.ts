@@ -931,7 +931,7 @@ export class FlashcardService {
                     type: 'http'
                 }
             ],
-            url: '/api/v1/flashcards/{id}',
+            url: '/api/v1/flashcards/course/{id}',
             ...options
         });
     }

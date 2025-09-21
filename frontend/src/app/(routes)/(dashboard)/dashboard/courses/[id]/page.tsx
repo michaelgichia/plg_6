@@ -2,16 +2,14 @@ import {TabsContent} from '@/components/ui/tabs'
 import QuizComponent from '@/components/quiz'
 import Flashcard from '@/components/flashcard';
 import {getCourse} from '@/lib/courses'
-import {getFlashcard} from "@/lib/flashcards";
+import {getFlashcard} from '@/lib/flashcards'
+
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params
   const id = params.id
 
   const course = await getCourse(id)
-
-  const flashcards = await getFlashcard(id)
-
 
   if (!course) {
     return (
@@ -34,7 +32,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       </TabsContent>
 
       <TabsContent value='flashcard' className='p-6'>
-        <Flashcard/>
+        <Flashcard courseId={id}/>
       </TabsContent>
 
       <TabsContent value='podcast' className='p-6'>
