@@ -13,6 +13,7 @@ import {CoursePublic} from '@/client'
 import {getCourse} from '@/lib/courses'
 import {deleteDocument} from '@/actions/documents'
 import {IState} from '@/types/common'
+import UploadComponent from '@/components/upload-component'
 
 export function ProjectSettings() {
   const [isLoading, setIsLoading] = useState(false)
@@ -44,7 +45,6 @@ export function ProjectSettings() {
   const courseId = params.id as string
 
   const fetchCourse = async (id: string) => {
-    setIsLoading(true)
     try {
       const courseData = await getCourse(id)
       setCourse(courseData)
@@ -56,6 +56,7 @@ export function ProjectSettings() {
   }
 
   useEffect(() => {
+    setIsLoading(true)
     fetchCourse(courseId)
   }, [courseId])
 
@@ -75,6 +76,7 @@ export function ProjectSettings() {
     <div className='p-4 bg-background text-foreground'>
       <h1 className='text-xl font-semibold mb-6'>Project Settings</h1>
 
+      {course && (
       <div className='space-y-6'>
         {/* Project Name Section */}
         <div className='space-y-2'>
@@ -104,6 +106,16 @@ export function ProjectSettings() {
             defaultValue={course.description}
             className='bg-muted border-border text-foreground min-h-[80px] resize-none'
           />
+        </div>
+        {/* Upload more documents Section */}
+        <div className='space-y-2'>
+          <Label
+            htmlFor='upload-more-docs'
+            className='text-sm text-muted-foreground'
+          >
+            Upload More Documents
+          </Label>
+          <UploadComponent courseId={course.id} callback={() => fetchCourse(course.id)} />
         </div>
 
         {/* Documents Section */}
@@ -148,6 +160,7 @@ export function ProjectSettings() {
           </div>
         </div>
       </div>
+      )}
     </div>
   )
 }
