@@ -8,7 +8,7 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
 
   const course = await getCourse(id)
 
-
+  console.log('Course data:', course)
 
   if (!course) {
     return (
