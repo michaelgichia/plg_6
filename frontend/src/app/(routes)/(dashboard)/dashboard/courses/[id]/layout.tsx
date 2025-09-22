@@ -1,3 +1,4 @@
+import {ProjectSettings} from '@/components/project-settings'
 import {Tabs, TabsList, TabsTrigger} from '@radix-ui/react-tabs'
 
 const StyledTabList = ({name}: {name: string}) => (
@@ -16,15 +17,25 @@ export default async function CourseLayout({
 }) {
   return (
     <div className='min-h-screen'>
-      <Tabs defaultValue='quiz' className='w-full'>
-        <TabsList className='w-full justify-start bg-transparent border-b border-slate-700 rounded-none h-12 p-0'>
-          <StyledTabList name='quiz' />
-          <StyledTabList name='qa' />
-          <StyledTabList name='flashcard' />
-          <StyledTabList name='podcast' />
-        </TabsList>
-        {children}
-      </Tabs>
+      <div className='grid grid-cols-10'>
+        <div className='col-span-7'>
+          <Tabs
+            defaultValue='quiz'
+            className='w-full min-h-dvh border-r-[1px] border-slate-700'
+          >
+            <TabsList className='w-full justify-start bg-transparent border-b border-slate-700 rounded-none h-12 p-0'>
+              <StyledTabList name='quiz' />
+              <StyledTabList name='qa' />
+              <StyledTabList name='flashcard' />
+              <StyledTabList name='podcast' />
+            </TabsList>
+            {children}
+          </Tabs>
+        </div>
+        <div className='col-span-3'>
+          <ProjectSettings />
+        </div>
+      </div>
     </div>
   )
 }

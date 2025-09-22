@@ -21,6 +21,7 @@ export async function uploadDocuments(
     })
     return response.data
   } catch (error) {
+    console.error(error)
     const errorMsg = get(
       error as Record<string, never>,
       'detail',
