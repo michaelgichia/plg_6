@@ -22,8 +22,8 @@ def list_chat(session: SessionDep, current_user: CurrentUser, id: uuid.UUID, cur
     Get chat history for a course.
     """
     
-@router.get("/{course_id}", response_model=Chat)
-def send_chat(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+@router.post("/{course_id}", response_model=Chat)
+def send_chat(session: SessionDep, current_user: CurrentUser, id: uuid.UUID, message: str) -> Any:
     """
     Send chat for a course.
     """
