@@ -41,9 +41,18 @@ export async function sendChat({ id, message }: {id?: string, message: string}):
   }
 }
 
+const mockHistoryApiRequest = (): Promise<{messages: ChatMessage[]}> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const data = { messages: []};
+      resolve(data);
+    }, 2000);
+  });
+}
+
 export async function getHistory({ cursor }: {cursor?: string}): Promise<ChatMessage[]> {
   try {
-    const response = await CoursesService.getApiV1Courses()
+    const response = await mockHistoryApiRequest()
     return [];
   } catch (error) {
     console.error(error)

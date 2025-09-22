@@ -12,36 +12,14 @@ import { ChatMessage, getHistory, sendChat } from '@/actions/chat'
 export default function CourseDashboard() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false)
-  const ws = useRef<WebSocket>(null);
   const [inputValue, setInputValue] = useState('')
 
   useEffect(() => {
-    // const baseURL = process.env.NEXT_INTERNAL_BACKEND_BASE_URL ?? 'http://localhost:8000';
-    // const wsBaseUrl = baseURL.replace(/^http(s)?:/, 'ws$1:');
-    // ws.current = new WebSocket(`${wsBaseUrl}}/api/chat/listen`);
-
-    // ws.current.onopen = () => {
-    //   console.log('WebSocket connected');
-    // };
-
-    // ws.current.onmessage = (event) => {
-    //   const message = JSON.parse(event.data);
-    //   setMessages(prev => [...prev, {
-    //     id: message.id,
-    //     is_system: true,
-    //     message: message.message,
-    //   }]);
-
-    //   setIsWaitingForResponse(false);
-    // };
-
-    // ws.current.onerror = (error) => {
-    //   console.error('WebSocket error:', error);
-    // };
-
-    // return () => {
-    //   ws.current!.close();
-    // };
+    setIsWaitingForResponse(true);
+    getHistory({}).then(response => {
+      setMessages(response);
+      setIsWaitingForResponse(false);
+    })
   }, []);
 
   const handleSendMessage = async() => {
