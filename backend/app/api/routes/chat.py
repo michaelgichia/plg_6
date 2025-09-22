@@ -29,14 +29,10 @@ def list_chat(session: SessionDep, current_user: CurrentUser, id: uuid.UUID, cur
     """
     Get chat history for a course.
     """
-    statement = (
-        select(Course).where(Course.id == id).options(selectinload(Course.documents))
-    )
-    course = session.exec(statement).first()
-
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-    if not current_user.is_superuser and (course.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
-
-    return course
+    
+@router.get("/{course_id}", response_model=Chat)
+def send_chat(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+    """
+    Send chat for a course.
+    """
+    
