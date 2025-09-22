@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
@@ -102,6 +103,9 @@ def update_course(
     course_data = course_in.model_dump(exclude_unset=True)
     for key, value in course_data.items():
         setattr(course, key, value)
+
+    course.updated_at = datetime.now(timezone.utc)
+
     session.add(course)
     session.commit()
     session.refresh(course)

@@ -1,10 +1,10 @@
 import asyncio
-import logging
 import os
 import shutil
 import tempfile
 import uuid
 from asyncio.log import logger
+from datetime import datetime, timezone
 from typing import Any
 
 import aiofiles
@@ -142,6 +142,7 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
         store_embeddings(
             chunks, embeddings, str(document.course_id), str(document.id), index
         )
+        document.updated_at = datetime.now(timezone.utc)
         document.status = DocumentStatus.COMPLETED
         document.chunk_count = len(chunks)
         session.add(document)

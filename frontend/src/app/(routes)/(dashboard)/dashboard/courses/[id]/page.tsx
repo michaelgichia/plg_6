@@ -8,8 +8,6 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
 
   const course = await getCourse(id)
 
-
-
   if (!course) {
     return (
       <div className='text-center text-red-500 py-12'>
