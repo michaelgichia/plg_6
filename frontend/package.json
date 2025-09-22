@@ -10,6 +10,7 @@
     "generate-client": "openapi-ts"
   },
   "dependencies": {
+    "@hey-api/openapi-ts": "^0.84.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-collapsible": "^1.1.12",
@@ -45,7 +46,6 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
     "@eslint/eslintrc": "^3",
-    "@hey-api/openapi-ts": "^0.83.1",
     "@tailwindcss/postcss": "^4.1.13",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",

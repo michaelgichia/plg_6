@@ -18,6 +18,9 @@ export async function uploadDocuments(
         files: documents,
         course_id: courseId,
       },
+      // openapi-ts misinterpret this as a plain string rather than a File
+      // object. This bypasses the validation
+      requestValidator: async () => {}
     })
     return response.data
   } catch (error) {
