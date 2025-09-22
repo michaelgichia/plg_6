@@ -16,12 +16,12 @@ export default async function CourseLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className='min-h-screen'>
-      <div className='grid grid-cols-10'>
+    <div className='h-full'>
+      <div className='grid grid-cols-10 h-full'>
         <div className='col-span-7'>
           <Tabs
             defaultValue='quiz'
-            className='w-full min-h-dvh border-r-[1px] border-slate-700'
+            className='w-full h-full border-r-[1px] border-slate-700 overflow-y-hidden'
           >
             <TabsList className='w-full justify-start bg-transparent border-b border-slate-700 rounded-none h-12 p-0'>
               <StyledTabList name='quiz' />
