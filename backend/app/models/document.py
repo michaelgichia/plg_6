@@ -30,6 +30,10 @@ class Document(DocumentBase, table=True):
     filename: str
     status: DocumentStatus = Field(default=DocumentStatus.PENDING)
 
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")}
+    )
     uploaded_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")}

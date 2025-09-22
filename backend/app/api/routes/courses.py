@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import uuid
 from typing import Any
 
@@ -102,6 +103,9 @@ def update_course(
     course_data = course_in.model_dump(exclude_unset=True)
     for key, value in course_data.items():
         setattr(course, key, value)
+
+    course.updated_at = datetime.now(timezone.utc)
+
     session.add(course)
     session.commit()
     session.refresh(course)
