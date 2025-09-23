@@ -8,6 +8,7 @@ import { BodyLoginLoginAccessToken, LoginService, UsersService } from '@/client'
 import { get } from '@/utils'
 import { SignUpSchema } from '@/types/form'
 import { handleError } from '@/actions/handleErrors'
+import { IState } from '@/types/common'
 
 /**
  * Authenticates a user using the provided form data.
@@ -23,7 +24,7 @@ import { handleError } from '@/actions/handleErrors'
 export async function authenticate(
   _prevState: IAuthState | undefined,
   formData?: FormData,
-): Promise<IAuthState | undefined> {
+): Promise<IAuthState | IState> {
   try {
     const data: BodyLoginLoginAccessToken = {
       username: formData!.get('email') as string,

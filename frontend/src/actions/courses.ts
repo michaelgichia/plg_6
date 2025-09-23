@@ -4,51 +4,42 @@ import {redirect} from 'next/navigation'
 
 import {CoursePublic, CoursesService} from '@/client'
 import {zCourseCreate} from '@/client/zod.gen'
-import {get} from '@/utils'
 
-export async function getCourses(): Promise<CoursePublic[] | undefined> {
+import {handleError} from './handleErrors'
+import {IState} from '@/types/common'
+
+export async function getCourses(): Promise<CoursePublic[] | IState> {
   try {
-    const response = await CoursesService.getApiV1Courses()
+    const response = await CoursesService.getApiV1Courses({
+      responseValidator: async () => {},
+    })
     return response.data?.data ?? []
   } catch (error) {
-    console.error(error)
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
-
-    throw new Error(errorMsg)
+    return {
+      message: handleError(error),
+      success: false,
+      courses: [],
+    }
   }
 }
 
-export async function getCourse(id: string): Promise<CoursePublic | undefined> {
+export async function getCourse(id: string): Promise<CoursePublic | IState> {
   try {
-    const response = await CoursesService.getApiV1CoursesById({path: {id}})
+    const response = await CoursesService.getApiV1CoursesById({
+      path: {id},
+      responseValidator: async () => {},
+    })
     return response.data
   } catch (error) {
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
-
-    throw new Error(errorMsg)
+    return {
+      message: handleError(error),
+      success: false,
+    }
   }
 }
 
-export type IState = {
-  errors?: {
-    name?: string[]
-    description?: string[]
-  }
-  message?: string | null
-  success: boolean | null
-  course?: CoursePublic
-}
-
-export async function createCourse(_state: IState, formData: FormData) {
-  let course: CoursePublic | undefined
+export async function createCourse(_state: unknown, formData: FormData) {
+  let course: CoursePublic | IState
   try {
     const payload = zCourseCreate.safeParse({
       name: formData.get('name'),
@@ -68,12 +59,8 @@ export async function createCourse(_state: IState, formData: FormData) {
     course = response.data
   } catch (error) {
     return {
+      message: handleError(error),
       success: false,
-      message: get(
-        error as Record<string, never>,
-        'detail',
-        'API request failed',
-      ),
     }
   }
 

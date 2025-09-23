@@ -106,24 +106,6 @@ export const CourseCreateSchema = {
 
 export const CoursePublicSchema = {
     properties: {
-        name: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 3,
-            title: 'Name'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 1020
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -133,10 +115,42 @@ export const CoursePublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Owner Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        documents: {
+            items: {
+                '$ref': '#/components/schemas/DocumentPublic'
+            },
+            type: 'array',
+            title: 'Documents'
         }
     },
     type: 'object',
-    required: ['name', 'id', 'owner_id'],
+    required: ['id', 'owner_id', 'name', 'created_at', 'updated_at', 'documents'],
     title: 'CoursePublic'
 } as const;
 
@@ -174,24 +188,6 @@ export const CourseUpdateSchema = {
 
 export const CourseWithDocumentsSchema = {
     properties: {
-        name: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 3,
-            title: 'Name'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 1020
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -201,6 +197,31 @@ export const CourseWithDocumentsSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Owner Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
         },
         documents: {
             items: {
@@ -212,7 +233,7 @@ export const CourseWithDocumentsSchema = {
         }
     },
     type: 'object',
-    required: ['name', 'id', 'owner_id'],
+    required: ['id', 'owner_id', 'name', 'created_at', 'updated_at'],
     title: 'CourseWithDocuments'
 } as const;
 
@@ -283,10 +304,15 @@ export const DocumentSchema = {
             '$ref': '#/components/schemas/DocumentStatus',
             default: 'pending'
         },
-        uploaded_at: {
+        created_at: {
             type: 'string',
             format: 'date-time',
-            title: 'Uploaded At'
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
         }
     },
     type: 'object',
@@ -296,12 +322,6 @@ export const DocumentSchema = {
 
 export const DocumentPublicSchema = {
     properties: {
-        title: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 1,
-            title: 'Title'
-        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -312,17 +332,18 @@ export const DocumentPublicSchema = {
             format: 'uuid',
             title: 'Course Id'
         },
-        uploaded_at: {
+        updated_at: {
             type: 'string',
             format: 'date-time',
-            title: 'Uploaded At'
+            title: 'Updated At'
         },
         status: {
-            '$ref': '#/components/schemas/DocumentStatus'
+            type: 'string',
+            title: 'Status'
         }
     },
     type: 'object',
-    required: ['title', 'id', 'course_id', 'uploaded_at', 'status'],
+    required: ['id', 'course_id', 'updated_at', 'status'],
     title: 'DocumentPublic'
 } as const;
 

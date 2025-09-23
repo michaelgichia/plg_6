@@ -146,7 +146,7 @@ async def list_documents(
             "filename": doc.filename,
             "chunk_count": doc.chunk_count,
             "status": doc.status,
-            "uploaded_at": doc.uploaded_at.isoformat(),
+            "updated_at": doc.updated_at.isoformat(),
         }
         for doc in documents
     ]

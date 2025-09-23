@@ -39,7 +39,7 @@ export default function CourseCard({
   return (
     <Card className={cn('bg-muted/20 py-4', className)}>
       <CardHeader className='[.border-b]:pb-4'>
-        <CardTitle className='text-lg break-all'>{course.name}</CardTitle>
+        <CardTitle className='text-lg break-word'>{course.name}</CardTitle>
         <div data-slot='card-action'>
           <Link
             href={{
@@ -61,8 +61,7 @@ export default function CourseCard({
       <CardContent className='pt-0'>
         <div className='text-sm text-muted-foreground flex items-center gap-2'>
           <Calendar className='size-3' />
-          <span className='text-xs'>Created at</span>
-          <span className='text-foreground'>{createdLabel}</span>
+          <span className='text-xs'>{createdLabel}</span>
         </div>
       </CardContent>
     </Card>

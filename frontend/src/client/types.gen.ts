@@ -63,6 +63,14 @@ export type CourseCreate = {
  */
 export type CoursePublic = {
     /**
+     * Id
+     */
+    id: string;
+    /**
+     * Owner Id
+     */
+    owner_id: string;
+    /**
      * Name
      */
     name: string;
@@ -71,13 +79,17 @@ export type CoursePublic = {
      */
     description?: string | null;
     /**
-     * Id
+     * Created At
      */
-    id: string;
+    created_at: string;
     /**
-     * Owner Id
+     * Updated At
      */
-    owner_id: string;
+    updated_at: string;
+    /**
+     * Documents
+     */
+    documents: Array<DocumentPublic>;
 };
 
 /**
@@ -99,6 +111,14 @@ export type CourseUpdate = {
  */
 export type CourseWithDocuments = {
     /**
+     * Id
+     */
+    id: string;
+    /**
+     * Owner Id
+     */
+    owner_id: string;
+    /**
      * Name
      */
     name: string;
@@ -107,13 +127,13 @@ export type CourseWithDocuments = {
      */
     description?: string | null;
     /**
-     * Id
+     * Created At
      */
-    id: string;
+    created_at: string;
     /**
-     * Owner Id
+     * Updated At
      */
-    owner_id: string;
+    updated_at: string;
     /**
      * Documents
      */
@@ -164,19 +184,19 @@ export type Document = {
     filename: string;
     status?: DocumentStatus;
     /**
-     * Uploaded At
+     * Created At
      */
-    uploaded_at?: string;
+    created_at?: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string;
 };
 
 /**
  * DocumentPublic
  */
 export type DocumentPublic = {
-    /**
-     * Title
-     */
-    title: string;
     /**
      * Id
      */
@@ -186,10 +206,13 @@ export type DocumentPublic = {
      */
     course_id: string;
     /**
-     * Uploaded At
+     * Updated At
      */
-    uploaded_at: string;
-    status: DocumentStatus;
+    updated_at: string;
+    /**
+     * Status
+     */
+    status: string;
 };
 
 /**

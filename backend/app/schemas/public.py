@@ -10,8 +10,11 @@ from sqlmodel import SQLModel
 
 class DocumentPublic(SQLModel):
     id: uuid.UUID
+    filename: str
+    description: str | None = None
     course_id: uuid.UUID
-    uploaded_at: datetime
+    updated_at: datetime
+    created_at: datetime
     status: str  # Use str for status to avoid Enum import cycles
 
 
@@ -21,7 +24,7 @@ class CoursePublic(SQLModel):
     name: str
     description: str | None = None
     created_at: datetime
-    uploaded_at: datetime
+    updated_at: datetime
     documents: list["DocumentPublic"]
 
 
