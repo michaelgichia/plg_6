@@ -35,7 +35,7 @@ export default function UploadDocuments({courseId}: {courseId: string}) {
   }, [courseId])
 
   function handleRedirect() {
-    router.replace(`/dashboard/courses/${courseId}?tab=quiz`)
+    router.replace(`/dashboard/courses/${courseId}?tab=chat`)
   }
 
   const isDisabled = !(course?.documents ?? []).length

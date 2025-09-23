@@ -1,5 +1,5 @@
 import {TabsContent} from '@/components/ui/tabs'
-import QuizComponent from '@/components/quiz'
+import ChatComponent from '@/components/chat'
 import { getCourse } from '@/lib/courses'
 
 export default async function Page(props: {params: Promise<{id: string}>}) {
@@ -24,8 +24,8 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
         </div>
       </TabsContent>
 
-      <TabsContent value='quiz' className='p-6'>
-        <QuizComponent />
+      <TabsContent value='chat' className='p-6'>
+        <ChatComponent />
       </TabsContent>
 
       <TabsContent value='flashcard' className='p-6'>

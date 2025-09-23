@@ -20,11 +20,11 @@ export default async function CourseLayout({
       <div className='grid grid-cols-10 h-full'>
         <div className='col-span-7'>
           <Tabs
-            defaultValue='quiz'
+            defaultValue='chat'
             className='w-full h-full border-r-[1px] border-slate-700 overflow-y-hidden'
           >
             <TabsList className='w-full justify-start bg-transparent border-b border-slate-700 rounded-none h-12 p-0'>
-              <StyledTabList name='quiz' />
+              <StyledTabList name='chat' />
               <StyledTabList name='qa' />
               <StyledTabList name='flashcard' />
               <StyledTabList name='podcast' />
