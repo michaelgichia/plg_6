@@ -2,14 +2,15 @@
 
 import React from 'react'
 
-import {useState, useEffect, useRef} from 'react'
+import {useState, useEffect,} from 'react'
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {Mic} from 'react-feather'
 import { ChatMessage, getHistory, sendChat } from '@/actions/chat'
+import { CourseWithDocuments } from '@/client'
 
-export default function CourseDashboard() {
+export default function CourseDashboard({ course }: { course: CourseWithDocuments }) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false)
   const [inputValue, setInputValue] = useState('')

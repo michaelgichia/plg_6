@@ -1,7 +1,6 @@
 import * as React from 'react'
 import {Calendar, ArrowUpRight} from 'react-feather'
 
-import {CoursePublic} from '@/client'
 import {cn} from '@/lib/utils'
 import {
   Card,
@@ -11,19 +10,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import Link from 'next/link'
-
-type CourseWithOptionalDate = CoursePublic & {created_at?: string | null}
-
-function formatDate(input?: string | null) {
-  if (!input) return '—'
-  const date = new Date(input)
-  if (Number.isNaN(date.getTime())) return '—'
-  return date.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-  })
-}
+import { formatDate } from '@/lib/date'
+import { CourseWithOptionalDate } from '@/types/date'
 
 export default function CourseCard({
   course,
@@ -32,9 +20,7 @@ export default function CourseCard({
   course: CourseWithOptionalDate
   className?: string
 }) {
-  const createdLabel = formatDate(
-    course.created_at ?? (course as unknown as {createdAt?: string}).createdAt,
-  )
+  const createdLabel = formatDate(course.created_at) ?? '-'
 
   return (
     <Card className={cn('bg-muted/20 py-4', className)}>

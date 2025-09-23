@@ -41,3 +41,14 @@ export function inPreset(date: Date, preset: DatePreset, onDate?: Date): boolean
       return true
   }
 }
+
+export function formatDate(input?: string | null) {
+  if (!input) return '—'
+  const date = new Date(input)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}

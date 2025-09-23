@@ -109,14 +109,6 @@ export const confirmPasswordRules = (
   return rules
 }
 
-// Auth state management
-export const isLoggedIn = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem("access_token") !== null
-  }
-  return false
-}
-
 // Toast notification mock
 export const showToast = (message: string, type: 'success' | 'error' = 'success') => {
   // Replace with actual toast implementation

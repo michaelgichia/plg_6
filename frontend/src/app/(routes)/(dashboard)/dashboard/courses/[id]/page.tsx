@@ -1,6 +1,6 @@
 import {TabsContent} from '@/components/ui/tabs'
 import QuizComponent from '@/components/quiz'
-import { getCourse } from '@/lib/courses'
+import { getCourse } from '@/actions/courses'
 import ErrorBox from '@/components/ui/ErrorBox'
 
 export default async function Page(props: {params: Promise<{id: string}>}) {
@@ -13,7 +13,7 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
     return (<ErrorBox error={result.error} />)
   }
   const course = result.data
-  console.log('Course data:', course)
+
   return (
     <>
       <TabsContent value='qa' className='p-6'>
@@ -23,7 +23,7 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
       </TabsContent>
 
       <TabsContent value='quiz' className='p-6'>
-        <QuizComponent />
+        <QuizComponent course={course} />
       </TabsContent>
 
       <TabsContent value='flashcard' className='p-6'>

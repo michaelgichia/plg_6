@@ -1,12 +1,12 @@
 'use server'
 
-import { redirect } from 'next/navigation'
+import {redirect} from 'next/navigation'
 
-import { CoursePublic, CoursesService, CourseWithDocuments } from '@/client'
-import { zCourseCreate } from '@/client/zod.gen'
+import {CoursePublic, CoursesService, CourseWithDocuments} from '@/client'
+import {zCourseCreate} from '@/client/zod.gen'
 
-import { mapApiError } from '@/lib/mapApiError'
-import { Result } from '@/lib/result'
+import {mapApiError} from '@/lib/mapApiError'
+import {Result} from '@/lib/result'
 
 /**
  * Fetch all courses.
@@ -34,10 +34,12 @@ export async function getCourses(): Promise<Result<CoursePublic[]>> {
  * Fetch a single course by ID.
  * Returns a Result<CoursePublic>.
  */
-export async function getCourse(id: string): Promise<Result<CourseWithDocuments>> {
+export async function getCourse(
+  id: string,
+): Promise<Result<CourseWithDocuments>> {
   try {
     const response = await CoursesService.getApiV1CoursesById({
-      path: { id },
+      path: {id},
       responseValidator: async () => {},
     })
 
@@ -58,7 +60,11 @@ export async function getCourse(id: string): Promise<Result<CourseWithDocuments>
  * Returns a Result<CoursePublic> that must be checked with `res.ok`.
  * If successful, it redirects to the dashboard page.
  */
-export async function createCourse(_state: unknown, formData: FormData): Promise<Result<CoursePublic>> {
+export async function createCourse(
+  _state: unknown,
+  formData: FormData,
+): Promise<Result<CoursePublic>> {
+  let response;
   try {
     const payload = zCourseCreate.safeParse({
       name: formData.get('name'),
@@ -71,26 +77,22 @@ export async function createCourse(_state: unknown, formData: FormData): Promise
         error: {
           code: 'VALIDATION',
           message: 'Validation failed',
-          details: payload.error.flatten().fieldErrors,
+          details: payload.error.message,
         },
       }
     }
 
-    const response = await CoursesService.postApiV1Courses({
+    response = await CoursesService.postApiV1Courses({
       body: payload.data,
+      responseValidator: async () => {},
     })
 
-    // Redirect after creation — safe to redirect only on success
-    redirect(`/dashboard/courses/create?courseId=${response.data.id}`)
-
-    return {
-      ok: true,
-      data: response.data,
-    }
   } catch (err) {
     return {
       ok: false,
       error: mapApiError(err),
     }
   }
+  // Redirect after creation — safe to redirect only on success
+  redirect(`/dashboard/courses/create?courseId=${response.data.id}`)
 }
