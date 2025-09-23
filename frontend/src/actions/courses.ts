@@ -3,7 +3,7 @@
 import {redirect} from 'next/navigation'
 
 import {CoursePublic, CoursesService, CourseWithDocuments} from '@/client'
-import {zCourseCreate} from '@/client/zod.gen'
+import {zCourseCreate, zDeleteApiV1CoursesByIdData} from '@/client/zod.gen'
 
 import {mapApiError} from '@/lib/mapApiError'
 import {Result} from '@/lib/result'
@@ -64,7 +64,7 @@ export async function createCourse(
   _state: unknown,
   formData: FormData,
 ): Promise<Result<CoursePublic>> {
-  let response;
+  let response
   try {
     const payload = zCourseCreate.safeParse({
       name: formData.get('name'),
@@ -86,7 +86,6 @@ export async function createCourse(
       body: payload.data,
       responseValidator: async () => {},
     })
-
   } catch (err) {
     return {
       ok: false,
@@ -95,4 +94,25 @@ export async function createCourse(
   }
   // Redirect after creation — safe to redirect only on success
   redirect(`/dashboard/courses/create?courseId=${response.data.id}`)
+}
+
+export async function deleteCourse(
+  _state: unknown,
+  formData: FormData,
+): Promise<Result<null>> {
+  try {
+    const id = formData.get('id') as string
+
+    await CoursesService.deleteApiV1CoursesById({path: {id}})
+
+    return {
+      ok: true,
+      data: null,
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      error: mapApiError(err),
+    }
+  }
 }
