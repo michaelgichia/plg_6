@@ -1,8 +1,3 @@
-// Auth utilities for Next.js app
-
-// API Configuration
-const API_BASE_URL = 'http://localhost:8000'
-
 export interface AccessToken {
   username: string
   password: string

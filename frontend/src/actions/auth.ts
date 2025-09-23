@@ -1,12 +1,13 @@
 'use server'
 
-import {cookies} from 'next/headers'
-import {redirect} from 'next/navigation'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 
-import {IAuthState} from '@/types/auth'
-import {BodyLoginLoginAccessToken, LoginService, UsersService} from '@/client'
-import {get} from '@/utils'
-import {SignUpSchema} from '@/types/form'
+import { IAuthState } from '@/types/auth'
+import { BodyLoginLoginAccessToken, LoginService, UsersService } from '@/client'
+import { get } from '@/utils'
+import { SignUpSchema } from '@/types/form'
+import { handleError } from '@/actions/handleErrors'
 
 /**
  * Authenticates a user using the provided form data.
@@ -30,7 +31,7 @@ export async function authenticate(
       grant_type: 'password',
     }
 
-    const response = await LoginService.postApiV1LoginAccessToken({body: data})
+    const response = await LoginService.postApiV1LoginAccessToken({ body: data })
     const accessToken = get(response, 'data.access_token')
 
     if (accessToken) {
@@ -46,28 +47,13 @@ export async function authenticate(
       redirect('/dashboard')
     }
 
-    if (response?.error) {
-      throw response.error
-    }
-
     return {
       message: 'Invalid credentials',
       success: false,
     }
   } catch (error: any) {
-    // Re-throw redirect errors so Next.js can handle them
-    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
-      throw error
-    }
-
-    const errorMsg = get(
-      error as Record<string, never>,
-      'response.data.detail',
-      'Something went wrong.',
-    )
-
     return {
-      message: errorMsg,
+      message: handleError(error),
       success: false,
     }
   }
@@ -81,27 +67,17 @@ export async function logout() {
 
 export async function register(formData: SignUpSchema): Promise<IAuthState> {
   try {
-    const response = await UsersService.postApiV1UsersSignup({
+    await UsersService.postApiV1UsersSignup({
       body: formData,
     })
-
-    if (response?.error) {
-      throw response.error
-    }
 
     return {
       message: 'Account created successfully! Please log in.',
       success: true,
     }
   } catch (error) {
-    const errorMsg = get(
-      error as Record<string, never>,
-      'response.data.detail',
-      'Something went wrong.',
-    )
-
     return {
-      message: errorMsg,
+      message: handleError(error),
       success: false,
     }
   }

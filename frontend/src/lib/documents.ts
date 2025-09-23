@@ -1,11 +1,12 @@
 import {DocumentPublic, DocumentsService} from '@/client'
 
-import {get} from '@/utils'
+import {handleError} from '@/actions/handleErrors'
+import {IState} from '@/types/common'
 
 export async function uploadDocuments(
   courseId: string,
   documents: File[],
-): Promise<{message: string} | {documents: DocumentPublic[]}> {
+): Promise<{message: string} | {documents: DocumentPublic[]} | IState> {
   try {
     const formData = new FormData()
     formData.append('course_id', courseId)
@@ -22,13 +23,9 @@ export async function uploadDocuments(
     })
     return response.data
   } catch (error) {
-    console.error(error)
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
-
-    throw new Error(errorMsg)
+    return {
+      message: handleError(error),
+      success: false,
+    }
   }
 }
