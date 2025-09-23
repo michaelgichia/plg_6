@@ -25,7 +25,7 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
       </TabsContent>
 
       <TabsContent value='chat' className='p-6'>
-        <ChatComponent />
+        <ChatComponent courseId={id} />
       </TabsContent>
 
       <TabsContent value='flashcard' className='p-6'>
