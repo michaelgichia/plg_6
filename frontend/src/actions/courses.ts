@@ -1,6 +1,7 @@
 'use server'
 
 import {redirect} from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 
 import {CoursePublic, CoursesService, CourseWithDocuments} from '@/client'
 import {zCourseCreate, zDeleteApiV1CoursesByIdData} from '@/client/zod.gen'
@@ -104,6 +105,8 @@ export async function deleteCourse(
     const id = formData.get('id') as string
 
     await CoursesService.deleteApiV1CoursesById({path: {id}})
+
+    revalidatePath('/dashboard')
 
     return {
       ok: true,
