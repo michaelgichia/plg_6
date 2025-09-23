@@ -62,7 +62,7 @@ export async function authenticate(
 
     const errorMsg = get(
       error as Record<string, never>,
-      'detail',
+      'response.data.detail',
       'Something went wrong.',
     )
 
@@ -96,7 +96,7 @@ export async function register(formData: SignUpSchema): Promise<IAuthState> {
   } catch (error) {
     const errorMsg = get(
       error as Record<string, never>,
-      'detail',
+      'response.data.detail',
       'Something went wrong.',
     )
 
