@@ -40,14 +40,12 @@ export default function UploadDocuments({courseId}: {courseId: string}) {
     router.replace(`/dashboard/courses/${courseId}?tab=quiz`)
   }
 
-  const isDisabled = !(course?.documents ?? []).length
+  const isDisabled = !(course?.documents ?? []).some(doc => doc.status === "completed");
   const documents = course?.documents ?? []
   return (
     <div className='space-y-2'>
       {(
         <>
-          {<p>Course Name: {course?.name}</p>}
-
           <UploadComponent courseId={courseId} />
 
           <Separator className='my-8' />
