@@ -9,7 +9,7 @@ import {Input} from '@/components/ui/input'
 import {Label} from '@/components/ui/label'
 import {Textarea} from '@/components/ui/textarea'
 
-import {CoursePublic} from '@/client'
+import {CourseCreate} from '@/client'
 import {getCourse} from '@/lib/courses'
 import {deleteDocument} from '@/actions/documents'
 import {IState} from '@/types/common'
@@ -17,7 +17,7 @@ import UploadComponent from '@/components/upload-component'
 
 export function ProjectSettings() {
   const [isLoading, setIsLoading] = useState(false)
-  const [course, setCourse] = useState<CoursePublic>()
+  const [course, setCourse] = useState<CourseCreate>()
 
   const handleOnSubmit = (_state: IState, formData: FormData) => {
     deleteDocument(_state, formData)

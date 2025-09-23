@@ -327,6 +327,21 @@ export const DocumentPublicSchema = {
             format: 'uuid',
             title: 'Id'
         },
+        filename: {
+            type: 'string',
+            title: 'Filename'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
         course_id: {
             type: 'string',
             format: 'uuid',
@@ -337,13 +352,18 @@ export const DocumentPublicSchema = {
             format: 'date-time',
             title: 'Updated At'
         },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
         status: {
             type: 'string',
             title: 'Status'
         }
     },
     type: 'object',
-    required: ['id', 'course_id', 'updated_at', 'status'],
+    required: ['id', 'filename', 'course_id', 'updated_at', 'created_at', 'status'],
     title: 'DocumentPublic'
 } as const;
 

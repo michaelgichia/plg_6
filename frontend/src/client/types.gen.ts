@@ -202,6 +202,14 @@ export type DocumentPublic = {
      */
     id: string;
     /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
      * Course Id
      */
     course_id: string;
@@ -209,6 +217,10 @@ export type DocumentPublic = {
      * Updated At
      */
     updated_at: string;
+    /**
+     * Created At
+     */
+    created_at: string;
     /**
      * Status
      */

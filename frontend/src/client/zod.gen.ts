@@ -47,8 +47,14 @@ export const zCourseCreate = z.object({
  */
 export const zDocumentPublic = z.object({
     id: z.uuid(),
+    filename: z.string(),
+    description: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
     course_id: z.uuid(),
     updated_at: z.iso.datetime(),
+    created_at: z.iso.datetime(),
     status: z.string()
 });
 
