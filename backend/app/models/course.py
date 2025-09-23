@@ -5,12 +5,16 @@ from sqlalchemy import text
 from sqlmodel import Field, Relationship, SQLModel
 
 from app.models.user import User
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from app.models.document import Document, DocumentPublic
+    from app.models.chat import Chat
 
 # shared properties
 class CourseBase(SQLModel):
   name: str = Field(min_length=3, max_length=255)
-  description: str | None =  Field(default=None, max_length=1020)
+  description: str | None = Field(default=None, max_length=1020)
 
 # Properties to receive on item creation
 class CourseCreate(CourseBase):
@@ -33,6 +37,7 @@ class Course(CourseBase, table=True):
 
   owner: User | None = Relationship(back_populates="courses")
   documents: list["Document"] = Relationship(back_populates="course")
+  chats: list["Chat"] = Relationship(back_populates="course")
 
   created_at: datetime = Field(
       default_factory=lambda: datetime.now(timezone.utc),
@@ -50,7 +55,7 @@ class CoursePublic(CourseBase):
   owner_id: uuid.UUID
   name: str
   description: str | None = None
-  documents: list["DocumentPublic"]
+  documents: list["DocumentPublic"] = []
 
 class CoursesPublic(SQLModel):
   data: list[CoursePublic]
