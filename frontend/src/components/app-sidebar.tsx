@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import {User, ChevronUp, Zap, Home, Settings} from 'react-feather'
+import {User, ChevronUp, Zap, Home, Settings, Plus} from 'react-feather'
 
 import {
   Sidebar,
@@ -67,6 +67,12 @@ export function AppSidebar({displayName = 'User'}: {displayName?: string}) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href='/dashboard/courses/create'>
+                    <Plus />
+                    <span>Add Course</span>
+                  </Link>
+                </SidebarMenuButton>
                 <SidebarMenuButton asChild>
                   <Link href='/dashboard/user-settings'>
                     <Settings />

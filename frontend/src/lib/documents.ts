@@ -18,6 +18,7 @@ export async function uploadDocuments(
         files: documents,
         course_id: courseId,
       },
+      requestValidator: async () => {},
     })
     return response.data
   } catch (error) {
