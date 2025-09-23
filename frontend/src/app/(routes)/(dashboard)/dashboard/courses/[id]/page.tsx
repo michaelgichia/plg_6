@@ -1,21 +1,19 @@
 import {TabsContent} from '@/components/ui/tabs'
 import QuizComponent from '@/components/quiz'
 import { getCourse } from '@/lib/courses'
+import ErrorBox from '@/components/ui/ErrorBox'
 
 export default async function Page(props: {params: Promise<{id: string}>}) {
   const params = await props.params
   const id = params.id
 
-  const course = await getCourse(id)
+  const result = await getCourse(id)
 
-  if (!course) {
-    return (
-      <div className='text-center text-red-500 py-12'>
-        Course not found.
-      </div>
-    )
+  if (!result.ok) {
+    return (<ErrorBox error={result.error} />)
   }
-
+  const course = result.data
+  console.log('Course data:', course)
   return (
     <>
       <TabsContent value='qa' className='p-6'>

@@ -12,9 +12,12 @@ const StyledTabList = ({name}: {name: string}) => (
 
 export default async function CourseLayout({
   children,
+  params,
 }: {
   children: React.ReactNode
+  params: Promise<{id: string}>
 }) {
+  console.log('CourseLayout params:', params)
   return (
     <div className='h-full'>
       <div className='grid grid-cols-10 h-full'>

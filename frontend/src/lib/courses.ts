@@ -1,33 +1,45 @@
-import {CoursePublic, CoursesService} from '@/client'
-import {handleError} from '@/actions/handleErrors'
-import {IState} from '@/types/common'
+import {CoursesService, CourseWithDocuments} from '@/client'
+import {Result} from '@/lib/result'
+import {mapApiError} from '@/lib/mapApiError'
 
-export const getCourse = async (id: string): Promise<CoursePublic | IState> => {
-  // On the server, use the SDK directly (cookie-based auth already wired)
+/**
+ * Fetches a course with documents.
+ * - On the server: calls the backend SDK directly.
+ * - On the client: routes through an internal API handler to forward HttpOnly cookies.
+ */
+export async function getCourse(
+  id: string,
+): Promise<Result<CourseWithDocuments>> {
+  const handleError = (error: unknown): Result<CourseWithDocuments> => ({
+    ok: false,
+    error: mapApiError(error),
+  })
+
+  // Server-side: use SDK
   if (typeof window === 'undefined') {
     try {
-      const response = await CoursesService.getApiV1CoursesById({
+      const {data} = await CoursesService.getApiV1CoursesById({
         path: {id},
         responseValidator: async () => {},
       })
-      return response.data
+      return {ok: true, data}
     } catch (error) {
-      return {
-        message: handleError(error),
-        success: false,
-      }
+      return handleError(error)
     }
   }
 
-  // On the client, route through an internal API handler so we can
-  // forward the HttpOnly cookie from the browser automatically.
-  const res = await fetch(`/api/courses/${id}`, {
-    method: 'GET',
-    headers: {'Content-Type': 'application/json'},
-    credentials: 'include',
-  })
-  if (!res.ok) {
-    throw new Error('API request failed')
+  // Client-side: fetch internal API
+  try {
+    const res = await fetch(`/api/courses/${id}`, {
+      method: 'GET',
+      headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
+    })
+
+    if (!res.ok) throw new Error(`Failed to fetch course ${id}`)
+
+    return {ok: true, data: (await res.json()) as CourseWithDocuments}
+  } catch (error) {
+    return handleError(error)
   }
-  return (await res.json()) as CoursePublic
 }
