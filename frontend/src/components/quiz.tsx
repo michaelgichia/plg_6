@@ -88,7 +88,7 @@ export default function CourseDashboard({ course }: { course: CourseWithDocument
                 </div>
               )}
               {!message.is_system && (
-                <div className='bg-blue-600 rounded-lg px-4 py-2 max-w-md text-white'>
+                <div className='bg-cyan-600 rounded-lg px-4 py-2 max-w-md text-white'>
                   {message.message}
                 </div>
               )}
@@ -97,7 +97,7 @@ export default function CourseDashboard({ course }: { course: CourseWithDocument
 
           {isWaitingForResponse &&
             <div key='waiting'>
-              <svg className="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-8 w-8 text-cyan-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor"
                   d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
@@ -115,12 +115,10 @@ export default function CourseDashboard({ course }: { course: CourseWithDocument
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyUp={handleKeyPress}
               placeholder='Ask a question...'
-              className='bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 pr-10'
             />
             <Button
-              size='sm'
               variant='ghost'
               className='absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-slate-400 hover:text-white'
             >
@@ -129,8 +127,9 @@ export default function CourseDashboard({ course }: { course: CourseWithDocument
           </div>
           <Button
             onClick={handleSendMessage}
-            className='bg-blue-600 hover:bg-blue-700 text-white'
             disabled={isWaitingForResponse}
+            variant="secondary"
+            size="lg"
           >
             Send
           </Button>

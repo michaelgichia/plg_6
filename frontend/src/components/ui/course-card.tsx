@@ -35,7 +35,7 @@ export default function CourseCard({
             }}
             as={`/dashboard/courses/${course.id}?tab=quiz`}
           >
-            <span className='text-xs inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-muted-foreground hover:text-blue-500 pointer hover:border-blue-500'>
+            <span className='text-xs inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-muted-foreground hover:text-cyan-500 pointer hover:border-cyan-500'>
               <ArrowUpRight className='size-3' />
               Details
             </span>
