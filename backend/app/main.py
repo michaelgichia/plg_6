@@ -9,8 +9,11 @@ from app.models.course import CoursePublic, CoursesPublic
 
 try:
     from app.models.document import DocumentPublic
+    from app.models.chat import Chat, ChatPublic
 except ImportError:
     DocumentPublic = None
+    ChatPublic = None
+    Chat = None
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -40,5 +43,8 @@ CoursePublic.model_rebuild()
 CoursesPublic.model_rebuild()
 if DocumentPublic:
     DocumentPublic.model_rebuild()
+if Chat and ChatPublic:
+    Chat.model_rebuild()
+    ChatPublic.model_rebuild()
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
