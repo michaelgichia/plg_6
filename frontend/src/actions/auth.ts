@@ -41,7 +41,6 @@ export async function authenticate(
     const response = await LoginService.postApiV1LoginAccessToken({
       body: data,
     })
-    console.log('Authentication response:', response.data.response)
     const accessToken = get(response, 'data.access_token')
 
     if (accessToken) {
@@ -55,7 +54,6 @@ export async function authenticate(
       })
     }
   } catch (error) {
-    console.error('Authentication error:', mapApiError(error))
     return {
       ok: false,
       error: mapApiError(error),

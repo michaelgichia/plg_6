@@ -1,12 +1,12 @@
-import {DocumentPublic, DocumentsService} from '@/client'
+import {DocumentsService} from '@/client'
 
-import {handleError} from '@/actions/handleErrors'
-import {IState} from '@/types/common'
+import {Result} from './result'
+import {mapApiError} from './mapApiError'
 
 export async function uploadDocuments(
   courseId: string,
   documents: File[],
-): Promise<{message: string} | {documents: DocumentPublic[]} | IState> {
+): Promise<Result<any>> {
   try {
     const formData = new FormData()
     formData.append('course_id', courseId)
@@ -21,13 +21,17 @@ export async function uploadDocuments(
       },
       // openapi-ts misinterpret this as a plain string rather than a File
       // object. This bypasses the validation
-      requestValidator: async () => {}
+      requestValidator: async () => {},
     })
-    return response.data
+
+    return {
+      ok: true,
+      data: response.data,
+    }
   } catch (error) {
     return {
-      message: handleError(error),
-      success: false,
+      error: mapApiError(error),
+      ok: false,
     }
   }
 }
