@@ -1,92 +1,28 @@
-'use server'
+"use server"
 
-import {CoursesService} from '@/client'
-import {get} from '@/utils'
+import { ChatMessageUI } from "@/client/client/types.gen";
+import { ChatService } from "@/client/sdk.gen";
+import { ChatMessage } from "@/client/zod.gen";
+import { get } from '@/utils'
 
-export interface ChatMessage {
-  id: string
-  is_system: boolean
-  message: string
-  created_at: string
-  author?: string
-  avatar?: string
-}
-
-// const mockApiRequest = (): Promise<{id: string, message: string}> => {
-//   return new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//       const data = { message: "This is system message", id: Date.now().toString() };
-//       resolve(data);
-//     }, 2000);
-//   });
-// }
-
-// export async function sendChat({ id, message }: {id?: string, message: string}): Promise<ChatMessage | undefined> {
-//   try {
-//     // change the api call when chat api is ready
-//     const response = await mockApiRequest();
-//     return {
-//       id: response.id,
-//       message: response.message,
-//       is_system: true
-//     };
-//   } catch (error) {
-//     console.error(error)
-//     const errorMsg = get(
-//       error as Record<string, never>,
-//       'detail',
-//       'API request failed',
-//     )
-
-//     throw new Error(errorMsg)
-//   }
-// }
-
-// const mockHistoryApiRequest = (): Promise<{messages: ChatMessage[]}> => {
-//   return new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//       const data = { messages: []};
-//       resolve(data);
-//     }, 2000);
-//   });
-// }
-
-export async function getHistory(courseId: string): Promise<ChatMessage[]> {
-  const response = await fetch(`/api/chat/${courseId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch chat history')
+export async function getChatHistory(courseId: string): Promise<ChatMessageUI[]> {
+  try {
+    const res = await ChatService.getApiV1ChatHistory({path: { course_id: courseId }});
+    return res.data.map((msg: ChatMessage) => ({
+      id: msg.id,
+      is_system: msg.is_system,
+      message: msg.message,
+      created_at: msg.created_at,
+      author: msg.is_system ? "Course Tutor" : undefined,
+      avatar: msg.is_system ? "/tutor-avatar.png" : undefined,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch chat history:", error);
+    const errorMsg = get(
+      error as Record<string, never>,
+      'detail',
+      'API request failed'
+    )
+    throw new Error(errorMsg)
   }
-
-  return response.json()
-}
-
-export function createChatStream(courseId: string, message: string) {
-  const encoder = new TextEncoder()
-  const eventSource = new EventSource(
-    `/api/chat/${courseId}/stream?message=${encodeURIComponent(message)}`
-  )
-
-  return new ReadableStream({
-    start(controller) {
-      eventSource.onmessage = (event) => {
-        const data = encoder.encode(event.data)
-        controller.enqueue(data)
-      }
-
-      eventSource.onerror = (error) => {
-        console.error('EventSource failed:', error)
-        eventSource.close()
-        controller.close()
-      }
-    },
-    cancel() {
-      eventSource.close()
-    },
-  })
 }

@@ -705,3 +705,53 @@ export const zPostApiV1PrivateUsersData = z.object({
  * Successful Response
  */
 export const zPostApiV1PrivateUsersResponse = zUserPublic;
+
+// Base chat message schema
+export const zChatMessage = z.object({
+  id: z.string(),
+  message: z.string(),
+  is_system: z.boolean(),
+  course_id: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export type ChatMessage = z.infer<typeof zChatMessage>;
+
+// Request schemas
+export const zCreateChatStreamData = z.object({
+    path: z.object({
+      course_id: z.string(),
+    }),
+    body: z.object({
+        message: z.string(),
+    }),
+});
+
+export const zGetChatHistoryData = z.object({
+    path: z.object({
+        course_id: z.string(),
+    }),
+    query: z.object({
+        limit: z.number().optional(),
+    }).optional(),
+});
+
+// Response schemas
+export const zGetChatHistoryResponse = z.array(zChatMessage);
+export type GetChatHistoryResponse = z.infer<typeof zGetChatHistoryResponse>;
+
+// Response types
+export type CreateChatStreamResponses = ReadableStream<Uint8Array>;
+export type GetChatHistoryResponses = GetChatHistoryResponse;
+
+// Error types
+export type CreateChatStreamErrors = {
+  404: { detail: string };
+  401: { detail: string };
+};
+
+export type GetChatHistoryErrors = {
+  404: { detail: string };
+  401: { detail: string };
+};

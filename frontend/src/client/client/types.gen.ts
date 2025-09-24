@@ -214,3 +214,13 @@ export type OptionsLegacyParser<
         TData &
         Pick<RequestOptions<unknown, ThrowOnError>, 'body'>
     : OmitKeys<RequestOptions<unknown, ThrowOnError>, 'url'> & TData;
+
+// ChatMessageUI type definition
+export interface ChatMessageUI {
+  id: string;
+  is_system: boolean;
+  message: string;
+  created_at?: string;
+  author?: string;
+  avatar?: string;
+}

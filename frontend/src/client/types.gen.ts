@@ -1366,3 +1366,16 @@ export type PostApiV1PrivateUsersResponses = {
 };
 
 export type PostApiV1PrivateUsersResponse = PostApiV1PrivateUsersResponses[keyof PostApiV1PrivateUsersResponses];
+
+export type CreateChatStreamData = {
+    path: {course_id: string},
+    body: { message: string },
+    credentials?: 'include' | 'omit' | 'same-origin',
+    url: "/api/v1/chat/{course_id}/stream",
+};
+
+export type GetChatHistoryData = {
+    path: {course_id: string},
+    query?: {limit?: number},
+    url: "/api/v1/chat/{course_id}/history",
+}
