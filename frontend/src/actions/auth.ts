@@ -1,14 +1,18 @@
 'use server'
 
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+import {cookies} from 'next/headers'
+import {redirect} from 'next/navigation'
 
-import { IAuthState } from '@/types/auth'
-import { BodyLoginLoginAccessToken, LoginService, UserPublic, UsersService } from '@/client'
-import { get } from '@/utils'
-import { SignUpSchema } from '@/types/form'
-import { handleError } from '@/actions/handleErrors'
-import { IState } from '@/types/common'
+import {IAuthState} from '@/types/auth'
+import {
+  BodyLoginLoginAccessToken,
+  LoginService,
+  UserPublic,
+  UsersService,
+} from '@/client'
+import {get} from '@/utils'
+import {SignUpSchema} from '@/types/form'
+import {IState} from '@/types/common'
 import {mapApiError} from '@/lib/mapApiError'
 import {Result} from '@/lib/result'
 
@@ -34,7 +38,10 @@ export async function authenticate(
       grant_type: 'password',
     }
 
-    const response = await LoginService.postApiV1LoginAccessToken({ body: data })
+    const response = await LoginService.postApiV1LoginAccessToken({
+      body: data,
+    })
+    console.log('Authentication response:', response.data.response)
     const accessToken = get(response, 'data.access_token')
 
     if (accessToken) {
@@ -46,20 +53,16 @@ export async function authenticate(
         path: '/',
         maxAge: 60 * 60 * 24, // 24 hours
       })
-
-      redirect('/dashboard')
     }
-
+  } catch (error) {
+    console.error('Authentication error:', mapApiError(error))
     return {
-      message: 'Invalid credentials',
-      success: false,
-    }
-  } catch (error: any) {
-    return {
-      message: handleError(error),
-      success: false,
+      ok: false,
+      error: mapApiError(error),
     }
   }
+
+  redirect('/dashboard')
 }
 
 export async function logout() {
@@ -68,7 +71,9 @@ export async function logout() {
   redirect('/login')
 }
 
-export async function register(formData: SignUpSchema): Promise<Result<UserPublic>> {
+export async function register(
+  formData: SignUpSchema,
+): Promise<Result<UserPublic>> {
   try {
     const response = await UsersService.postApiV1UsersSignup({
       body: formData,
