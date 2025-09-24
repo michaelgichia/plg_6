@@ -1,7 +1,14 @@
-import QuizComponent from '@/components/quiz'
+import dynamic from 'next/dynamic'
+
 import {getCourse} from '@/actions/courses'
 import ErrorBox from '@/components/ui/ErrorBox'
 import {Tabs, TabsContent, TabsList, StyledTabList} from '@/components/ui/tabs'
+import PageLoader from '@/components/ui/page-loader'
+
+const QuizComponent = dynamic(() => import('@/components/quiz'), {
+  ssr: true,
+  loading: () => <PageLoader />,
+})
 
 export default async function Page(props: {params: Promise<{id: string}>}) {
   const params = await props.params

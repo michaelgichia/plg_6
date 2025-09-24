@@ -16,7 +16,7 @@ import {deleteDocument} from '@/actions/documents'
 import {IState} from '@/types/common'
 import UploadComponent from '@/components/upload-component'
 
-export function ProjectSettings() {
+export default function ProjectSettings() {
   const [isLoading, setIsLoading] = useState(false)
   const [course, setCourse] = useState<CourseWithDocuments>()
 
