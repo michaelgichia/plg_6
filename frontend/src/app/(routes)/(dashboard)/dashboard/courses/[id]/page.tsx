@@ -1,4 +1,4 @@
-import {TabsContent} from '@/components/ui/tabs'
+import {TabsContent} from '@radix-ui/react-tabs'
 import ChatComponent from '@/components/chat'
 import { getCourse } from '@/lib/courses'
 

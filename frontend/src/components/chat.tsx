@@ -123,7 +123,7 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
   }
 
   return (
-    <div className='h-full flex flex-col'>
+    <div className='h-[calc(100vh-10rem)] flex flex-col'>
       {/* Chat Messages */}
       <div className='flex-1 overflow-y-auto p-6 space-y-4'>
         <div className="space-y-4">  
