@@ -14,7 +14,6 @@ export default async function CourseLayout({
   children,
 }: {
   children: React.ReactNode
-  params: Promise<{id: string}>
 }) {
   return (
     <div className='h-full'>

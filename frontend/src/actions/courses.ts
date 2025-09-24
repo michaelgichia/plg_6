@@ -4,7 +4,7 @@ import {redirect} from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 import {CoursePublic, CoursesService, CourseWithDocuments} from '@/client'
-import {zCourseCreate, zDeleteApiV1CoursesByIdData} from '@/client/zod.gen'
+import {zCourseCreate} from '@/client/zod.gen'
 
 import {mapApiError} from '@/lib/mapApiError'
 import {Result} from '@/lib/result'

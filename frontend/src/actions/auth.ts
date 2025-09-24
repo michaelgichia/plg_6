@@ -4,11 +4,13 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import { IAuthState } from '@/types/auth'
-import { BodyLoginLoginAccessToken, LoginService, UsersService } from '@/client'
+import { BodyLoginLoginAccessToken, LoginService, UserPublic, UsersService } from '@/client'
 import { get } from '@/utils'
 import { SignUpSchema } from '@/types/form'
 import { handleError } from '@/actions/handleErrors'
 import { IState } from '@/types/common'
+import {mapApiError} from '@/lib/mapApiError'
+import {Result} from '@/lib/result'
 
 /**
  * Authenticates a user using the provided form data.
@@ -66,20 +68,20 @@ export async function logout() {
   redirect('/login')
 }
 
-export async function register(formData: SignUpSchema): Promise<IAuthState> {
+export async function register(formData: SignUpSchema): Promise<Result<UserPublic>> {
   try {
-    await UsersService.postApiV1UsersSignup({
+    const response = await UsersService.postApiV1UsersSignup({
       body: formData,
     })
 
     return {
-      message: 'Account created successfully! Please log in.',
-      success: true,
+      data: response.data,
+      ok: true,
     }
   } catch (error) {
     return {
-      message: handleError(error),
-      success: false,
+      error: mapApiError(error),
+      ok: false,
     }
   }
 }
