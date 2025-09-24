@@ -44,12 +44,12 @@ export default function UploadDocuments({courseId}: {courseId: string}) {
     <div className='space-y-2'>
       {(
         <>
-          {<p>Course Name: {course.name}</p>}
+          {<p>Course Name: {course?.name}</p>}
 
           <UploadComponent courseId={courseId} />
 
           <Separator className='my-8' />
-          {course.documents.length > 0 && (
+          {course?.documents.length > 0 && (
             <div className='space-y-1'>
               {course.documents.map((file) => (
                 <FileCard file={file} key={file.document_id} />
