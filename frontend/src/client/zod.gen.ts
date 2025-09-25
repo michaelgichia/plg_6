@@ -43,19 +43,24 @@ export const zCourseCreate = z.object({
 });
 
 /**
+ * DocumentStatus
+ */
+export const zDocumentStatus = z.enum([
+    'pending',
+    'processing',
+    'completed',
+    'failed'
+]);
+
+/**
  * DocumentPublic
  */
 export const zDocumentPublic = z.object({
     id: z.uuid(),
-    filename: z.string(),
-    description: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
     course_id: z.uuid(),
     updated_at: z.iso.datetime(),
     created_at: z.iso.datetime(),
-    status: z.string()
+    status: zDocumentStatus
 });
 
 /**
@@ -69,8 +74,6 @@ export const zCoursePublic = z.object({
         z.string(),
         z.null()
     ])),
-    created_at: z.iso.datetime(),
-    updated_at: z.iso.datetime(),
     documents: z.array(zDocumentPublic)
 });
 
@@ -99,8 +102,6 @@ export const zCourseWithDocuments = z.object({
         z.string(),
         z.null()
     ])),
-    created_at: z.iso.datetime(),
-    updated_at: z.iso.datetime(),
     documents: z.optional(z.array(zDocumentPublic)).default([])
 });
 
@@ -111,16 +112,6 @@ export const zCoursesPublic = z.object({
     data: z.array(zCoursePublic),
     count: z.int()
 });
-
-/**
- * DocumentStatus
- */
-export const zDocumentStatus = z.enum([
-    'pending',
-    'processing',
-    'completed',
-    'failed'
-]);
 
 /**
  * Document
@@ -231,6 +222,31 @@ export const zPrivateUserCreate = z.object({
     password: z.string(),
     full_name: z.string(),
     is_verified: z.optional(z.boolean()).default(false)
+});
+
+/**
+ * QuestionChoice
+ */
+export const zQuestionChoice = z.object({
+    id: z.string(),
+    text: z.string()
+});
+
+/**
+ * QuestionPublic
+ */
+export const zQuestionPublic = z.object({
+    id: z.uuid(),
+    question_text: z.string(),
+    choices: z.array(zQuestionChoice)
+});
+
+/**
+ * QuestionsPublic
+ */
+export const zQuestionsPublic = z.object({
+    data: z.array(zQuestionPublic),
+    count: z.int()
 });
 
 /**
@@ -705,6 +721,17 @@ export const zGetApiV1DocumentsByIdData = z.object({
  * Successful Response
  */
 export const zGetApiV1DocumentsByIdResponse = zDocument;
+
+export const zGetApiV1QuizzesByQuizIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zGetApiV1QuizzesByQuizIdResponse = zQuestionsPublic;
 
 export const zPostApiV1PrivateUsersData = z.object({
     body: zPrivateUserCreate,

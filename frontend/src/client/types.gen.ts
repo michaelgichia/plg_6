@@ -83,14 +83,6 @@ export type CoursePublic = {
      */
     description?: string | null;
     /**
-     * Created At
-     */
-    created_at: string;
-    /**
-     * Updated At
-     */
-    updated_at: string;
-    /**
      * Documents
      */
     documents: Array<DocumentPublic>;
@@ -130,14 +122,6 @@ export type CourseWithDocuments = {
      * Description
      */
     description?: string | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-    /**
-     * Updated At
-     */
-    updated_at: string;
     /**
      * Documents
      */
@@ -206,14 +190,6 @@ export type DocumentPublic = {
      */
     id: string;
     /**
-     * Filename
-     */
-    filename: string;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
      * Course Id
      */
     course_id: string;
@@ -225,10 +201,7 @@ export type DocumentPublic = {
      * Created At
      */
     created_at: string;
-    /**
-     * Status
-     */
-    status: string;
+    status: DocumentStatus;
 };
 
 /**
@@ -354,6 +327,52 @@ export type PrivateUserCreate = {
      * Is Verified
      */
     is_verified?: boolean;
+};
+
+/**
+ * QuestionChoice
+ */
+export type QuestionChoice = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Text
+     */
+    text: string;
+};
+
+/**
+ * QuestionPublic
+ */
+export type QuestionPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Question Text
+     */
+    question_text: string;
+    /**
+     * Choices
+     */
+    choices: Array<QuestionChoice>;
+};
+
+/**
+ * QuestionsPublic
+ */
+export type QuestionsPublic = {
+    /**
+     * Data
+     */
+    data: Array<QuestionPublic>;
+    /**
+     * Count
+     */
+    count: number;
 };
 
 /**
@@ -1376,6 +1395,22 @@ export type GetApiV1DocumentsByIdResponses = {
 };
 
 export type GetApiV1DocumentsByIdResponse = GetApiV1DocumentsByIdResponses[keyof GetApiV1DocumentsByIdResponses];
+
+export type GetApiV1QuizzesByQuizIdData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/quizzes/{quiz_id}';
+};
+
+export type GetApiV1QuizzesByQuizIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuestionsPublic;
+};
+
+export type GetApiV1QuizzesByQuizIdResponse = GetApiV1QuizzesByQuizIdResponses[keyof GetApiV1QuizzesByQuizIdResponses];
 
 export type PostApiV1PrivateUsersData = {
     body: PrivateUserCreate;

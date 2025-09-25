@@ -131,16 +131,6 @@ export const CoursePublicSchema = {
             ],
             title: 'Description'
         },
-        created_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Created At'
-        },
-        updated_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Updated At'
-        },
         documents: {
             items: {
                 '$ref': '#/components/schemas/DocumentPublic'
@@ -150,7 +140,7 @@ export const CoursePublicSchema = {
         }
     },
     type: 'object',
-    required: ['id', 'owner_id', 'name', 'created_at', 'updated_at', 'documents'],
+    required: ['id', 'owner_id', 'name', 'documents'],
     title: 'CoursePublic'
 } as const;
 
@@ -213,16 +203,6 @@ export const CourseWithDocumentsSchema = {
             ],
             title: 'Description'
         },
-        created_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Created At'
-        },
-        updated_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Updated At'
-        },
         documents: {
             items: {
                 '$ref': '#/components/schemas/DocumentPublic'
@@ -233,7 +213,7 @@ export const CourseWithDocumentsSchema = {
         }
     },
     type: 'object',
-    required: ['id', 'owner_id', 'name', 'created_at', 'updated_at'],
+    required: ['id', 'owner_id', 'name'],
     title: 'CourseWithDocuments'
 } as const;
 
@@ -327,21 +307,6 @@ export const DocumentPublicSchema = {
             format: 'uuid',
             title: 'Id'
         },
-        filename: {
-            type: 'string',
-            title: 'Filename'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
         course_id: {
             type: 'string',
             format: 'uuid',
@@ -358,12 +323,11 @@ export const DocumentPublicSchema = {
             title: 'Created At'
         },
         status: {
-            type: 'string',
-            title: 'Status'
+            '$ref': '#/components/schemas/DocumentStatus'
         }
     },
     type: 'object',
-    required: ['id', 'filename', 'course_id', 'updated_at', 'created_at', 'status'],
+    required: ['id', 'course_id', 'updated_at', 'created_at', 'status'],
     title: 'DocumentPublic'
 } as const;
 
@@ -553,6 +517,65 @@ export const PrivateUserCreateSchema = {
     type: 'object',
     required: ['email', 'password', 'full_name'],
     title: 'PrivateUserCreate'
+} as const;
+
+export const QuestionChoiceSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            title: 'Id'
+        },
+        text: {
+            type: 'string',
+            title: 'Text'
+        }
+    },
+    type: 'object',
+    required: ['id', 'text'],
+    title: 'QuestionChoice'
+} as const;
+
+export const QuestionPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        question_text: {
+            type: 'string',
+            title: 'Question Text'
+        },
+        choices: {
+            items: {
+                '$ref': '#/components/schemas/QuestionChoice'
+            },
+            type: 'array',
+            title: 'Choices'
+        }
+    },
+    type: 'object',
+    required: ['id', 'question_text', 'choices'],
+    title: 'QuestionPublic'
+} as const;
+
+export const QuestionsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/QuestionPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'QuestionsPublic'
 } as const;
 
 export const TokenSchema = {
