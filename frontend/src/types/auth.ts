@@ -1,6 +1,8 @@
+import { APIError } from '@/lib/result';
+
 export interface IAuthState {
-  message: string | null
-  success: boolean
+  error?: APIError
+  ok: boolean
 }
 
 export type User = {

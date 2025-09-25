@@ -9,16 +9,12 @@ import {Label} from '@/components/ui/label'
 import {createCourse} from '@/actions/courses'
 
 export function CourseForm() {
-  const [state, formAction, isPending] = useActionState(createCourse, {
+  const router = useRouter()
+  const [_state, formAction, isPending] = useActionState(createCourse, {
     message: '',
     success: false,
-    errors: {
-      name: [],
-      description: [],
-    },
-    course: undefined,
   })
-  const router = useRouter()
+
 
   function handleGoBack() {
     router.back()
@@ -26,16 +22,6 @@ export function CourseForm() {
 
   return (
     <form action={formAction} className='space-y-6'>
-      {state?.success && state?.message && (
-        <div className='mb-4 p-4 rounded-md bg-green-50 text-green-700'>
-          {state.message}
-        </div>
-      )}
-      {!state?.success && state?.message && (
-        <div className='mb-4 p-4 rounded-md bg-red-50 text-red-700'>
-          {state.message}
-        </div>
-      )}
       <div className='space-y-2'>
         <Label htmlFor='name'>Course Title</Label>
         <Input

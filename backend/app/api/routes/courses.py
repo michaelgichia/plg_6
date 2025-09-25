@@ -11,11 +11,10 @@ from app.models.common import Message
 from app.models.course import (
     Course,
     CourseCreate,
-    CoursePublic,
-    CoursesPublic,
     CourseUpdate,
 )
-from app.models.document import Document, DocumentPublic
+from app.models.document import Document
+from app.schemas.public import CoursePublic, CoursesPublic, DocumentPublic
 
 
 class CourseWithDocuments(CoursePublic):
@@ -79,6 +78,7 @@ def create_course(
     Create new course.
     """
     course = Course.model_validate(course_in, update={"owner_id": current_user.id})
+    course.updated_at = datetime.now(timezone.utc)
     session.add(course)
     session.commit()
     session.refresh(course)
@@ -100,12 +100,11 @@ def update_course(
         raise HTTPException(status_code=404, detail="Course not found")
     if not current_user.is_superuser and (course.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
+
     course_data = course_in.model_dump(exclude_unset=True)
+
     for key, value in course_data.items():
         setattr(course, key, value)
-
-    course.updated_at = datetime.now(timezone.utc)
-
     session.add(course)
     session.commit()
     session.refresh(course)
@@ -147,7 +146,7 @@ async def list_documents(
             "filename": doc.filename,
             "chunk_count": doc.chunk_count,
             "status": doc.status,
-            "uploaded_at": doc.uploaded_at.isoformat(),
+            "updated_at": doc.updated_at.isoformat(),
         }
         for doc in documents
     ]
