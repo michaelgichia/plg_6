@@ -14,9 +14,8 @@ export function mapApiError(err: unknown): APIError {
         'Something went wrong',
       status: err.response?.status,
       details: get(err, 'response.data') ??
-        get(err, 'response.error.response.data') ?? {
-          details: 'Something went wrong',
-        },
+        get(err, 'response.error.response.data') ??
+        'Something went wrong',
     }
   }
 
