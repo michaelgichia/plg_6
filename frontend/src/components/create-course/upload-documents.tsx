@@ -18,7 +18,7 @@ export default function UploadDocuments({courseId}: {courseId: string}) {
   const fetchCourse = async (id: string) => {
     try {
       const result = await getCourse(id)
-      if(result.ok) {
+      if (result.ok) {
         setCourse(result.data)
       }
     } catch (error) {
