@@ -5,15 +5,6 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
-from app.models.course import CoursePublic, CoursesPublic
-
-try:
-    from app.models.document import DocumentPublic
-    from app.models.chat import Chat, ChatPublic
-except ImportError:
-    DocumentPublic = None
-    ChatPublic = None
-    Chat = None
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -38,13 +29,5 @@ if settings.all_cors_origins:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-CoursePublic.model_rebuild()
-CoursesPublic.model_rebuild()
-if DocumentPublic:
-    DocumentPublic.model_rebuild()
-if Chat and ChatPublic:
-    Chat.model_rebuild()
-    ChatPublic.model_rebuild()
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
