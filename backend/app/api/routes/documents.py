@@ -140,7 +140,7 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
         for chunk in chunks:
             # Create a Chunk record, which will auto-generate an 'id'
             chunk_record = Chunk(
-                document_id=document_id, text_content=chunk, embedding_id=""
+                document_id=document_id, text_content=chunk, embedding_id= uuid.uuid4().hex  # Temporary ID
             )
             session.add(chunk_record)
             chunk_records.append(chunk_record)
@@ -163,19 +163,17 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
         ):
             embedding_uuid = str(uuid.uuid4())
             record.embedding_id = embedding_uuid
-
-            vectors_to_upsert.append(
-                {
+            _vector = {
                     "id": embedding_uuid,
                     "values": embedding,
                     "metadata": {
                         "document_id": str(document_id),
-                        "chunk_id": record.id,  # Link to the Chunk table's primary key
+                        "chunk_id": str(record.id),
                         "text": record.text_content,
                         "chunk_index": i,
                     },
                 }
-            )
+            vectors_to_upsert.append(_vector)
 
         session.commit()
 

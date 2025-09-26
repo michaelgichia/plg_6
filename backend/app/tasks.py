@@ -1,5 +1,6 @@
 import logging
 import uuid
+import json
 
 import openai
 from sqlmodel import select
@@ -65,31 +66,52 @@ async def generate_questions_task(document_id: uuid.UUID, session: SessionDep):
                     {"role": "user", "content": prompt},
                 ],
             )
+            print("LLM Response:", response)  # Debugging line to inspect the response
+        # 5. Parse the LLM's JSON response
+        raw_json_string = response.choices[0].message.content
+        try:
+            data = json.loads(raw_json_string) # Use 'data' instead of the list name initially
+        except json.JSONDecodeError as e:
+            logger.error(f"LLM returned invalid JSON for document {document_id}: {raw_json_string[:200]}... Error: {e}")
+            return
 
-            # 5. Parse the LLM's JSON response
-            generated_questions = response.choices[0].message.content
+        # --- NEW LOGIC HERE ---
+        if isinstance(data, dict) and "questions" in data:
+            # Case A: LLM wrapped the array in a {"questions": [...]} key
+            final_question_list = data["questions"]
+        elif isinstance(data, list):
+            # Case B: LLM returned the array directly (ideal case)
+            final_question_list = data
+        else:
+            # Case C: Unexpected/malformed structure
+            logger.error(f"LLM returned unexpected JSON structure for document {document_id}.")
+            return
 
-            # 6. Save the generated questions to the database
-            for q_data in generated_questions:
-                # Assuming the LLM returns the chunk ID or a way to derive it
-                # For this example, we'll assign a random chunk for simplicity.
-                # In a real system, the prompt would need to ask the LLM to return
-                # the chunk ID it used for each question.
+        # 6. Save the generated questions to the database
+        # We now iterate over the correctly extracted list: final_question_list
+        for q_data in final_question_list:
 
-                # Create a new Question record
-                new_question = Question(
-                    chunk_id=chunks[0].id,  # Needs to be dynamically linked
-                    difficulty_level=difficulty_level,
-                    question_text=q_data["question"],
-                    correct_answer=q_data["correct_answer"],
-                    distraction_1=q_data["distraction_1"],
-                    distraction_2=q_data["distraction_2"],
-                    distraction_3=q_data["distraction_3"],
-                    topic=q_data["topic"],
-                )
-                session.add(new_question)
+            # 🚨 Final check: Ensure q_data is a dictionary before accessing its keys
+            if not isinstance(q_data, dict):
+                logger.warning(f"Skipping malformed item in question list: {q_data}")
+                continue
 
-            session.commit()
+            print("Processing question data:", q_data)
+
+            new_question = Question(
+                chunk_id=chunks[0].id, # Using the UUID directly from the SQLModel object
+                difficulty_level=difficulty_level,
+                question_text=q_data["question"],
+                correct_answer=q_data["correct_answer"],
+                distraction_1=q_data["distraction_1"],
+                distraction_2=q_data["distraction_2"],
+                distraction_3=q_data["distraction_3"],
+                topic=q_data["topic"],
+            )
+            session.add(new_question)
+
+        session.commit()
+
 
     except Exception as e:
         # Log the error and potentially update document status
