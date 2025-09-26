@@ -58,3 +58,12 @@ class QuestionsPublic(SQLModel):
     data: list["QuestionPublic"]
     count: int
 
+class ChunkPublic(SQLModel):
+    id: uuid.UUID
+    document_id: uuid.UUID
+    text_content: str
+    questions: list["QuestionPublic"]
+
+class ChunksPublic(SQLModel):
+    data: list["ChunkPublic"]
+    count: int
