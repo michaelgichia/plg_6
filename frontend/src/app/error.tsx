@@ -28,6 +28,7 @@ export class GracefullyDegradingErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.log("Error component did catch", error)
     if (this.props.onError) {
       this.props.onError(error, errorInfo)
     }

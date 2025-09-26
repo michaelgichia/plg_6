@@ -90,6 +90,7 @@ export const createClient = (config: Config = {}): Client => {
 
       let { data } = response;
 
+
       if (opts.responseType === 'json') {
         if (opts.responseValidator) {
           await opts.responseValidator(data);
