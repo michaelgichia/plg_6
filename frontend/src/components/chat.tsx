@@ -5,9 +5,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Mic } from 'react-feather'
-import { getChatHistory } from '@/actions/chat'
+import { createChatStream, getChatHistory } from '@/actions/chat'
 import { ChatMessageUI } from '@/client/client/types.gen'
-import { createChatStream, readStreamAsText } from '@/lib/chat'
+import { readStreamAsText } from '@/lib/streamResponse'
 
 export default function ChatComponent({ courseId }: { courseId: string }) {
   const [messages, setMessages] = useState<ChatMessageUI[]>([])
