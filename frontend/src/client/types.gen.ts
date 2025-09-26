@@ -86,6 +86,14 @@ export type CoursePublic = {
      * Documents
      */
     documents: Array<DocumentPublic>;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
 };
 
 /**
@@ -126,6 +134,14 @@ export type CourseWithDocuments = {
      * Documents
      */
     documents?: Array<DocumentPublic>;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
 };
 
 /**

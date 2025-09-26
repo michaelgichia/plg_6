@@ -74,7 +74,9 @@ export const zCoursePublic = z.object({
         z.string(),
         z.null()
     ])),
-    documents: z.array(zDocumentPublic)
+    documents: z.array(zDocumentPublic),
+    created_at: z.iso.datetime(),
+    updated_at: z.iso.datetime()
 });
 
 /**
@@ -102,7 +104,9 @@ export const zCourseWithDocuments = z.object({
         z.string(),
         z.null()
     ])),
-    documents: z.optional(z.array(zDocumentPublic)).default([])
+    documents: z.optional(z.array(zDocumentPublic)).default([]),
+    created_at: z.iso.datetime(),
+    updated_at: z.iso.datetime()
 });
 
 /**

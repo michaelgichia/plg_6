@@ -137,10 +137,20 @@ export const CoursePublicSchema = {
             },
             type: 'array',
             title: 'Documents'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
         }
     },
     type: 'object',
-    required: ['id', 'owner_id', 'name', 'documents'],
+    required: ['id', 'owner_id', 'name', 'documents', 'created_at', 'updated_at'],
     title: 'CoursePublic'
 } as const;
 
@@ -210,10 +220,20 @@ export const CourseWithDocumentsSchema = {
             type: 'array',
             title: 'Documents',
             default: []
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
         }
     },
     type: 'object',
-    required: ['id', 'owner_id', 'name'],
+    required: ['id', 'owner_id', 'name', 'created_at', 'updated_at'],
     title: 'CourseWithDocuments'
 } as const;
 
