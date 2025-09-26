@@ -1,10 +1,14 @@
 'use server'
 
 import {DocumentsService} from '@/client'
+import {Result} from '@/lib/result'
 import {IState} from '@/types/common'
-import {get} from '@/utils'
+import {mapApiError} from '@/lib/mapApiError'
 
-export async function deleteDocument(_state: IState, formData: FormData): Promise<IState> {
+export async function deleteDocument(
+  _state: IState,
+  formData: FormData,
+): Promise<Result<null>> {
   try {
     const documentId = formData.get('documentId') as string
     if (!documentId) {
@@ -12,17 +16,13 @@ export async function deleteDocument(_state: IState, formData: FormData): Promis
     }
     await DocumentsService.deleteApiV1DocumentsById({path: {id: documentId}})
     return {
-      success: true,
-      message: 'Document deleted successfully',
+      ok: true,
+      data: null,
     }
   } catch (error) {
     return {
-      success: false,
-      message: get(
-        error as Record<string, never>,
-        'detail',
-        'API request failed',
-      ),
+      ok: false,
+      error: mapApiError(error),
     }
   }
 }

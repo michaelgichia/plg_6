@@ -1,31 +1,33 @@
 'use server'
 
-import {UsersService, type UserPublic} from '@/client'
-import {get} from '@/utils'
+import {Message, UsersService, type UserPublic} from '@/client'
+import { Result } from '@/lib/result'
+import { mapApiError } from '@/lib/mapApiError'
 
 export type UserActionState = {
   success: boolean | null
   message?: string | null
 }
 
-export async function getMe(): Promise<UserPublic | undefined> {
+export async function getMe(): Promise<Result<UserPublic>> {
   try {
     const response = await UsersService.getApiV1UsersMe()
-    return response.data
+    return {
+      ok: true,
+      data: response.data,
+    }
   } catch (error) {
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
-    throw new Error(errorMsg)
+    return {
+      error: mapApiError(error),
+      ok: false,
+    }
   }
 }
 
 export async function updateMe(payload: {
   full_name?: string
   email?: string
-}): Promise<UserPublic | undefined> {
+}): Promise<Result<UserPublic>> {
   try {
     const response = await UsersService.patchApiV1UsersMe({
       body: {
@@ -33,76 +35,78 @@ export async function updateMe(payload: {
         email: payload.email,
       },
     })
-    return response.data
+    return {
+      ok: true,
+      data: response.data,
+    }
   } catch (error) {
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
-    throw new Error(errorMsg)
+    return {
+      error: mapApiError(error),
+      ok: false,
+    }
   }
 }
 
 export async function updateMyPassword(payload: {
   current_password: string
   new_password: string
-}): Promise<{message: string} | undefined> {
+}): Promise<Result<Message>> {
   try {
     const response = await UsersService.patchApiV1UsersMePassword({
       body: payload,
     })
-    return response.data
+    return {
+      ok: true,
+      data: response.data,
+    }
   } catch (error) {
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
-    throw new Error(errorMsg)
+    return {
+      error: mapApiError(error),
+      ok: false,
+    }
   }
 }
 
 export async function updateProfileAction(
-  _state: UserActionState | undefined,
+  _state: UserActionState,
   formData: FormData,
-): Promise<UserActionState> {
+): Promise<Result<UserPublic>> {
   try {
     const full_name = (formData.get('full_name') as string) || undefined
     const email = (formData.get('email') as string) || undefined
-    await UsersService.patchApiV1UsersMe({
-      body: { full_name, email },
+    const response = await UsersService.patchApiV1UsersMe({
+      body: {full_name, email},
     })
-    return { success: true, message: 'Profile updated' }
+    return {
+      ok: true,
+      data: response.data,
+    }
   } catch (error) {
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
-    return { success: false, message: errorMsg }
+    return {
+      error: mapApiError(error),
+      ok: false,
+    }
   }
 }
 
 export async function updatePasswordAction(
   _state: UserActionState | undefined,
   formData: FormData,
-): Promise<UserActionState> {
+): Promise<Result<Message>> {
   try {
     const current_password = formData.get('current_password') as string
     const new_password = formData.get('new_password') as string
-    await UsersService.patchApiV1UsersMePassword({
-      body: { current_password, new_password },
+    const response = await UsersService.patchApiV1UsersMePassword({
+      body: {current_password, new_password},
     })
-    return { success: true, message: 'Password updated' }
+    return {
+      ok: true,
+      data: response.data,
+    }
   } catch (error) {
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
-    return { success: false, message: errorMsg }
+    return {
+      error: mapApiError(error),
+      ok: false,
+    }
   }
 }
-
-
