@@ -1,6 +1,6 @@
+import json
 import logging
 import uuid
-import json
 
 import openai
 from sqlmodel import select

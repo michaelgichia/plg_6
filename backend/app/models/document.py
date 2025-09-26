@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime, timezone
-from enum import Enum
 
 from sqlalchemy import text
 from sqlmodel import Field, Relationship, SQLModel
