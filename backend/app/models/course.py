@@ -36,6 +36,7 @@ class Course(CourseBase, table=True):
         back_populates="course",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
+    chats: list["Chat"] = Relationship(back_populates="course")
 
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),

@@ -56,7 +56,7 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
       is_system: true,
       created_at: new Date().toISOString(),
       author: 'Course Tutor',
-      avatar: '/tutor-avatar.png',
+      avatar: '/tutor-session.png',
     }
     setMessages(prev => [...prev, systemMessage])
 

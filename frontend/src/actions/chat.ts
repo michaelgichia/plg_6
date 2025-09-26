@@ -4,7 +4,6 @@ import { ChatMessageUI } from "@/client/client/types.gen";
 import { ChatService } from "@/client/sdk.gen";
 import { ChatMessage } from "@/client/zod.gen";
 import { get } from '@/utils'
-import { IncomingMessage } from "http";
 
 export async function getChatHistory(courseId: string): Promise<ChatMessageUI[]> {
   try {
@@ -15,7 +14,7 @@ export async function getChatHistory(courseId: string): Promise<ChatMessageUI[]>
       message: msg.message,
       created_at: msg.created_at,
       author: msg.is_system ? "Course Tutor" : undefined,
-      avatar: msg.is_system ? "/tutor-avatar.png" : undefined,
+      avatar: msg.is_system ? "/tutor-session.png" : undefined,
     }));
   } catch (error) {
     console.log("Failed to fetch chat history:", error);
@@ -37,11 +36,8 @@ export const createChatStream = async (courseId: string, message: string) => {
       responseValidator: async () => {},
     });
 
-     // Check if the response is an IncomingMessage
-    if (response.data && response.data instanceof IncomingMessage) {
-      // Convert IncomingMessage to ReadableStream
-      const stream = response.data as unknown as ReadableStream;
-      return stream;
+    if (!response.data) {
+      throw new Error("No data received from chat stream");
     }
 
     return response.data;

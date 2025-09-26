@@ -1,20 +1,19 @@
+import { IncomingMessage } from "http";
+
 // Helper to read EventSource stream as text
-export async function* readStreamAsText(stream: ReadableStream): AsyncGenerator<string> {
+export async function* readStreamAsText(stream: IncomingMessage): AsyncGenerator<string> {
   console.log("Reading stream as text...", [stream, typeof stream]);
-  const reader = stream.getReader()
-  const decoder = new TextDecoder()
   
-  try {
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      
-      const chunk = decoder.decode(value, { stream: true })
-      if (chunk) {
-        yield chunk
-      }
+  const nodeStream = stream as IncomingMessage;
+  
+  for await (const chunk of nodeStream) {
+    if (chunk) {
+      const text = chunk instanceof Buffer ? chunk.toString("utf-8") : chunk;
+      yield text;
     }
-  } finally {
-    reader.releaseLock()
+    else {
+      console.log("Received empty chunk");
+    }
   }
+  
 }
