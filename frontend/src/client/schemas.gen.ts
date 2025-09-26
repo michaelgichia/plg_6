@@ -579,6 +579,25 @@ export const QuizPublicSchema = {
     title: 'QuizPublic'
 } as const;
 
+export const QuizzesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/QuizPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'QuizzesPublic'
+} as const;
+
 export const TokenSchema = {
     properties: {
         access_token: {

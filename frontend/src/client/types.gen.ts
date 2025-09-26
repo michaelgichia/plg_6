@@ -378,6 +378,20 @@ export type QuizPublic = {
 };
 
 /**
+ * QuizzesPublic
+ */
+export type QuizzesPublic = {
+    /**
+     * Data
+     */
+    data: Array<QuizPublic>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
  * Token
  */
 export type Token = {
@@ -1398,21 +1412,35 @@ export type GetApiV1DocumentsByIdResponses = {
 
 export type GetApiV1DocumentsByIdResponse = GetApiV1DocumentsByIdResponses[keyof GetApiV1DocumentsByIdResponses];
 
-export type GetApiV1QuizzesByQuizIdData = {
+export type GetApiV1QuizzesByCourseIdData = {
     body?: never;
-    path?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
     query?: never;
-    url: '/api/v1/quizzes/{quiz_id}';
+    url: '/api/v1/quizzes/{course_id}';
 };
 
-export type GetApiV1QuizzesByQuizIdResponses = {
+export type GetApiV1QuizzesByCourseIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1QuizzesByCourseIdError = GetApiV1QuizzesByCourseIdErrors[keyof GetApiV1QuizzesByCourseIdErrors];
+
+export type GetApiV1QuizzesByCourseIdResponses = {
     /**
      * Successful Response
      */
-    200: QuizPublic;
+    200: QuizzesPublic;
 };
 
-export type GetApiV1QuizzesByQuizIdResponse = GetApiV1QuizzesByQuizIdResponses[keyof GetApiV1QuizzesByQuizIdResponses];
+export type GetApiV1QuizzesByCourseIdResponse = GetApiV1QuizzesByCourseIdResponses[keyof GetApiV1QuizzesByCourseIdResponses];
 
 export type PostApiV1PrivateUsersData = {
     body: PrivateUserCreate;

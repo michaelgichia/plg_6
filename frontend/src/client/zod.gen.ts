@@ -246,6 +246,14 @@ export const zQuizPublic = z.object({
 });
 
 /**
+ * QuizzesPublic
+ */
+export const zQuizzesPublic = z.object({
+    data: z.array(zQuizPublic),
+    count: z.int()
+});
+
+/**
  * Token
  */
 export const zToken = z.object({
@@ -718,16 +726,18 @@ export const zGetApiV1DocumentsByIdData = z.object({
  */
 export const zGetApiV1DocumentsByIdResponse = zDocument;
 
-export const zGetApiV1QuizzesByQuizIdData = z.object({
+export const zGetApiV1QuizzesByCourseIdData = z.object({
     body: z.optional(z.never()),
-    path: z.optional(z.never()),
+    path: z.object({
+        course_id: z.string()
+    }),
     query: z.optional(z.never())
 });
 
 /**
  * Successful Response
  */
-export const zGetApiV1QuizzesByQuizIdResponse = zQuizPublic;
+export const zGetApiV1QuizzesByCourseIdResponse = zQuizzesPublic;
 
 export const zPostApiV1PrivateUsersData = z.object({
     body: zPrivateUserCreate,
