@@ -10,6 +10,11 @@ const QuizComponent = dynamic(() => import('@/components/quiz'), {
   loading: () => <PageLoader />,
 })
 
+const QAComponent = dynamic(() => import('@/components/q-and-a'), {
+  ssr: true,
+  loading: () => <PageLoader />,
+})
+
 export default async function Page(props: {params: Promise<{id: string}>}) {
   const params = await props.params
   const id = params.id
@@ -38,9 +43,7 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
         </TabsContent>
 
         <TabsContent value='qa' className='p-6'>
-          <div className='text-center text-slate-400 py-12'>
-            Q/A content will be displayed here
-          </div>
+          <QAComponent course={course} />
         </TabsContent>
 
         <TabsContent value='flashcard' className='p-6'>
