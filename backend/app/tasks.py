@@ -7,13 +7,13 @@ from sqlmodel import select
 
 from app.api.deps import SessionDep
 from app.models.embeddings import Chunk
-from app.models.questions import Question
+from app.models.quizzes import Quiz
 from app.schemas.public import DifficultyLevel
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-async def generate_questions_task(document_id: uuid.UUID, session: SessionDep):
+async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
     """
     Background task to generate a bank of quiz questions from a document.
     """
@@ -26,7 +26,7 @@ async def generate_questions_task(document_id: uuid.UUID, session: SessionDep):
             # Handle case where no chunks are found
             return
 
-        # 2. Iterate through difficulty levels and generate questions
+        # 2. Iterate through difficulty levels and generate quizzes
         for difficulty_level in [
             DifficultyLevel.EASY,
             DifficultyLevel.MEDIUM,
@@ -38,16 +38,16 @@ async def generate_questions_task(document_id: uuid.UUID, session: SessionDep):
             # 3. Create a prompt for the LLM
             # The prompt needs to guide the LLM to generate the correct format.
             prompt = f"""
-            Generate a set of multiple-choice questions based on the following text chunks.
-            The questions should be at a '{difficulty_level}' difficulty level.
+            Generate a set of multiple-choice quizzes based on the following text chunks.
+            The quizzes should be at a '{difficulty_level}' difficulty level.
 
-            For each question, provide:
-            1. The question text.
+            For each quiz, provide:
+            1. The quiz text.
             2. The single correct answer.
             3. Three plausible but incorrect distractions.
 
             Format the response as a JSON array of objects, where each object has keys:
-            'question', 'correct_answer', 'distraction_1', 'distraction_2', 'distraction_3', 'topic'.
+            'quiz', 'correct_answer', 'distraction_1', 'distraction_2', 'distraction_3', 'topic'.
 
             Text Chunks:
             """
@@ -57,7 +57,7 @@ async def generate_questions_task(document_id: uuid.UUID, session: SessionDep):
             concatenated_text = " ".join([chunk.text_content for chunk in chunks])
             prompt += concatenated_text
 
-            # 4. Call the LLM to generate the questions
+            # 4. Call the LLM to generate the quizzes
             response = await openai.AsyncOpenAI().chat.completions.create(
                 model="gpt-4o",  # or another suitable model
                 response_format={"type": "json_object"},
@@ -76,43 +76,43 @@ async def generate_questions_task(document_id: uuid.UUID, session: SessionDep):
             return
 
         # --- NEW LOGIC HERE ---
-        if isinstance(data, dict) and "questions" in data:
-            # Case A: LLM wrapped the array in a {"questions": [...]} key
-            final_question_list = data["questions"]
+        if isinstance(data, dict) and "quizzes" in data:
+            # Case A: LLM wrapped the array in a {"quizzes": [...]} key
+            final_quiz_list = data["quizzes"]
         elif isinstance(data, list):
             # Case B: LLM returned the array directly (ideal case)
-            final_question_list = data
+            final_quiz_list = data
         else:
             # Case C: Unexpected/malformed structure
             logger.error(f"LLM returned unexpected JSON structure for document {document_id}.")
             return
 
-        # 6. Save the generated questions to the database
-        # We now iterate over the correctly extracted list: final_question_list
-        for q_data in final_question_list:
+        # 6. Save the generated quizzes to the database
+        # We now iterate over the correctly extracted list: final_quiz_list
+        for q_data in final_quiz_list:
 
             # 🚨 Final check: Ensure q_data is a dictionary before accessing its keys
             if not isinstance(q_data, dict):
-                logger.warning(f"Skipping malformed item in question list: {q_data}")
+                logger.warning(f"Skipping malformed item in quiz list: {q_data}")
                 continue
 
-            print("Processing question data:", q_data)
+            print("Processing quiz data:", q_data)
 
-            new_question = Question(
+            new_quiz = Quiz(
                 chunk_id=chunks[0].id, # Using the UUID directly from the SQLModel object
                 difficulty_level=difficulty_level,
-                question_text=q_data["question"],
+                quiz_text=q_data["quiz"],
                 correct_answer=q_data["correct_answer"],
                 distraction_1=q_data["distraction_1"],
                 distraction_2=q_data["distraction_2"],
                 distraction_3=q_data["distraction_3"],
                 topic=q_data["topic"],
             )
-            session.add(new_question)
+            session.add(new_quiz)
 
         session.commit()
 
 
     except Exception as e:
         # Log the error and potentially update document status
-        logger.error(f"Error generating questions for document {document_id}: {e}")
+        logger.error(f"Error generating quizzes for document {document_id}: {e}")

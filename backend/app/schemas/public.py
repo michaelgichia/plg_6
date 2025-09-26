@@ -45,24 +45,24 @@ class DifficultyLevel(StrEnum):
     EXPERT = "expert"
     ALL = "all"
 
-class QuestionChoice(SQLModel):
+class QuizChoice(SQLModel):
     id: str
     text: str
 
-class QuestionPublic(SQLModel):
+class QuizPublic(SQLModel):
     id: uuid.UUID
-    question_text: str
-    choices: list[QuestionChoice]
+    quiz_text: str
+    choices: list[QuizChoice]
 
-class QuestionsPublic(SQLModel):
-    data: list["QuestionPublic"]
+class QuizzesPublic(SQLModel):
+    data: list["QuizPublic"]
     count: int
 
 class ChunkPublic(SQLModel):
     id: uuid.UUID
     document_id: uuid.UUID
     text_content: str
-    questions: list["QuestionPublic"]
+    quizzes: list["QuizPublic"]
 
 class ChunksPublic(SQLModel):
     data: list["ChunkPublic"]

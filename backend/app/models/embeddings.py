@@ -5,7 +5,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from app.models.document import Document
-    from app.models.questions import Question
+    from app.models.quizzes import Quiz
 
 
 class ChunkBase(SQLModel):
@@ -27,6 +27,6 @@ class Chunk(ChunkBase, table=True):
     document_id: uuid.UUID = Field(foreign_key="document.id", nullable=False)
 
     document: "Document" = Relationship(back_populates="chunks")
-    questions: list["Question"] = Relationship(
+    quizzes: list["Quiz"] = Relationship(
         back_populates="chunk", sa_relationship_kwargs={"cascade": "delete"}
     )

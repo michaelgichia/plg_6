@@ -22,7 +22,7 @@ from app.models.course import Course
 from app.models.document import Document
 from app.models.embeddings import Chunk
 from app.schemas.public import DocumentStatus
-from app.tasks import generate_questions_task
+from app.tasks import generate_quizzes_task
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 index_name = "developer-quickstart-py"
@@ -187,10 +187,10 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
         session.add(document)
         session.commit()
 
-        # --- NEW CODE: Trigger the question generation task ---
+        # --- NEW CODE: Trigger the quiz generation task ---
         # Note: You'll need to pass the session to the background task
         # to ensure it has a database connection.
-        await generate_questions_task(document_id, session)
+        await generate_quizzes_task(document_id, session)
 
     except Exception as e:
         logger.error(f"[process_pdf_task] Error processing document: {e}")

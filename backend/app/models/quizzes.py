@@ -7,8 +7,8 @@ from sqlmodel import Field, Relationship, SQLModel, text
 from app.schemas.public import DifficultyLevel
 
 
-class QuestionBase(SQLModel):
-    question_text: str
+class QuizBase(SQLModel):
+    quiz_text: str
     correct_answer: str
     distraction_1: str
     distraction_2: str
@@ -16,17 +16,17 @@ class QuestionBase(SQLModel):
     topic: str
     chunk_id: uuid.UUID
 
-# Properties to receive on question creation
-class QuestionCreate(QuestionBase):
+# Properties to receive on quiz creation
+class QuizCreate(QuizBase):
     pass
 
-class Question(QuestionBase, table=True):
+class Quiz(QuizBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
     difficulty_level: DifficultyLevel = Field(default=DifficultyLevel.ALL)
 
     chunk_id: uuid.UUID = Field(foreign_key="chunk.id")
-    chunk: "Chunk" = Relationship(back_populates="questions")
+    chunk: "Chunk" = Relationship(back_populates="quizzes")
 
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
