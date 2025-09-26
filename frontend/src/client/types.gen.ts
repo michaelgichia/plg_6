@@ -346,9 +346,9 @@ export type PrivateUserCreate = {
 };
 
 /**
- * QuestionChoice
+ * QuizChoice
  */
-export type QuestionChoice = {
+export type QuizChoice = {
     /**
      * Id
      */
@@ -360,35 +360,21 @@ export type QuestionChoice = {
 };
 
 /**
- * QuestionPublic
+ * QuizPublic
  */
-export type QuestionPublic = {
+export type QuizPublic = {
     /**
      * Id
      */
     id: string;
     /**
-     * Question Text
+     * Quiz Text
      */
-    question_text: string;
+    quiz_text: string;
     /**
      * Choices
      */
-    choices: Array<QuestionChoice>;
-};
-
-/**
- * QuestionsPublic
- */
-export type QuestionsPublic = {
-    /**
-     * Data
-     */
-    data: Array<QuestionPublic>;
-    /**
-     * Count
-     */
-    count: number;
+    choices: Array<QuizChoice>;
 };
 
 /**
@@ -1423,7 +1409,7 @@ export type GetApiV1QuizzesByQuizIdResponses = {
     /**
      * Successful Response
      */
-    200: QuestionsPublic;
+    200: QuizPublic;
 };
 
 export type GetApiV1QuizzesByQuizIdResponse = GetApiV1QuizzesByQuizIdResponses[keyof GetApiV1QuizzesByQuizIdResponses];

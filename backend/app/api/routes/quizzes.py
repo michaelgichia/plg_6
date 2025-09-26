@@ -1,34 +1,35 @@
 from random import shuffle
 
 from fastapi import APIRouter
+from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models.course import Course
 from app.models.document import Document
+from app.models.embeddings import Chunk
 from app.models.quizzes import Quiz
-from app.schemas.public import QuizChoice, QuizPublic
+from app.schemas.public import QuizChoice, QuizPublic, QuizzesPublic
 
-router = APIRouter(prefix='/quizzes', tags=['quizzes'])
+router = APIRouter(prefix="/quizzes", tags=["quizzes"])
 
-@router.get("/{quiz_id}", response_model=QuizPublic)
-def get_quiz_for_user(session: SessionDep, current_user: CurrentUser,):
+@router.get("/{course_id}", response_model=QuizzesPublic)
+def list_quizzes(course_id: str, session: SessionDep, current_user: CurrentUser):
     """
-    Retrieve quiz questions with shuffled answer choices.
+    Retrieve quizzes for a course.
     """
-
     statement = (
         select(Quiz)
-        .join(Document)
-        .where(Document.id == Quiz.document_id)
-        .join(Course)
+        .join(Chunk, Quiz.chunk_id == Chunk.id)
+        .join(Document, Chunk.document_id == Document.id)
+        .join(Course, Document.course_id == Course.id)
+        .where(Course.id == course_id)
         .where(Course.owner_id == current_user.id)
+        .options(selectinload(Quiz.chunk))
     )
-    # Fetch quizzes from your internal, secure model
-    internal_quizzes = session.exec(statement).all()
-
+    quizzes = session.exec(statement).all()
     public_quizzes = []
-    for q in internal_quizzes:
+    for q in quizzes:
         # Create a list of all choices
         all_choices = [q.correct_answer, q.distraction_1, q.distraction_2, q.distraction_3]
 
@@ -46,4 +47,5 @@ def get_quiz_for_user(session: SessionDep, current_user: CurrentUser,):
             )
         )
 
-    return QuizPublic(data=public_quizzes, count=len(public_quizzes))
+
+    return QuizzesPublic(data=public_quizzes, count=len(public_quizzes))

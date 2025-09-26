@@ -23,96 +23,111 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
         chunks = session.exec(statement).all()
 
         if not chunks:
-            # Handle case where no chunks are found
+            logger.warning(f"No chunks found for document {document_id}")
             return
 
-        # 2. Iterate through difficulty levels and generate quizzes
+        concatenated_text = " ".join([chunk.text_content for chunk in chunks])
+
         for difficulty_level in [
             DifficultyLevel.EASY,
             DifficultyLevel.MEDIUM,
             DifficultyLevel.HARD,
         ]:
-            # This is a conceptual example; you'd likely use Pinecone's client
-            # to retrieve embeddings and text. For simplicity, we use the chunks
-            # directly from the database here.
-            # 3. Create a prompt for the LLM
-            # The prompt needs to guide the LLM to generate the correct format.
+            # 2. Build prompt
             prompt = f"""
-            Generate a set of multiple-choice quizzes based on the following text chunks.
-            The quizzes should be at a '{difficulty_level}' difficulty level.
+            Generate a set of multiple-choice quizzes based on the following text.
+            Each quiz should be at '{difficulty_level}' difficulty.
 
-            For each quiz, provide:
-            1. The quiz text.
-            2. The single correct answer.
-            3. Three plausible but incorrect distractions.
+            Each quiz object must include:
+              - quiz: string (the quiz question)
+              - correct_answer: string
+              - distraction_1: string
+              - distraction_2: string
+              - distraction_3: string
+              - topic: string (short topic or category)
 
-            Format the response as a JSON array of objects, where each object has keys:
-            'quiz', 'correct_answer', 'distraction_1', 'distraction_2', 'distraction_3', 'topic'.
-
-            Text Chunks:
+            Return only a JSON array of quiz objects.
+            Text:
+            {concatenated_text}
             """
 
-            # Concatenate chunks into the prompt, up to a token limit
-            # This is a critical step for RAG
-            concatenated_text = " ".join([chunk.text_content for chunk in chunks])
-            prompt += concatenated_text
-
-            # 4. Call the LLM to generate the quizzes
-            response = await openai.AsyncOpenAI().chat.completions.create(
-                model="gpt-4o",  # or another suitable model
-                response_format={"type": "json_object"},
+            # 3. Call the LLM with strict schema enforcement
+            client = openai.AsyncOpenAI()
+            response = await client.chat.completions.create(
+                model="gpt-4o",
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "quiz_list",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "quizzes": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "quiz": {"type": "string"},
+                                            "correct_answer": {"type": "string"},
+                                            "distraction_1": {"type": "string"},
+                                            "distraction_2": {"type": "string"},
+                                            "distraction_3": {"type": "string"},
+                                            "topic": {"type": "string"}
+                                        },
+                                        "required": [
+                                            "quiz",
+                                            "correct_answer",
+                                            "distraction_1",
+                                            "distraction_2",
+                                            "distraction_3",
+                                            "topic"
+                                        ],
+                                        "additionalProperties": False
+                                    }
+                                }
+                            },
+                            "required": ["quizzes"],
+                            "additionalProperties": False
+                        }
+                    }
+                },
                 messages=[
-                    {"role": "system", "content": "You are a quiz generator."},
+                    {"role": "system", "content": "You are a quiz generator. Only output valid JSON."},
                     {"role": "user", "content": prompt},
                 ],
             )
-            print("LLM Response:", response)  # Debugging line to inspect the response
-        # 5. Parse the LLM's JSON response
-        raw_json_string = response.choices[0].message.content
-        try:
-            data = json.loads(raw_json_string) # Use 'data' instead of the list name initially
-        except json.JSONDecodeError as e:
-            logger.error(f"LLM returned invalid JSON for document {document_id}: {raw_json_string[:200]}... Error: {e}")
-            return
 
-        # --- NEW LOGIC HERE ---
-        if isinstance(data, dict) and "quizzes" in data:
-            # Case A: LLM wrapped the array in a {"quizzes": [...]} key
-            final_quiz_list = data["quizzes"]
-        elif isinstance(data, list):
-            # Case B: LLM returned the array directly (ideal case)
-            final_quiz_list = data
-        else:
-            # Case C: Unexpected/malformed structure
-            logger.error(f"LLM returned unexpected JSON structure for document {document_id}.")
-            return
-
-        # 6. Save the generated quizzes to the database
-        # We now iterate over the correctly extracted list: final_quiz_list
-        for q_data in final_quiz_list:
-
-            # 🚨 Final check: Ensure q_data is a dictionary before accessing its keys
-            if not isinstance(q_data, dict):
-                logger.warning(f"Skipping malformed item in quiz list: {q_data}")
+            # 4. Parse structured JSON directly
+            try:
+                raw_content = response.choices[0].message.content
+                parsed = json.loads(raw_content)
+                quiz_list = parsed.get("quizzes", [])
+                if not isinstance(quiz_list, list):
+                    logger.error(f"LLM did not return 'quizzes' as a list for document {document_id}. Got: {type(quiz_list)}")
+                    continue
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse LLM response for document {document_id}: {e}. Raw content: {raw_content[:200]}...")
                 continue
 
-            print("Processing quiz data:", q_data)
+            # 5. Save quizzes to DB
+            for q_data in quiz_list:
+                if not isinstance(q_data, dict):
+                    logger.warning(f"Skipping malformed item in quiz list: {q_data}")
+                    continue
 
-            new_quiz = Quiz(
-                chunk_id=chunks[0].id, # Using the UUID directly from the SQLModel object
-                difficulty_level=difficulty_level,
-                quiz_text=q_data["quiz"],
-                correct_answer=q_data["correct_answer"],
-                distraction_1=q_data["distraction_1"],
-                distraction_2=q_data["distraction_2"],
-                distraction_3=q_data["distraction_3"],
-                topic=q_data["topic"],
-            )
-            session.add(new_quiz)
+                new_quiz = Quiz(
+                    chunk_id=chunks[0].id,
+                    difficulty_level=difficulty_level,
+                    quiz_text=q_data["quiz"],
+                    correct_answer=q_data["correct_answer"],
+                    distraction_1=q_data["distraction_1"],
+                    distraction_2=q_data["distraction_2"],
+                    distraction_3=q_data["distraction_3"],
+                    topic=q_data["topic"],
+                )
+                session.add(new_quiz)
 
-        session.commit()
-
+            session.commit()
 
     except Exception as e:
-        # Log the error and potentially update document status
         logger.error(f"Error generating quizzes for document {document_id}: {e}")

@@ -539,7 +539,7 @@ export const PrivateUserCreateSchema = {
     title: 'PrivateUserCreate'
 } as const;
 
-export const QuestionChoiceSchema = {
+export const QuizChoiceSchema = {
     properties: {
         id: {
             type: 'string',
@@ -552,50 +552,31 @@ export const QuestionChoiceSchema = {
     },
     type: 'object',
     required: ['id', 'text'],
-    title: 'QuestionChoice'
+    title: 'QuizChoice'
 } as const;
 
-export const QuestionPublicSchema = {
+export const QuizPublicSchema = {
     properties: {
         id: {
             type: 'string',
             format: 'uuid',
             title: 'Id'
         },
-        question_text: {
+        quiz_text: {
             type: 'string',
-            title: 'Question Text'
+            title: 'Quiz Text'
         },
         choices: {
             items: {
-                '$ref': '#/components/schemas/QuestionChoice'
+                '$ref': '#/components/schemas/QuizChoice'
             },
             type: 'array',
             title: 'Choices'
         }
     },
     type: 'object',
-    required: ['id', 'question_text', 'choices'],
-    title: 'QuestionPublic'
-} as const;
-
-export const QuestionsPublicSchema = {
-    properties: {
-        data: {
-            items: {
-                '$ref': '#/components/schemas/QuestionPublic'
-            },
-            type: 'array',
-            title: 'Data'
-        },
-        count: {
-            type: 'integer',
-            title: 'Count'
-        }
-    },
-    type: 'object',
-    required: ['data', 'count'],
-    title: 'QuestionsPublic'
+    required: ['id', 'quiz_text', 'choices'],
+    title: 'QuizPublic'
 } as const;
 
 export const TokenSchema = {

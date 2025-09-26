@@ -229,28 +229,20 @@ export const zPrivateUserCreate = z.object({
 });
 
 /**
- * QuestionChoice
+ * QuizChoice
  */
-export const zQuestionChoice = z.object({
+export const zQuizChoice = z.object({
     id: z.string(),
     text: z.string()
 });
 
 /**
- * QuestionPublic
+ * QuizPublic
  */
-export const zQuestionPublic = z.object({
+export const zQuizPublic = z.object({
     id: z.uuid(),
-    question_text: z.string(),
-    choices: z.array(zQuestionChoice)
-});
-
-/**
- * QuestionsPublic
- */
-export const zQuestionsPublic = z.object({
-    data: z.array(zQuestionPublic),
-    count: z.int()
+    quiz_text: z.string(),
+    choices: z.array(zQuizChoice)
 });
 
 /**
@@ -735,7 +727,7 @@ export const zGetApiV1QuizzesByQuizIdData = z.object({
 /**
  * Successful Response
  */
-export const zGetApiV1QuizzesByQuizIdResponse = zQuestionsPublic;
+export const zGetApiV1QuizzesByQuizIdResponse = zQuizPublic;
 
 export const zPostApiV1PrivateUsersData = z.object({
     body: zPrivateUserCreate,
