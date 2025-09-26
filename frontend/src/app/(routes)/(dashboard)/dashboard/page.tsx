@@ -1,12 +1,17 @@
 import {getCourses} from '@/actions/courses'
-import CoursesClient from '@/components/courses-client'
+import CoursesList from '@/components/courses-list'
+import ErrorBox from '@/components/ui/ErrorBox'
 
 export default async function DashboardPage() {
-  const courses = await getCourses()
+  const result = await getCourses()
+
+  if (!result.ok) {
+    return <ErrorBox error={result.error} />
+  }
 
   return (
     <div className='flex flex-1 flex-col gap-4 p-4'>
-      <CoursesClient courses={courses ?? []} />
+      <CoursesList courses={result.data} />
     </div>
   )
 }

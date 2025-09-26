@@ -4,9 +4,17 @@ import {cookies} from 'next/headers'
 import {redirect} from 'next/navigation'
 
 import {IAuthState} from '@/types/auth'
-import {BodyLoginLoginAccessToken, LoginService, UsersService} from '@/client'
+import {
+  BodyLoginLoginAccessToken,
+  LoginService,
+  UserPublic,
+  UsersService,
+} from '@/client'
 import {get} from '@/utils'
 import {SignUpSchema} from '@/types/form'
+import {IState} from '@/types/common'
+import {mapApiError} from '@/lib/mapApiError'
+import {Result} from '@/lib/result'
 
 /**
  * Authenticates a user using the provided form data.
@@ -22,7 +30,7 @@ import {SignUpSchema} from '@/types/form'
 export async function authenticate(
   _prevState: IAuthState | undefined,
   formData?: FormData,
-): Promise<IAuthState | undefined> {
+): Promise<IAuthState | IState> {
   try {
     const data: BodyLoginLoginAccessToken = {
       username: formData!.get('email') as string,
@@ -30,7 +38,9 @@ export async function authenticate(
       grant_type: 'password',
     }
 
-    const response = await LoginService.postApiV1LoginAccessToken({body: data})
+    const response = await LoginService.postApiV1LoginAccessToken({
+      body: data,
+    })
     const accessToken = get(response, 'data.access_token')
 
     if (accessToken) {
@@ -42,35 +52,15 @@ export async function authenticate(
         path: '/',
         maxAge: 60 * 60 * 24, // 24 hours
       })
-
-      redirect('/dashboard')
     }
-
-    if (response?.error) {
-      throw response.error
-    }
-
+  } catch (error) {
     return {
-      message: 'Invalid credentials',
-      success: false,
-    }
-  } catch (error: any) {
-    // Re-throw redirect errors so Next.js can handle them
-    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
-      throw error
-    }
-
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'Something went wrong.',
-    )
-
-    return {
-      message: errorMsg,
-      success: false,
+      ok: false,
+      error: mapApiError(error),
     }
   }
+
+  redirect('/dashboard')
 }
 
 export async function logout() {
@@ -79,30 +69,22 @@ export async function logout() {
   redirect('/login')
 }
 
-export async function register(formData: SignUpSchema): Promise<IAuthState> {
+export async function register(
+  formData: SignUpSchema,
+): Promise<Result<UserPublic>> {
   try {
     const response = await UsersService.postApiV1UsersSignup({
       body: formData,
     })
 
-    if (response?.error) {
-      throw response.error
-    }
-
     return {
-      message: 'Account created successfully! Please log in.',
-      success: true,
+      data: response.data,
+      ok: true,
     }
   } catch (error) {
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'Something went wrong.',
-    )
-
     return {
-      message: errorMsg,
-      success: false,
+      error: mapApiError(error),
+      ok: false,
     }
   }
 }

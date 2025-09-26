@@ -6,7 +6,6 @@ import {
   getMe,
   updateProfileAction,
   updatePasswordAction,
-  type UserActionState,
 } from '@/actions/users'
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs'
 import {Input} from '@/components/ui/input'
@@ -18,22 +17,22 @@ export default function UserSettingsClient() {
     full_name: string
     email: string
   }>({full_name: '', email: ''})
-  const [profileState, profileAction, profilePending] = useActionState<
-    UserActionState | undefined,
-    FormData
-  >(updateProfileAction, {success: null, message: null})
-  const [passwordState, passwordAction, passwordPending] = useActionState<
-    UserActionState | undefined,
-    FormData
-  >(updatePasswordAction, {success: null, message: null})
+  const [profileState, profileAction, profilePending] = useActionState(
+    updateProfileAction,
+    {ok: false, error: undefined},
+  )
+  const [passwordState, passwordAction, passwordPending] = useActionState(
+    updatePasswordAction,
+    {ok: false, error: undefined},
+  )
 
   useEffect(() => {
     ;(async () => {
-      const me = await getMe()
-      if (me) {
+      const result = await getMe()
+      if (result.ok) {
         setProfileDefaults({
-          full_name: (me as {full_name?: string | null}).full_name ?? '',
-          email: me.email ?? '',
+          full_name: result.data.full_name!,
+          email: result.data.email,
         })
       }
     })()
@@ -80,17 +79,17 @@ export default function UserSettingsClient() {
                   Cancel
                 </Button>
               </div>
-              {profileState?.message && (
-                <p
-                  className={
-                    profileState.success
-                      ? 'text-green-600 text-sm'
-                      : 'text-red-600 text-sm'
-                  }
-                >
-                  {profileState.message}
-                </p>
-              )}
+              <p
+                className={
+                  profileState.ok
+                    ? 'text-green-600 text-sm'
+                    : 'text-red-600 text-sm'
+                }
+              >
+                {profileState.ok
+                  ? 'Profile updated successfully'
+                  : profileState.error?.message}
+              </p>
             </form>
           </div>
         </TabsContent>
@@ -117,17 +116,17 @@ export default function UserSettingsClient() {
                   Cancel
                 </Button>
               </div>
-              {passwordState?.message && (
-                <p
-                  className={
-                    passwordState.success
-                      ? 'text-green-600 text-sm'
-                      : 'text-red-600 text-sm'
-                  }
-                >
-                  {passwordState.message}
-                </p>
-              )}
+              <p
+                className={
+                  passwordState.ok
+                    ? 'text-green-600 text-sm'
+                    : 'text-red-600 text-sm'
+                }
+              >
+                {passwordState.ok
+                  ? 'Password updated successfully'
+                  : passwordState.error?.message}
+              </p>
             </form>
           </div>
         </TabsContent>

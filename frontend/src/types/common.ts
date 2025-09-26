@@ -1,3 +1,5 @@
+import { CoursePublic } from '@/client'
+
 export type IState = {
   errors?: {
     name?: string[]
@@ -5,5 +7,6 @@ export type IState = {
   }
   message?: string | null
   success: boolean | null
-  course?: CoursePublic
+  course?: CoursePublic,
+  courses?: CoursePublic[],
 }

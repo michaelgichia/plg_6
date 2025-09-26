@@ -1,11 +1,9 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, DateTime, text, event
-from sqlmodel import Field, Relationship, SQLModel
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-  from app.models.course import Course
+from sqlalchemy import Column, DateTime, event, text
+from sqlmodel import Field, Relationship, SQLModel
+
 
 class ChatBase(SQLModel):
   message: str | None = Field(default=None, max_length=1024)
@@ -28,16 +26,9 @@ class ChatUpdate(SQLModel):
 class Chat(ChatBase, table=True):
   id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
   course_id: uuid.UUID = Field(foreign_key="course.id", ondelete="CASCADE")
-  course: "Course" = Relationship(back_populates="chats")
+  course: "Course" = Relationship(back_populates="chats") # noqa: F821
 
-# Public model for API responses
-class ChatPublic(SQLModel):
-  id: uuid.UUID
-  message: str
-  course_id: uuid.UUID
-  is_system: bool
-  created_at: datetime
-  updated_at: datetime
+
 
 # Automatically update the updated_at field before update
 @event.listens_for(Chat, "before_update", propagate=True)
