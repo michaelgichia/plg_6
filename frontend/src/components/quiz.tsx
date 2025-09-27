@@ -28,8 +28,8 @@ export default async function QuizComponent({
           <ul>
             {quiz.choices.map((choice) => (
               <div className='flex items-center gap-3 mb-4' key={choice.id}>
-                <Checkbox id='terms' />
-                <Label htmlFor='terms'>{choice.text}</Label>
+                <Checkbox id={choice.id} value={choice.id} />
+                <Label htmlFor={choice.id}>{choice.text}</Label>
               </div>
             ))}
           </ul>
