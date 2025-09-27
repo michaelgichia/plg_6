@@ -2,14 +2,20 @@ import json
 import logging
 import uuid
 
-from app.utils import clean_string
 import openai
-from sqlmodel import select
+from sqlalchemy.orm import load_only
+from sqlmodel import Session, select
 
-from app.api.deps import SessionDep
+from app.api.deps import CurrentUser, SessionDep
 from app.models.embeddings import Chunk
-from app.models.quizzes import Quiz
-from app.schemas.public import DifficultyLevel
+from app.models.quizzes import Quiz, QuizAttempt, QuizSession
+from app.schemas.public import (
+    DifficultyLevel,
+    QuizScoreSummary,
+    QuizSubmissionBatch,
+    SingleQuizScore,
+)
+from app.utils import clean_string
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -132,3 +138,101 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
 
     except Exception as e:
         logger.error(f"Error generating quizzes for document {document_id}: {e}")
+
+def score_quiz_batch(
+    db: Session,
+    course_id: uuid.UUID,
+    submission_batch: QuizSubmissionBatch,
+    current_user: CurrentUser
+) -> QuizScoreSummary:
+    """
+    Retrieves correct answers for a batch of quiz IDs and scores them.
+    """
+    try:
+      if not submission_batch.submissions:
+          return QuizScoreSummary(total_submitted=0, total_correct=0, score_percentage=0.0, results=[])
+
+      submitted_ids = [sub.quiz_id for sub in submission_batch.submissions]
+
+      submitted_answers: dict[uuid.UUID, str] = {
+          sub.quiz_id: sub.selected_answer_text for sub in submission_batch.submissions
+      }
+
+      statement = (
+          select(Quiz)
+          .where(Quiz.id.in_(submitted_ids))
+          .options(load_only(Quiz.id, Quiz.correct_answer))
+      )
+
+      correct_answers_map: dict[uuid.UUID, str] = {
+          q.id: q.correct_answer.strip() for q in db.exec(statement).all()
+      }
+
+      results: list[SingleQuizScore] = []
+      total_correct = 0
+
+      quiz_session = QuizSession(
+          user_id=current_user.id,
+          course_id=course_id,
+          total_time_seconds=submission_batch.total_time_seconds,
+          total_submitted=len(submission_batch.submissions),
+          total_correct=0
+      )
+      db.add(quiz_session)
+      db.flush()
+
+      session_id_to_use = quiz_session.id
+
+      for submitted_quiz_id, submitted_text in submitted_answers.items():
+          correct_text = correct_answers_map.get(submitted_quiz_id)
+
+          if not correct_text:
+              results.append(SingleQuizScore(
+                  quiz_id=submitted_quiz_id,
+                  is_correct=False,
+                  correct_answer_text="N/A",
+                  feedback="Quiz ID not found in database."
+              ))
+              continue
+
+          is_correct = (submitted_text.strip() == correct_text)
+
+          if is_correct:
+              total_correct += 1
+              feedback = "Correct! Well done."
+          else:
+              feedback = "Incorrect. Review the material."
+
+          results.append(SingleQuizScore(
+              quiz_id=submitted_quiz_id,
+              is_correct=is_correct,
+              correct_answer_text=correct_text,
+              feedback=feedback
+          ))
+          attempt = QuizAttempt(
+              session_id=session_id_to_use,
+              user_id=current_user.id,
+              quiz_id=submitted_quiz_id,
+              selected_answer_text=submitted_text,
+              is_correct=is_correct,
+              correct_answer_text=correct_text,
+          )
+          db.add(attempt)
+
+      total_submitted = len(submission_batch.submissions)
+      score_percentage = (total_correct / total_submitted) * 100 if total_submitted > 0 else 0.0
+
+      quiz_session.total_correct = total_correct
+      db.add(quiz_session)
+      db.commit()
+
+      return QuizScoreSummary(
+          total_submitted=total_submitted,
+          total_correct=total_correct,
+          score_percentage=round(score_percentage, 2),
+          results=results
+      )
+    except Exception as e:
+        logger.error(f"Error scoring quiz batch: {e}")
+        db.rollback()
+        raise

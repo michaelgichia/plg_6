@@ -47,6 +47,7 @@ class User(UserBase, table=True): # type: ignore
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
     courses: list["Course"] = Relationship(back_populates="owner", cascade_delete=True)
+    quiz_attempts: list["QuizAttempt"] = Relationship(back_populates="user")
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):

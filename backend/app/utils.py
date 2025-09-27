@@ -124,7 +124,7 @@ def verify_password_reset_token(token: str) -> str | None:
         return None
 
 
-def clean_llm_string(text):
+def clean_string(text):
     # Replace newlines with a space.
     text = re.sub(r"\n+", " ", text)
 
