@@ -2,6 +2,7 @@ import json
 import logging
 import uuid
 
+from app.utils import clean_string
 import openai
 from sqlmodel import select
 
@@ -119,11 +120,11 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
                     chunk_id=chunks[0].id,
                     difficulty_level=difficulty_level,
                     quiz_text=q_data["quiz"],
-                    correct_answer=q_data["correct_answer"],
-                    distraction_1=q_data["distraction_1"],
-                    distraction_2=q_data["distraction_2"],
-                    distraction_3=q_data["distraction_3"],
-                    topic=q_data["topic"],
+                    correct_answer=clean_string(q_data["correct_answer"]),
+                    distraction_1=clean_string(q_data["distraction_1"]),
+                    distraction_2=clean_string(q_data["distraction_2"]),
+                    distraction_3=clean_string(q_data["distraction_3"]),
+                    topic=clean_string(q_data["topic"]),
                 )
                 session.add(new_quiz)
 
