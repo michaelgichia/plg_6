@@ -256,6 +256,12 @@ export const CoursesPublicSchema = {
     title: 'CoursesPublic'
 } as const;
 
+export const DifficultyLevelSchema = {
+    type: 'string',
+    enum: ['easy', 'medium', 'hard', 'expert', 'all'],
+    title: 'DifficultyLevel'
+} as const;
+
 export const DocumentSchema = {
     properties: {
         title: {
@@ -579,6 +585,55 @@ export const QuizPublicSchema = {
     title: 'QuizPublic'
 } as const;
 
+export const QuizScoreSummarySchema = {
+    properties: {
+        total_submitted: {
+            type: 'integer',
+            title: 'Total Submitted'
+        },
+        total_correct: {
+            type: 'integer',
+            title: 'Total Correct'
+        },
+        score_percentage: {
+            type: 'number',
+            title: 'Score Percentage'
+        },
+        results: {
+            items: {
+                '$ref': '#/components/schemas/SingleQuizScore'
+            },
+            type: 'array',
+            title: 'Results'
+        }
+    },
+    type: 'object',
+    required: ['total_submitted', 'total_correct', 'score_percentage', 'results'],
+    title: 'QuizScoreSummary',
+    description: 'The overall score for the batch of submissions.'
+} as const;
+
+export const QuizSubmissionBatchSchema = {
+    properties: {
+        submissions: {
+            items: {
+                '$ref': '#/components/schemas/SingleQuizSubmission'
+            },
+            type: 'array',
+            title: 'Submissions'
+        },
+        total_time_seconds: {
+            type: 'number',
+            title: 'Total Time Seconds',
+            default: 0
+        }
+    },
+    type: 'object',
+    required: ['submissions'],
+    title: 'QuizSubmissionBatch',
+    description: 'Container for multiple quiz submissions.'
+} as const;
+
 export const QuizzesPublicSchema = {
     properties: {
         data: {
@@ -596,6 +651,50 @@ export const QuizzesPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'QuizzesPublic'
+} as const;
+
+export const SingleQuizScoreSchema = {
+    properties: {
+        quiz_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Quiz Id'
+        },
+        is_correct: {
+            type: 'boolean',
+            title: 'Is Correct'
+        },
+        correct_answer_text: {
+            type: 'string',
+            title: 'Correct Answer Text'
+        },
+        feedback: {
+            type: 'string',
+            title: 'Feedback'
+        }
+    },
+    type: 'object',
+    required: ['quiz_id', 'is_correct', 'correct_answer_text', 'feedback'],
+    title: 'SingleQuizScore',
+    description: 'The result for a single question.'
+} as const;
+
+export const SingleQuizSubmissionSchema = {
+    properties: {
+        quiz_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Quiz Id'
+        },
+        selected_answer_text: {
+            type: 'string',
+            title: 'Selected Answer Text'
+        }
+    },
+    type: 'object',
+    required: ['quiz_id', 'selected_answer_text'],
+    title: 'SingleQuizSubmission',
+    description: "The user's answer for one question."
 } as const;
 
 export const TokenSchema = {

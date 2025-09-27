@@ -159,6 +159,11 @@ export type CoursesPublic = {
 };
 
 /**
+ * DifficultyLevel
+ */
+export type DifficultyLevel = 'easy' | 'medium' | 'hard' | 'expert' | 'all';
+
+/**
  * Document
  */
 export type Document = {
@@ -378,6 +383,44 @@ export type QuizPublic = {
 };
 
 /**
+ * QuizScoreSummary
+ * The overall score for the batch of submissions.
+ */
+export type QuizScoreSummary = {
+    /**
+     * Total Submitted
+     */
+    total_submitted: number;
+    /**
+     * Total Correct
+     */
+    total_correct: number;
+    /**
+     * Score Percentage
+     */
+    score_percentage: number;
+    /**
+     * Results
+     */
+    results: Array<SingleQuizScore>;
+};
+
+/**
+ * QuizSubmissionBatch
+ * Container for multiple quiz submissions.
+ */
+export type QuizSubmissionBatch = {
+    /**
+     * Submissions
+     */
+    submissions: Array<SingleQuizSubmission>;
+    /**
+     * Total Time Seconds
+     */
+    total_time_seconds?: number;
+};
+
+/**
  * QuizzesPublic
  */
 export type QuizzesPublic = {
@@ -389,6 +432,44 @@ export type QuizzesPublic = {
      * Count
      */
     count: number;
+};
+
+/**
+ * SingleQuizScore
+ * The result for a single question.
+ */
+export type SingleQuizScore = {
+    /**
+     * Quiz Id
+     */
+    quiz_id: string;
+    /**
+     * Is Correct
+     */
+    is_correct: boolean;
+    /**
+     * Correct Answer Text
+     */
+    correct_answer_text: string;
+    /**
+     * Feedback
+     */
+    feedback: string;
+};
+
+/**
+ * SingleQuizSubmission
+ * The user's answer for one question.
+ */
+export type SingleQuizSubmission = {
+    /**
+     * Quiz Id
+     */
+    quiz_id: string;
+    /**
+     * Selected Answer Text
+     */
+    selected_answer_text: string;
 };
 
 /**
@@ -1420,7 +1501,9 @@ export type GetApiV1QuizzesByCourseIdData = {
          */
         course_id: string;
     };
-    query?: never;
+    query?: {
+        difficulty?: DifficultyLevel;
+    };
     url: '/api/v1/quizzes/{course_id}';
 };
 
@@ -1441,6 +1524,36 @@ export type GetApiV1QuizzesByCourseIdResponses = {
 };
 
 export type GetApiV1QuizzesByCourseIdResponse = GetApiV1QuizzesByCourseIdResponses[keyof GetApiV1QuizzesByCourseIdResponses];
+
+export type PostApiV1QuizzesByCourseIdScoreData = {
+    body: QuizSubmissionBatch;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/quizzes/{course_id}/score';
+};
+
+export type PostApiV1QuizzesByCourseIdScoreErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostApiV1QuizzesByCourseIdScoreError = PostApiV1QuizzesByCourseIdScoreErrors[keyof PostApiV1QuizzesByCourseIdScoreErrors];
+
+export type PostApiV1QuizzesByCourseIdScoreResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuizScoreSummary;
+};
+
+export type PostApiV1QuizzesByCourseIdScoreResponse = PostApiV1QuizzesByCourseIdScoreResponses[keyof PostApiV1QuizzesByCourseIdScoreResponses];
 
 export type PostApiV1PrivateUsersData = {
     body: PrivateUserCreate;

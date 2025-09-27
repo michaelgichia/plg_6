@@ -118,6 +118,17 @@ export const zCoursesPublic = z.object({
 });
 
 /**
+ * DifficultyLevel
+ */
+export const zDifficultyLevel = z.enum([
+    'easy',
+    'medium',
+    'hard',
+    'expert',
+    'all'
+]);
+
+/**
  * Document
  */
 export const zDocument = z.object({
@@ -243,6 +254,46 @@ export const zQuizPublic = z.object({
     id: z.uuid(),
     quiz_text: z.string(),
     choices: z.array(zQuizChoice)
+});
+
+/**
+ * SingleQuizScore
+ * The result for a single question.
+ */
+export const zSingleQuizScore = z.object({
+    quiz_id: z.uuid(),
+    is_correct: z.boolean(),
+    correct_answer_text: z.string(),
+    feedback: z.string()
+});
+
+/**
+ * QuizScoreSummary
+ * The overall score for the batch of submissions.
+ */
+export const zQuizScoreSummary = z.object({
+    total_submitted: z.int(),
+    total_correct: z.int(),
+    score_percentage: z.number(),
+    results: z.array(zSingleQuizScore)
+});
+
+/**
+ * SingleQuizSubmission
+ * The user's answer for one question.
+ */
+export const zSingleQuizSubmission = z.object({
+    quiz_id: z.uuid(),
+    selected_answer_text: z.string()
+});
+
+/**
+ * QuizSubmissionBatch
+ * Container for multiple quiz submissions.
+ */
+export const zQuizSubmissionBatch = z.object({
+    submissions: z.array(zSingleQuizSubmission),
+    total_time_seconds: z.optional(z.number()).default(0)
 });
 
 /**
@@ -731,13 +782,28 @@ export const zGetApiV1QuizzesByCourseIdData = z.object({
     path: z.object({
         course_id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.object({
+        difficulty: z.optional(zDifficultyLevel)
+    }))
 });
 
 /**
  * Successful Response
  */
 export const zGetApiV1QuizzesByCourseIdResponse = zQuizzesPublic;
+
+export const zPostApiV1QuizzesByCourseIdScoreData = z.object({
+    body: zQuizSubmissionBatch,
+    path: z.object({
+        course_id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zPostApiV1QuizzesByCourseIdScoreResponse = zQuizScoreSummary;
 
 export const zPostApiV1PrivateUsersData = z.object({
     body: zPrivateUserCreate,
