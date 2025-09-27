@@ -95,7 +95,6 @@ async def generate_chat_response(
             ],
             stream=True,
             temperature=0.7,
-            max_tokens=1000,
         )
 
         full_response = ""
