@@ -1,3 +1,4 @@
+import uuid
 from random import shuffle
 
 from fastapi import APIRouter
@@ -37,7 +38,7 @@ def list_quizzes(course_id: str, session: SessionDep, current_user: CurrentUser)
         shuffle(all_choices)
 
         choices_with_ids = [
-            QuizChoice(id=chr(65 + i), text=choice)
+            QuizChoice(id=str(uuid.uuid4()), text=choice)
             for i, choice in enumerate(all_choices)
         ]
 
