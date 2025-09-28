@@ -107,6 +107,7 @@ class QuizScoreSummary(SQLModel):
     score_percentage: float
     results: list[SingleQuizScore]
 
+
 class QuizSessionPublic(SQLModel):
     """
     Public schema for a QuizSession, used to show the user their incomplete
@@ -125,3 +126,7 @@ class QuizSessionPublic(SQLModel):
     updated_at: datetime
 
     total_questions_in_session: int | None = None
+
+
+class QuizSessionsList(SQLModel):
+    data: list[QuizSessionPublic]

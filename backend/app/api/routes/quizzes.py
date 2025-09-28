@@ -1,9 +1,11 @@
+import logging
 import uuid
 from random import shuffle
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import and_, desc, select, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import CurrentUser, SessionDep
@@ -11,12 +13,13 @@ from app.models.course import Course
 from app.models.document import Document
 from app.models.embeddings import Chunk
 from app.models.quizzes import Quiz, QuizSession
-from app.schemas.internal import QuizFilterParams, get_quiz_filters
+from app.schemas.internal import QuizFilterParams
 from app.schemas.public import (
     QuizChoice,
     QuizPublic,
     QuizScoreSummary,
     QuizSessionPublic,
+    QuizSessionsList,
     QuizSubmissionBatch,
     QuizzesPublic,
 )
@@ -26,6 +29,10 @@ from app.tasks import (
     score_quiz_batch,
 )
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
 router = APIRouter(prefix="/quizzes", tags=["quizzes"])
 
 
@@ -34,7 +41,7 @@ def list_quizzes(
     course_id: str,
     session: SessionDep,
     current_user: CurrentUser,
-    filters: Annotated[QuizFilterParams, Depends(get_quiz_filters)],
+    filters: Annotated[QuizFilterParams, Depends()],
 ):
     """
     Fetches the first 10 Quiz objects related to a specific course,
@@ -63,24 +70,31 @@ def list_quizzes(
 
     public_quizzes = []
     for q in quizzes:
+        result = dict(q[0])
+        logger.info(f"Result[1] {result}")
+
         # Create a list of all choices
         all_choices = [
-            q.correct_answer,
-            q.distraction_1,
-            q.distraction_2,
-            q.distraction_3,
+            result["correct_answer"],  # Change from result.correct_answer
+            result["distraction_1"],  # Change from result.distraction_1
+            result["distraction_2"],
+            result["distraction_3"],
         ]
 
         # Shuffle the list of choices
         shuffle(all_choices)
+        logger.info(f"All choices: {all_choices}")
 
         choices_with_ids = [
-            QuizChoice(id=str(uuid.uuid4()), text=choice)
-            for i, choice in enumerate(all_choices)
+            QuizChoice(id=str(uuid.uuid4()), text=choice) for choice in all_choices
         ]
 
+        logger.info(f"Choices with IDs: {choices_with_ids}")
+
         public_quizzes.append(
-            QuizPublic(id=q.id, quiz_text=q.quiz_text, choices=choices_with_ids)
+            QuizPublic(
+                id=result["id"], quiz_text=result["quiz_text"], choices=choices_with_ids
+            )
         )
 
     return QuizzesPublic(data=public_quizzes, count=len(public_quizzes))
@@ -108,28 +122,40 @@ def submit_and_score_quiz_batch(
     return score_summary
 
 
-@router.get("/incomplete/{course_id}", response_model=list[QuizSessionPublic])
+@router.get("/incomplete/{course_id}", response_model=QuizSessionsList)
 def get_incomplete_sessions(
-    course_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+    course_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
 ):
     """
-    Fetches all incomplete (resumable) quiz sessions for a specific course
-    and the current user.
+    Fetch all incomplete quiz sessions for a given course and user.
     """
-
     statement = (
         select(QuizSession)
         .where(
             QuizSession.user_id == current_user.id,
             QuizSession.course_id == course_id,
-            QuizSession.is_completed == False,  # noqa: E712
+            QuizSession.is_completed.is_(False),
         )
         .order_by(desc(QuizSession.updated_at))
     )
 
-    sessions = session.exec(statement).all()
+    try:
+        raw_results = session.exec(statement).all()
+        sessions: list[QuizSession] = [
+            r[0] if not isinstance(r, QuizSession) else r for r in raw_results
+        ]
 
-    return sessions
+        if not sessions:
+            return QuizSessionsList(data=[])
+
+        public_sessions = [QuizSessionPublic.model_validate(s) for s in sessions]
+        return QuizSessionsList(data=public_sessions)
+
+    except SQLAlchemyError as e:
+        logger.error("Database error fetching incomplete sessions", exc_info=e)
+        raise HTTPException(status_code=500, detail="Database error")
 
 
 @router.post(
@@ -139,59 +165,71 @@ def start_new_quiz_session(
     course_id: uuid.UUID,
     session: SessionDep,
     current_user: CurrentUser,
-    filters: Annotated[QuizFilterParams, Depends(get_quiz_filters)],
+    filters: Annotated[QuizFilterParams, Depends()],
 ):
     """
     Creates a new, immutable QuizSession, selects the initial set of questions,
     and returns the session details and the first batch of questions.
     """
-    # 1. Check for existing active session (Prevent users from having multiple active sessions)
-    active_session_check = (
-        select(QuizSession)
-        .where(
-            QuizSession.user_id == current_user.id,
-            QuizSession.course_id == course_id,
-            QuizSession.is_completed == False,
-        )
-        .limit(1)
-    )
-
-    if session.exec(active_session_check).first():
-        # Raise an error or redirect to the incomplete sessions list
-        raise HTTPException(
-            status_code=400,
-            detail="An incomplete quiz session already exists. Please resume or finish it first.",
+    try:
+        # 1. Check for existing active session (Prevent users from having multiple active sessions)
+        active_session_check = (
+            select(QuizSession)
+            .where(
+                QuizSession.user_id == current_user.id,
+                QuizSession.course_id == course_id,
+                QuizSession.is_completed == False,
+            )
+            .limit(1)
         )
 
-    # 2. Get Initial Quizzes (Helper function required)
-    # This must contain the logic from your original list_quizzes function
-    initial_quizzes = get_new_quizzes_for_course(
-        session, course_id, current_user, filters.difficulty
-    )
+        if session.exec(active_session_check).first():
+            # Raise an error or redirect to the incomplete sessions list
+            raise HTTPException(
+                status_code=400,
+                detail="An incomplete quiz session already exists. Please resume or finish it first.",
+            )
 
-    if not initial_quizzes:
-        raise HTTPException(
-            status_code=404, detail="No quizzes found for this course and difficulty."
+        # 2. Get Initial Quizzes (Helper function required)
+        # This must contain the logic from your original list_quizzes function
+        initial_quizzes = get_new_quizzes_for_course(
+            session, course_id, current_user, filters.difficulty
         )
 
-    initial_quiz_ids = [q.id for q in initial_quizzes]
+        if not initial_quizzes:
+            raise HTTPException(
+                status_code=404,
+                detail="No quizzes found for this course and difficulty.",
+            )
 
-    # 3. Create and Commit New Session
-    new_session = QuizSession(
-        user_id=current_user.id,
-        course_id=course_id,
-        total_submitted=0,
-        total_correct=0,
-        is_completed=False,
-        quiz_ids_json=initial_quiz_ids,  # Save the blueprint
-    )
-    session.add(new_session)
-    session.commit()
-    session.refresh(new_session)  # Refresh to get final DB values (like timestamps)
+        logger.info(f"Initial quizzes: {initial_quizzes}")
 
-    # 4. Format and Return
-    # Return the first 5 questions formatted for the user
-    quizzes_to_show = fetch_and_format_quizzes(session, initial_quiz_ids)
+        initial_quiz_ids = [str(q.id) for q in initial_quizzes]
 
-    # Note: You need a QuizSessionPublic schema for the return type
-    return new_session, quizzes_to_show
+        logger.info(f"Initial quiz IDs: {initial_quiz_ids}")
+
+        # 3. Create and Commit New Session
+        new_session = QuizSession(
+            user_id=current_user.id,
+            course_id=course_id,
+            total_submitted=0,
+            total_correct=0,
+            is_completed=False,
+            quiz_ids_json=initial_quiz_ids,
+        )
+
+        logger.info(f"New session: {new_session}")
+
+        session.add(new_session)
+        session.commit()
+        session.refresh(new_session)  # Refresh to get final DB values (like timestamps)
+
+        # 4. Format and Return
+        # Return the first 5 questions formatted for the user
+        quizzes_to_show = fetch_and_format_quizzes(session, initial_quiz_ids)
+
+        # Note: You need a QuizSessionPublic schema for the return type
+        return new_session, quizzes_to_show
+    except Exception as e:
+        logger.error(f"Error in start_new_quiz_session: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
