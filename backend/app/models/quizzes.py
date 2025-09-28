@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Column, func
 from sqlalchemy import Enum as SAEnum
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel, text
 
 from app.schemas.public import DifficultyLevel
@@ -17,7 +18,6 @@ class QuizBase(SQLModel):
     topic: str
     chunk_id: uuid.UUID
     difficulty_level: DifficultyLevel
-
 
 # Properties to receive on quiz creation
 class QuizCreate(QuizBase):
@@ -41,6 +41,10 @@ class QuizSessionBase(SQLModel):
     total_time_seconds: float = Field(default=0.0)
     total_submitted: int
     total_correct: int
+    quiz_ids_json: list[uuid.UUID] = Field(
+        sa_column=Column(JSONB),
+        default_factory=list
+    )
 
 
 class QuizSession(QuizSessionBase, table=True):
@@ -49,6 +53,14 @@ class QuizSession(QuizSessionBase, table=True):
         default_factory=lambda: datetime.now(timezone.utc),
         sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")},
     )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column_kwargs={
+            "server_default": text("CURRENT_TIMESTAMP"),
+            "onupdate": func.now(),
+        },
+    )
+    is_completed: bool = Field(default=False)
 
     attempts: list["QuizAttempt"] = Relationship(back_populates="session")
 
