@@ -73,15 +73,13 @@ def list_quizzes(
         result = dict(q[0])
         logger.info(f"Result[1] {result}")
 
-        # Create a list of all choices
         all_choices = [
-            result["correct_answer"],  # Change from result.correct_answer
-            result["distraction_1"],  # Change from result.distraction_1
+            result["correct_answer"],
+            result["distraction_1"],
             result["distraction_2"],
             result["distraction_3"],
         ]
 
-        # Shuffle the list of choices
         shuffle(all_choices)
         logger.info(f"All choices: {all_choices}")
 
@@ -172,7 +170,6 @@ def start_new_quiz_session(
     and returns the session details and the first batch of questions.
     """
     try:
-        # 1. Check for existing active session (Prevent users from having multiple active sessions)
         active_session_check = (
             select(QuizSession)
             .where(
@@ -184,14 +181,11 @@ def start_new_quiz_session(
         )
 
         if session.exec(active_session_check).first():
-            # Raise an error or redirect to the incomplete sessions list
             raise HTTPException(
                 status_code=400,
                 detail="An incomplete quiz session already exists. Please resume or finish it first.",
             )
 
-        # 2. Get Initial Quizzes (Helper function required)
-        # This must contain the logic from your original list_quizzes function
         initial_quizzes = get_new_quizzes_for_course(
             session, course_id, current_user, filters.difficulty
         )
@@ -222,13 +216,10 @@ def start_new_quiz_session(
 
         session.add(new_session)
         session.commit()
-        session.refresh(new_session)  # Refresh to get final DB values (like timestamps)
+        session.refresh(new_session)
 
-        # 4. Format and Return
-        # Return the first 5 questions formatted for the user
         quizzes_to_show = fetch_and_format_quizzes(session, initial_quiz_ids)
 
-        # Note: You need a QuizSessionPublic schema for the return type
         return new_session, quizzes_to_show
     except Exception as e:
         logger.error(f"Error in start_new_quiz_session: {e}")

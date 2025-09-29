@@ -33,7 +33,6 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
     Background task to generate a bank of quiz questions from a document.
     """
     try:
-        # 1. Retrieve the document's chunks from the database
         statement = select(Chunk).where(Chunk.document_id == document_id)
         chunks = session.exec(statement).all()
 
@@ -48,7 +47,6 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
             DifficultyLevel.MEDIUM,
             DifficultyLevel.HARD,
         ]:
-            # 2. Build prompt
             prompt = f"""
             Generate a set of multiple-choice quizzes based on the following text.
             Each quiz should be at '{difficulty_level}' difficulty.
@@ -66,7 +64,6 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
             {concatenated_text}
             """
 
-            # 3. Call the LLM with strict schema enforcement
             client = openai.AsyncOpenAI()
             response = await client.chat.completions.create(
                 model="gpt-4o",
@@ -115,7 +112,6 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
                 ],
             )
 
-            # 4. Parse structured JSON directly
             try:
                 raw_content = response.choices[0].message.content
                 parsed = json.loads(raw_content)
@@ -131,7 +127,6 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
                 )
                 continue
 
-            # 5. Save quizzes to DB
             for q_data in quiz_list:
                 if not isinstance(q_data, dict):
                     logger.warning(f"Skipping malformed item in quiz list: {q_data}")
@@ -304,21 +299,17 @@ def fetch_and_format_quizzes(db: Session, quiz_ids: list[uuid.UUID]) -> QuizzesP
     if not quiz_ids:
         return QuizzesPublic(data=[], count=0)
 
-    # 1. Fetch the Quizzes using the list of IDs (Logic remains the same)
     statement = select(Quiz).where(Quiz.id.in_(quiz_ids)).order_by(Quiz.created_at)
     quizzes = db.exec(statement).all()
 
-    # 2. Re-sort the fetched quizzes based on the input `quiz_ids` list (Logic remains the same)
     quiz_lookup = {quiz.id: quiz for quiz in quizzes}
     final_quizzes: list[Quiz] = [
         quiz_lookup[q_id] for q_id in quiz_ids if q_id in quiz_lookup
     ]
 
-    # 3. Format the final, ordered list into the public schema
     quiz_public_list: list[QuizPublic] = []
 
     for quiz in final_quizzes:
-        # Collect all answer texts
         all_texts = [
             quiz.correct_answer,
             quiz.distraction_1,
@@ -326,19 +317,15 @@ def fetch_and_format_quizzes(db: Session, quiz_ids: list[uuid.UUID]) -> QuizzesP
             quiz.distraction_3,
         ]
 
-        # Randomize the order of the options
         random.shuffle(all_texts)
 
-        # 💡 CHANGE: Create the list of QuizChoice objects with UUIDs as IDs
         choices_list: list[QuizChoice] = []
 
         for text in all_texts:
-            # Generate a new, unique UUID for the choice ID and convert it to a string
             choice_uuid = str(uuid.uuid4())
 
             choices_list.append(QuizChoice(id=choice_uuid, text=text))
 
-        # Instantiate the public model
         public_quiz = QuizPublic(
             id=quiz.id,
             quiz_text=quiz.quiz_text,
@@ -346,5 +333,4 @@ def fetch_and_format_quizzes(db: Session, quiz_ids: list[uuid.UUID]) -> QuizzesP
         )
         quiz_public_list.append(public_quiz)
 
-    # 4. Package and return
     return QuizzesPublic(data=quiz_public_list, count=len(quiz_public_list))

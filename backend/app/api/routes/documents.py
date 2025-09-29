@@ -136,20 +136,16 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
 
         chunks = chunk_text(full_text)
 
-        # --- NEW CODE: Save chunks to the database first ---
         chunk_records = []
         for chunk in chunks:
-            # Create a Chunk record, which will auto-generate an 'id'
             chunk_record = Chunk(
                 document_id=document_id,
                 text_content=chunk,
-                embedding_id=uuid.uuid4().hex,  # Temporary ID
+                embedding_id=uuid.uuid4().hex,
             )
             session.add(chunk_record)
             chunk_records.append(chunk_record)
         session.commit()
-
-        # Now that we have the auto-generated IDs, proceed with embedding
 
         embeddings = []
         BATCH_SIZE = 50
@@ -160,7 +156,6 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
 
         vectors_to_upsert = []
 
-        # Update the chunk records with the Pinecone embedding IDs
         for i, (record, embedding) in enumerate(
             zip(chunk_records, embeddings, strict=False)
         ):
@@ -180,7 +175,6 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
 
         session.commit()
 
-        # Finally, upsert the vectors to Pinecone
         index = pc.Index(index_name)
         index.upsert(vectors=vectors_to_upsert)
 
@@ -190,9 +184,6 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
         session.add(document)
         session.commit()
 
-        # --- NEW CODE: Trigger the quiz generation task ---
-        # Note: You'll need to pass the session to the background task
-        # to ensure it has a database connection.
         await generate_quizzes_task(document_id, session)
 
     except Exception as e:
@@ -215,20 +206,17 @@ async def handle_document_processing(
     tmp_path = os.path.join(tmp_dir, f"{document_id}_{file.filename}")
 
     try:
-        # Asynchronously read chunks from the UploadFile stream
         with open(tmp_path, "wb") as buffer:
             while True:
-                chunk = await file.read(1024)  # Read in 1KB chunks
+                chunk = await file.read(1024)
                 if not chunk:
                     break
                 buffer.write(chunk)
 
-        # Pass the path of the saved file to the next background task
         await process_pdf_task(tmp_path, document_id, session)
 
     except Exception as e:
         logger.error(f"[handle_document_processing] Error processing document: {e}")
-        # Handle errors and update the document status
         document = session.get(Document, document_id)
         if document:
             document.status = DocumentStatus.FAILED
@@ -236,7 +224,6 @@ async def handle_document_processing(
             session.commit()
 
     finally:
-        # Clean up the temporary file and directory
         shutil.rmtree(tmp_dir)
 
 
@@ -273,7 +260,6 @@ async def process_multiple_documents(
 
         title_without_extension = os.path.splitext(file.filename)[0]
 
-        # 1. Create a Document record in the database
         db_document = Document(
             title=title_without_extension,
             filename=file.filename,
@@ -283,17 +269,13 @@ async def process_multiple_documents(
         session.commit()
         session.refresh(db_document)
 
-        # 2. Save the file to a temporary location within the request
         tmp_dir = tempfile.mkdtemp()
         tmp_path = os.path.join(tmp_dir, f"{db_document.id}_{file.filename}")
 
-        # The key change: Asynchronously read and write the file in the endpoint.
-        # This ensures the stream is consumed before the endpoint returns.
         async with aiofiles.open(tmp_path, "wb") as buffer:
             while chunk := await file.read(1024):
                 await buffer.write(chunk)
 
-        # 3. Add the background task, passing the path to the saved file.
         background_tasks.add_task(process_pdf_task, tmp_path, db_document.id, session)
 
         results.append(
@@ -328,7 +310,6 @@ def read_document(session: SessionDep, current_user: CurrentUser, id: uuid.UUID)
     return document
 
 
-# Background task for deleting embeddings
 def delete_embeddings_task(document_id: uuid.UUID):
     """Background task to delete embeddings from Pinecone."""
     try:
@@ -345,7 +326,7 @@ def delete_document(
     session: SessionDep,
     current_user: CurrentUser,
     id: uuid.UUID,
-    background_tasks: BackgroundTasks,  # Inject BackgroundTasks
+    background_tasks: BackgroundTasks,
 ) -> Any:
     """Delete a document by its ID, ensuring the user has permissions."""
 
@@ -370,7 +351,6 @@ def delete_document(
     session.delete(document)
     session.commit()
 
-    # 3. Return an immediate response
     return Message(
         message="Document deleted successfully. Embeddings are being removed in the background."
     )
