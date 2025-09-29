@@ -21,15 +21,14 @@ export default async function QuizComponent({
     <div className='h-full flex flex-col'>
       {result.data.map((quiz, idx) => (
         <div className='flex flex-col gap-6'>
-          <p>
-            {' '}
+          <p className='text-sm'>
             {idx + 1}. {quiz.quiz_text}
           </p>
           <ul>
             {quiz.choices.map((choice) => (
-              <div className='flex items-center gap-3 mb-4' key={choice.id}>
+              <div className='flex gap-3 mb-4' key={choice.id}>
                 <Checkbox id={choice.id} value={choice.id} />
-                <Label htmlFor={choice.id}>{choice.text}</Label>
+                <Label htmlFor={choice.id} className='capitalize text-sm/snug'>{choice.text}</Label>
               </div>
             ))}
           </ul>

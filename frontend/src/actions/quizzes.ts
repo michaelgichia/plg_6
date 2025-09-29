@@ -1,6 +1,6 @@
 'use server'
 
-import {QuizPublic, QuizzesService} from '@/client'
+import {CoursesService, QuizPublic} from '@/client'
 
 import {mapApiError} from '@/lib/mapApiError'
 import {Result} from '@/lib/result'
@@ -13,8 +13,8 @@ export async function getQuizzes(
   courseId: string,
 ): Promise<Result<QuizPublic[]>> {
   try {
-    const response = await QuizzesService.getApiV1QuizzesByCourseId({
-      path: {course_id: courseId},
+    const response = await CoursesService.getApiV1CoursesByIdQuizzes({
+      query: {course_id: courseId},
       responseValidator: async () => {},
     })
 
