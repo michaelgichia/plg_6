@@ -5,14 +5,9 @@ import { z } from 'zod';
 /**
  * Body_documents-process_multiple_documents
  */
-// export const zBodyDocumentsProcessMultipleDocuments = z.object({
-//     files: z.array(z.string()),
-//     course_id: z.uuid()
-// });
-
 export const zBodyDocumentsProcessMultipleDocuments = z.object({
-  files: z.array(z.instanceof(File)),
-  course_id: z.uuid(),
+    files: z.array(z.string()),
+    course_id: z.uuid()
 });
 
 /**
@@ -48,16 +43,35 @@ export const zCourseCreate = z.object({
 });
 
 /**
+ * DocumentPublic
+ */
+export const zDocumentPublic = z.object({
+    id: z.uuid(),
+    filename: z.string(),
+    description: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    course_id: z.uuid(),
+    updated_at: z.iso.datetime(),
+    created_at: z.iso.datetime(),
+    status: z.string()
+});
+
+/**
  * CoursePublic
  */
 export const zCoursePublic = z.object({
-    name: z.string().min(3).max(255),
+    id: z.uuid(),
+    owner_id: z.uuid(),
+    name: z.string(),
     description: z.optional(z.union([
-        z.string().max(1020),
+        z.string(),
         z.null()
     ])),
-    id: z.uuid(),
-    owner_id: z.uuid()
+    created_at: z.iso.datetime(),
+    updated_at: z.iso.datetime(),
+    documents: z.array(zDocumentPublic)
 });
 
 /**
@@ -75,37 +89,18 @@ export const zCourseUpdate = z.object({
 });
 
 /**
- * DocumentStatus
- */
-export const zDocumentStatus = z.enum([
-    'pending',
-    'processing',
-    'completed',
-    'failed'
-]);
-
-/**
- * DocumentPublic
- */
-export const zDocumentPublic = z.object({
-    title: z.string().min(1).max(255),
-    id: z.uuid(),
-    course_id: z.uuid(),
-    uploaded_at: z.iso.datetime(),
-    status: zDocumentStatus
-});
-
-/**
  * CourseWithDocuments
  */
 export const zCourseWithDocuments = z.object({
-    name: z.string().min(3).max(255),
-    description: z.optional(z.union([
-        z.string().max(1020),
-        z.null()
-    ])),
     id: z.uuid(),
     owner_id: z.uuid(),
+    name: z.string(),
+    description: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    created_at: z.iso.datetime(),
+    updated_at: z.iso.datetime(),
     documents: z.optional(z.array(zDocumentPublic)).default([])
 });
 
@@ -116,6 +111,16 @@ export const zCoursesPublic = z.object({
     data: z.array(zCoursePublic),
     count: z.int()
 });
+
+/**
+ * DocumentStatus
+ */
+export const zDocumentStatus = z.enum([
+    'pending',
+    'processing',
+    'completed',
+    'failed'
+]);
 
 /**
  * Document
@@ -134,7 +139,8 @@ export const zDocument = z.object({
     ])),
     filename: z.string(),
     status: z.optional(zDocumentStatus),
-    uploaded_at: z.optional(z.iso.datetime())
+    created_at: z.optional(z.iso.datetime()),
+    updated_at: z.optional(z.iso.datetime())
 });
 
 /*
@@ -684,6 +690,14 @@ export const zGetApiV1CoursesByCourseIdDocumentsResponse = z.array(z.record(z.st
 export const zPostApiV1DocumentsProcessData = z.object({
     body: zBodyDocumentsProcessMultipleDocuments,
     path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+export const zDeleteApiV1DocumentsByIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        id: z.uuid()
+    }),
     query: z.optional(z.never())
 });
 

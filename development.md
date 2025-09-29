@@ -2,10 +2,12 @@
 
 ## Docker Compose
 
-* Start the local stack with Docker Compose:
+* Start the local stack with Docker Compose, but first we need to install pnpm within docker:
 
 ```bash
-docker compose watch
+docker compose build frontend
+docker compose run --rm frontend sh -lc "pnpm install"
+docker compose up
 ```
 
 * Now you can open your browser and interact with these URLs:

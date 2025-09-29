@@ -1,8 +1,8 @@
-"""Fix datetime error.
+"""Add cascade delete to documents relationship
 
-Revision ID: 00256652a84e
-Revises: fbdd5b8eb59b
-Create Date: 2025-09-17 12:49:00.910675
+Revision ID: b93831eb9fa1
+Revises: 373edea4505d
+Create Date: 2025-09-23 16:18:57.084526
 
 """
 from alembic import op
@@ -11,8 +11,8 @@ import sqlmodel.sql.sqltypes
 
 
 # revision identifiers, used by Alembic.
-revision = '00256652a84e'
-down_revision = 'fbdd5b8eb59b'
+revision = 'b93831eb9fa1'
+down_revision = '373edea4505d'
 branch_labels = None
 depends_on = None
 

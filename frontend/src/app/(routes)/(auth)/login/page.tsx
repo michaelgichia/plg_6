@@ -21,8 +21,8 @@ export default function Login() {
     IAuthState | undefined,
     FormData
   >(authenticate, {
-    message: null,
-    success: false,
+    error: undefined,
+    ok: false,
   })
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -64,8 +64,8 @@ export default function Login() {
                 error={errors?.password || null}
                 label="Password"
               />
-              {state && state?.message && (
-                <div className='text-red-500 text-sm'>{state?.message}</div>
+              {state && !state?.ok && (
+                <div className='text-red-500 text-sm'>{state?.error?.message}</div>
               )}
             </div>
 

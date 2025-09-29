@@ -1,24 +1,24 @@
-import {CoursePublic, CoursesService} from '@/client'
+import {CourseWithDocuments} from '@/client'
+import {Result} from '@/lib/result'
+import {mapApiError} from '@/lib/mapApiError'
 
-export const getCourse = async (id: string): Promise<CoursePublic> => {
-  // On the server, use the SDK directly (cookie-based auth already wired)
-  if (typeof window === 'undefined') {
-    const response = await CoursesService.getApiV1CoursesById({
-      path: {id},
-      responseValidator: async () => {},
+export async function getCourse(
+  id: string,
+): Promise<Result<CourseWithDocuments>> {
+  try {
+    const res = await fetch(`/api/courses/${id}`, {
+      method: 'GET',
+      headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
     })
-    return response.data
-  }
 
-  // On the client, route through an internal API handler so we can
-  // forward the HttpOnly cookie from the browser automatically.
-  const res = await fetch(`/api/courses/${id}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-  })
-  if (!res.ok) {
-    throw new Error('API request failed')
+    if (!res.ok) throw new Error(`Failed to fetch course ${id}`)
+
+    return {ok: true, data: (await res.json()) as CourseWithDocuments}
+  } catch (error) {
+    return {
+      ok: false,
+      error: mapApiError(error),
+    }
   }
-  return (await res.json()) as CoursePublic
 }
