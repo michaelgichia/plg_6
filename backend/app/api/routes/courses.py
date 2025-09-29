@@ -280,67 +280,6 @@ def get_incomplete_sessions(
         raise HTTPException(status_code=500, detail="Database error")
 
 
-# @router.post("/{id}/quiz/start", response_model=tuple[QuizSessionPublic, QuizzesPublic])
-# def start_new_quiz_session(
-#     id: uuid.UUID,
-#     session: SessionDep,
-#     current_user: CurrentUser,
-#     filters: Annotated[QuizFilterParams, Depends()],
-# ):
-#     """
-#     Creates a new, immutable QuizSession, selects the initial set of questions,
-#     and returns the session details and the first batch of questions.
-#     """
-#     try:
-#         active_session_check = (
-#             select(QuizSession)
-#             .where(
-#                 QuizSession.user_id == current_user.id,  # type: ignore
-#                 QuizSession.course_id == id,  # type: ignore
-#                 QuizSession.is_completed == False,  # type: ignore  # noqa: E712
-#             )
-#             .limit(1)
-#         )
-
-#         if session.exec(active_session_check).first():  # type: ignore
-#             raise HTTPException(
-#                 status_code=400,
-#                 detail="An incomplete quiz session already exists. Please resume or finish it first.",
-#             )
-
-#         initial_quizzes = get_quizzes_for_session(
-#             session, id, current_user, filters.difficulty
-#         )
-
-#         if not initial_quizzes:
-#             raise HTTPException(
-#                 status_code=404,
-#                 detail="No quizzes found for this course and difficulty.",
-#             )
-
-#         initial_quiz_ids = [q.id for q in initial_quizzes]
-
-#         new_session = QuizSession(
-#             user_id=current_user.id,
-#             course_id=id,
-#             total_submitted=0,
-#             total_correct=0,
-#             is_completed=False,
-#             quiz_ids_json=initial_quiz_ids,
-#         )
-
-#         session.add(new_session)
-#         session.commit()
-#         session.refresh(new_session)
-
-#         quizzes_to_show = fetch_and_format_quizzes(session, initial_quiz_ids)
-
-#         return new_session, quizzes_to_show
-#     except Exception as e:
-#         logger.error(f"Error in start_new_quiz_session: {e}")
-#         raise HTTPException(status_code=400, detail=str(e))
-
-
 @router.post(
     "/{course_id}/quiz/start", response_model=tuple[QuizSessionPublic, QuizzesPublic]
 )
