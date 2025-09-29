@@ -377,6 +377,42 @@ export const HTTPValidationErrorSchema = {
     title: 'HTTPValidationError'
 } as const;
 
+export const ItemSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Title'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id'
+        }
+    },
+    type: 'object',
+    required: ['title', 'owner_id'],
+    title: 'Item'
+} as const;
+
 export const ItemCreateSchema = {
     properties: {
         title: {
@@ -475,7 +511,7 @@ export const ItemsPublicSchema = {
     properties: {
         data: {
             items: {
-                '$ref': '#/components/schemas/ItemPublic'
+                '$ref': '#/components/schemas/Item'
             },
             type: 'array',
             title: 'Data'
@@ -611,6 +647,85 @@ export const QuizScoreSummarySchema = {
     required: ['total_submitted', 'total_correct', 'score_percentage', 'results'],
     title: 'QuizScoreSummary',
     description: 'The overall score for the batch of submissions.'
+} as const;
+
+export const QuizSessionPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        total_submitted: {
+            type: 'integer',
+            title: 'Total Submitted'
+        },
+        total_correct: {
+            type: 'integer',
+            title: 'Total Correct'
+        },
+        score_percentage: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Score Percentage'
+        },
+        is_completed: {
+            type: 'boolean',
+            title: 'Is Completed'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        total_questions_in_session: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Total Questions In Session'
+        }
+    },
+    type: 'object',
+    required: ['id', 'course_id', 'total_submitted', 'total_correct', 'is_completed', 'created_at', 'updated_at'],
+    title: 'QuizSessionPublic',
+    description: `Public schema for a QuizSession, used to show the user their incomplete
+or completed quiz attempts.`
+} as const;
+
+export const QuizSessionsListSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/QuizSessionPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        }
+    },
+    type: 'object',
+    required: ['data'],
+    title: 'QuizSessionsList'
 } as const;
 
 export const QuizSubmissionBatchSchema = {

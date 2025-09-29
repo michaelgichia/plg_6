@@ -1,22 +1,16 @@
 import logging
 import uuid
-from random import shuffle
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import and_, desc, select, text
+from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import selectinload
+from sqlmodel import select
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models.course import Course
-from app.models.document import Document
-from app.models.embeddings import Chunk
-from app.models.quizzes import Quiz, QuizSession
+from app.models.quizzes import QuizSession
 from app.schemas.internal import QuizFilterParams
 from app.schemas.public import (
-    QuizChoice,
-    QuizPublic,
     QuizScoreSummary,
     QuizSessionPublic,
     QuizSessionsList,
@@ -34,64 +28,6 @@ logger = logging.getLogger(__name__)
 
 
 router = APIRouter(prefix="/quizzes", tags=["quizzes"])
-
-
-@router.get("/{course_id}", response_model=QuizzesPublic)
-def list_quizzes(
-    course_id: str,
-    session: SessionDep,
-    current_user: CurrentUser,
-    filters: Annotated[QuizFilterParams, Depends()],
-):
-    """
-    Fetches the first 10 Quiz objects related to a specific course,
-    ensuring the course is owned by the current user.
-    """
-
-    statement = (
-        select(Quiz)
-        .join(Chunk, Quiz.chunk_id == Chunk.id)
-        .join(Document, Chunk.document_id == Document.id)
-        .join(Course, Document.course_id == Course.id)
-        .where(
-            and_(
-                Course.id == course_id,
-                Course.owner_id == current_user.id,
-                Quiz.difficulty_level == filters.difficulty,
-            )
-        )
-        .order_by(text(f"{filters.order_by} {filters.order_direction}"))
-        .offset(filters.offset)
-        .limit(filters.limit)
-        .options(selectinload(Quiz.chunk))
-        .limit(5)
-    )
-    quizzes = session.exec(statement).all()
-
-    public_quizzes = []
-    for q in quizzes:
-        result = dict(q[0])
-
-        all_choices = [
-            result["correct_answer"],
-            result["distraction_1"],
-            result["distraction_2"],
-            result["distraction_3"],
-        ]
-
-        shuffle(all_choices)
-
-        choices_with_ids = [
-            QuizChoice(id=str(uuid.uuid4()), text=choice) for choice in all_choices
-        ]
-
-        public_quizzes.append(
-            QuizPublic(
-                id=result["id"], quiz_text=result["quiz_text"], choices=choices_with_ids
-            )
-        )
-
-    return QuizzesPublic(data=public_quizzes, count=len(public_quizzes))
 
 
 @router.post("/{course_id}/score", response_model=QuizScoreSummary)
@@ -128,15 +64,15 @@ def get_incomplete_sessions(
     statement = (
         select(QuizSession)
         .where(
-            QuizSession.user_id == current_user.id,
-            QuizSession.course_id == course_id,
-            QuizSession.is_completed.is_(False),
+            QuizSession.user_id == current_user.id,  # type: ignore
+            QuizSession.course_id == course_id,  # type: ignore
+            QuizSession.is_completed.is_(False),  # type: ignore
         )
-        .order_by(desc(QuizSession.updated_at))
+        .order_by(desc(QuizSession.updated_at))  # type: ignore
     )
 
     try:
-        raw_results = session.exec(statement).all()
+        raw_results = session.exec(statement).all()  # type: ignore
         sessions: list[QuizSession] = [
             r[0] if not isinstance(r, QuizSession) else r for r in raw_results
         ]
@@ -169,14 +105,14 @@ def start_new_quiz_session(
         active_session_check = (
             select(QuizSession)
             .where(
-                QuizSession.user_id == current_user.id,
-                QuizSession.course_id == course_id,
-                QuizSession.is_completed == False,
+                QuizSession.user_id == current_user.id,  # type: ignore
+                QuizSession.course_id == course_id,  # type: ignore
+                QuizSession.is_completed == False,  # type: ignore  # noqa: E712
             )
             .limit(1)
         )
 
-        if session.exec(active_session_check).first():
+        if session.exec(active_session_check).first():  # type: ignore
             raise HTTPException(
                 status_code=400,
                 detail="An incomplete quiz session already exists. Please resume or finish it first.",
@@ -192,7 +128,7 @@ def start_new_quiz_session(
                 detail="No quizzes found for this course and difficulty.",
             )
 
-        initial_quiz_ids = [str(q.id) for q in initial_quizzes]
+        initial_quiz_ids = [q.id for q in initial_quizzes]
 
         new_session = QuizSession(
             user_id=current_user.id,

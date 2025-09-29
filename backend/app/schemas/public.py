@@ -3,10 +3,13 @@ Centralized Pydantic/response schemas for Course and Document to avoid circular 
 """
 
 import uuid
+from collections.abc import Sequence
 from datetime import datetime
 from enum import Enum, StrEnum
 
 from sqlmodel import Field, SQLModel
+
+from app.models.course import Course
 
 
 class DocumentStatus(str, Enum):
@@ -29,13 +32,13 @@ class CoursePublic(SQLModel):
     owner_id: uuid.UUID
     name: str
     description: str | None = None
-    documents: list["DocumentPublic"]
+    documents: Sequence["DocumentPublic"]
     created_at: datetime
     updated_at: datetime
 
 
 class CoursesPublic(SQLModel):
-    data: list["CoursePublic"]
+    data: Sequence["Course"]
     count: int
 
 
@@ -49,18 +52,18 @@ class DifficultyLevel(StrEnum):
 
 
 class QuizChoice(SQLModel):
-    id: str
+    id: uuid.UUID
     text: str
 
 
 class QuizPublic(SQLModel):
     id: uuid.UUID
     quiz_text: str
-    choices: list[QuizChoice]
+    choices: Sequence[QuizChoice]
 
 
 class QuizzesPublic(SQLModel):
-    data: list["QuizPublic"]
+    data: Sequence["QuizPublic"]
     count: int
 
 
@@ -68,11 +71,11 @@ class ChunkPublic(SQLModel):
     id: uuid.UUID
     document_id: uuid.UUID
     text_content: str
-    quizzes: list["QuizPublic"]
+    quizzes: Sequence["QuizPublic"]
 
 
 class ChunksPublic(SQLModel):
-    data: list["ChunkPublic"]
+    data: Sequence["ChunkPublic"]
     count: int
 
 
@@ -86,7 +89,7 @@ class SingleQuizSubmission(SQLModel):
 class QuizSubmissionBatch(SQLModel):
     """Container for multiple quiz submissions."""
 
-    submissions: list[SingleQuizSubmission]
+    submissions: Sequence[SingleQuizSubmission]
     total_time_seconds: float = Field(default=0.0)
 
 
@@ -105,7 +108,7 @@ class QuizScoreSummary(SQLModel):
     total_submitted: int
     total_correct: int
     score_percentage: float
-    results: list[SingleQuizScore]
+    results: Sequence[SingleQuizScore]
 
 
 class QuizSessionPublic(SQLModel):
@@ -129,4 +132,4 @@ class QuizSessionPublic(SQLModel):
 
 
 class QuizSessionsList(SQLModel):
-    data: list[QuizSessionPublic]
+    data: Sequence[QuizSessionPublic]

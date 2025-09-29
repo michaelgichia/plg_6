@@ -258,11 +258,12 @@ async def process_multiple_documents(
                 detail=f"File '{file.filename}' exceeds the {MAX_FILE_SIZE_MB}MB size limit.",
             )
 
-        title_without_extension = os.path.splitext(file.filename)[0]
+        filename_str = file.filename if file.filename is not None else ""
+        title_without_extension = os.path.splitext(filename_str)[0]
 
         db_document = Document(
             title=title_without_extension,
-            filename=file.filename,
+            filename=filename_str,
             course_id=course_id,
         )
         session.add(db_document)
@@ -339,7 +340,7 @@ def delete_document(
             detail="Document not found or you do not have permission to delete it.",
         )
 
-    if not current_user.is_superuser and (document.course.owner_id != current_user.id):
+    if not current_user.is_superuser and (document.course.owner_id != current_user.id):  # type: ignore
         raise HTTPException(
             status_code=403,
             detail="Not enough permissions to delete this document.",

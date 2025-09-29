@@ -169,6 +169,19 @@ export const zHttpValidationError = z.object({
 });
 
 /**
+ * Item
+ */
+export const zItem = z.object({
+    title: z.string().min(1).max(255),
+    description: z.optional(z.union([
+        z.string().max(255),
+        z.null()
+    ])),
+    id: z.optional(z.uuid()),
+    owner_id: z.uuid()
+});
+
+/**
  * ItemCreate
  */
 export const zItemCreate = z.object({
@@ -210,7 +223,7 @@ export const zItemUpdate = z.object({
  * ItemsPublic
  */
 export const zItemsPublic = z.object({
-    data: z.array(zItemPublic),
+    data: z.array(zItem),
     count: z.int()
 });
 
@@ -276,6 +289,36 @@ export const zQuizScoreSummary = z.object({
     total_correct: z.int(),
     score_percentage: z.number(),
     results: z.array(zSingleQuizScore)
+});
+
+/**
+ * QuizSessionPublic
+ * Public schema for a QuizSession, used to show the user their incomplete
+ * or completed quiz attempts.
+ */
+export const zQuizSessionPublic = z.object({
+    id: z.uuid(),
+    course_id: z.uuid(),
+    total_submitted: z.int(),
+    total_correct: z.int(),
+    score_percentage: z.optional(z.union([
+        z.number(),
+        z.null()
+    ])),
+    is_completed: z.boolean(),
+    created_at: z.iso.datetime(),
+    updated_at: z.iso.datetime(),
+    total_questions_in_session: z.optional(z.union([
+        z.int(),
+        z.null()
+    ]))
+});
+
+/**
+ * QuizSessionsList
+ */
+export const zQuizSessionsList = z.object({
+    data: z.array(zQuizSessionPublic)
 });
 
 /**
@@ -783,7 +826,18 @@ export const zGetApiV1QuizzesByCourseIdData = z.object({
         course_id: z.string()
     }),
     query: z.optional(z.object({
-        difficulty: z.optional(zDifficultyLevel)
+        limit: z.optional(z.int().gt(0).lte(50)).default(5),
+        offset: z.optional(z.int().gte(0)).default(0),
+        order_by: z.optional(z.enum([
+            'created_at',
+            'difficulty_level',
+            'quiz_text'
+        ])),
+        difficulty: z.optional(zDifficultyLevel),
+        order_direction: z.optional(z.enum([
+            'asc',
+            'desc'
+        ]))
     }))
 });
 
@@ -804,6 +858,49 @@ export const zPostApiV1QuizzesByCourseIdScoreData = z.object({
  * Successful Response
  */
 export const zPostApiV1QuizzesByCourseIdScoreResponse = zQuizScoreSummary;
+
+export const zGetApiV1QuizzesIncompleteByCourseIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        course_id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zGetApiV1QuizzesIncompleteByCourseIdResponse = zQuizSessionsList;
+
+export const zPostApiV1QuizzesStartByCourseIdData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        course_id: z.uuid()
+    }),
+    query: z.optional(z.object({
+        limit: z.optional(z.int().gt(0).lte(50)).default(5),
+        offset: z.optional(z.int().gte(0)).default(0),
+        order_by: z.optional(z.enum([
+            'created_at',
+            'difficulty_level',
+            'quiz_text'
+        ])),
+        difficulty: z.optional(zDifficultyLevel),
+        order_direction: z.optional(z.enum([
+            'asc',
+            'desc'
+        ]))
+    }))
+});
+
+/**
+ * Response Quizzes-Start New Quiz Session
+ * Successful Response
+ */
+export const zPostApiV1QuizzesStartByCourseIdResponse = z.tuple([
+    zQuizSessionPublic,
+    zQuizzesPublic
+]);
 
 export const zPostApiV1PrivateUsersData = z.object({
     body: zPrivateUserCreate,

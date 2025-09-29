@@ -241,6 +241,28 @@ export type HttpValidationError = {
 };
 
 /**
+ * Item
+ */
+export type Item = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Id
+     */
+    id?: string;
+    /**
+     * Owner Id
+     */
+    owner_id: string;
+};
+
+/**
  * ItemCreate
  */
 export type ItemCreate = {
@@ -297,7 +319,7 @@ export type ItemsPublic = {
     /**
      * Data
      */
-    data: Array<ItemPublic>;
+    data: Array<Item>;
     /**
      * Count
      */
@@ -403,6 +425,60 @@ export type QuizScoreSummary = {
      * Results
      */
     results: Array<SingleQuizScore>;
+};
+
+/**
+ * QuizSessionPublic
+ * Public schema for a QuizSession, used to show the user their incomplete
+ * or completed quiz attempts.
+ */
+export type QuizSessionPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Total Submitted
+     */
+    total_submitted: number;
+    /**
+     * Total Correct
+     */
+    total_correct: number;
+    /**
+     * Score Percentage
+     */
+    score_percentage?: number | null;
+    /**
+     * Is Completed
+     */
+    is_completed: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Total Questions In Session
+     */
+    total_questions_in_session?: number | null;
+};
+
+/**
+ * QuizSessionsList
+ */
+export type QuizSessionsList = {
+    /**
+     * Data
+     */
+    data: Array<QuizSessionPublic>;
 };
 
 /**
@@ -1502,7 +1578,23 @@ export type GetApiV1QuizzesByCourseIdData = {
         course_id: string;
     };
     query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Order By
+         */
+        order_by?: 'created_at' | 'difficulty_level' | 'quiz_text';
         difficulty?: DifficultyLevel;
+        /**
+         * Order Direction
+         */
+        order_direction?: 'asc' | 'desc';
     };
     url: '/api/v1/quizzes/{course_id}';
 };
@@ -1554,6 +1646,88 @@ export type PostApiV1QuizzesByCourseIdScoreResponses = {
 };
 
 export type PostApiV1QuizzesByCourseIdScoreResponse = PostApiV1QuizzesByCourseIdScoreResponses[keyof PostApiV1QuizzesByCourseIdScoreResponses];
+
+export type GetApiV1QuizzesIncompleteByCourseIdData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/quizzes/incomplete/{course_id}';
+};
+
+export type GetApiV1QuizzesIncompleteByCourseIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1QuizzesIncompleteByCourseIdError = GetApiV1QuizzesIncompleteByCourseIdErrors[keyof GetApiV1QuizzesIncompleteByCourseIdErrors];
+
+export type GetApiV1QuizzesIncompleteByCourseIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuizSessionsList;
+};
+
+export type GetApiV1QuizzesIncompleteByCourseIdResponse = GetApiV1QuizzesIncompleteByCourseIdResponses[keyof GetApiV1QuizzesIncompleteByCourseIdResponses];
+
+export type PostApiV1QuizzesStartByCourseIdData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Order By
+         */
+        order_by?: 'created_at' | 'difficulty_level' | 'quiz_text';
+        difficulty?: DifficultyLevel;
+        /**
+         * Order Direction
+         */
+        order_direction?: 'asc' | 'desc';
+    };
+    url: '/api/v1/quizzes/start/{course_id}';
+};
+
+export type PostApiV1QuizzesStartByCourseIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostApiV1QuizzesStartByCourseIdError = PostApiV1QuizzesStartByCourseIdErrors[keyof PostApiV1QuizzesStartByCourseIdErrors];
+
+export type PostApiV1QuizzesStartByCourseIdResponses = {
+    /**
+     * Response Quizzes-Start New Quiz Session
+     * Successful Response
+     */
+    200: [
+        QuizSessionPublic,
+        QuizzesPublic
+    ];
+};
+
+export type PostApiV1QuizzesStartByCourseIdResponse = PostApiV1QuizzesStartByCourseIdResponses[keyof PostApiV1QuizzesStartByCourseIdResponses];
 
 export type PostApiV1PrivateUsersData = {
     body: PrivateUserCreate;
