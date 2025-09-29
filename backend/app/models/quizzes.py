@@ -44,9 +44,7 @@ class QuizSessionBase(SQLModel):
     total_time_seconds: float = Field(default=0.0)
     total_submitted: int
     total_correct: int
-    quiz_ids_json: list[uuid.UUID] = Field(
-        sa_column=Column(JSONB), default_factory=list
-    )
+    quiz_ids_json: list[str] = Field(sa_column=Column(JSONB), default_factory=list)
 
 
 class QuizSession(QuizSessionBase, table=True):

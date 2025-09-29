@@ -4,10 +4,13 @@ import random
 import uuid
 
 from fastapi import HTTPException
+from sqlalchemy import and_
 from sqlalchemy.orm import load_only, selectinload
 from sqlmodel import Session, select
 
 from app.api.deps import CurrentUser, SessionDep
+from app.models.course import Course
+from app.models.document import Document
 from app.models.embeddings import Chunk
 from app.models.quizzes import Quiz, QuizAttempt, QuizSession
 from app.prompts.quizzes import get_quiz_prompt
@@ -317,3 +320,37 @@ def fetch_and_format_quizzes(db: Session, quiz_ids: list[uuid.UUID]) -> QuizzesP
         quiz_public_list.append(public_quiz)
 
     return QuizzesPublic(data=quiz_public_list, count=len(quiz_public_list))
+
+
+def select_quizzes_by_course_criteria(
+    db: Session,
+    course_id: uuid.UUID,
+    current_user: CurrentUser,
+    difficulty: DifficultyLevel,
+    limit: int = 5,
+) -> list[Quiz]:
+    """
+    Selects a set of Quizzes for a specific course and difficulty level,
+    ensuring the user owns the course. This is used for NEW sessions.
+    """
+    statement = (
+        select(Quiz)
+        .join(Chunk, Quiz.chunk_id == Chunk.id)  # type: ignore
+        .join(Document, Chunk.document_id == Document.id)  # type: ignore
+        .join(Course, Document.course_id == Course.id)  # type: ignore
+        .where(
+            and_(
+                Course.id == course_id,  # type: ignore
+                Course.owner_id == current_user.id,  # type: ignore
+                Quiz.difficulty_level == difficulty,  # type: ignore
+            )
+        )
+        .options(selectinload(Quiz.chunk))  # type: ignore[arg-type]
+        .order_by(Quiz.created_at)  # type: ignore
+        .limit(limit)
+    )
+
+    quizzes_raw = db.exec(statement).all()
+    # Ensure only Quiz objects are returned
+    quizzes: list[Quiz] = [r[0] if isinstance(r, tuple) else r for r in quizzes_raw]
+    return quizzes

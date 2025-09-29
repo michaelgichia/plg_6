@@ -34,7 +34,7 @@ from app.schemas.public import (
 )
 from app.tasks import (
     fetch_and_format_quizzes,
-    get_quizzes_for_session,
+    select_quizzes_by_course_criteria,
 )
 
 
@@ -280,13 +280,76 @@ def get_incomplete_sessions(
         raise HTTPException(status_code=500, detail="Database error")
 
 
-@router.post("/{id}/quiz/start", response_model=tuple[QuizSessionPublic, QuizzesPublic])
+# @router.post("/{id}/quiz/start", response_model=tuple[QuizSessionPublic, QuizzesPublic])
+# def start_new_quiz_session(
+#     id: uuid.UUID,
+#     session: SessionDep,
+#     current_user: CurrentUser,
+#     filters: Annotated[QuizFilterParams, Depends()],
+# ):
+#     """
+#     Creates a new, immutable QuizSession, selects the initial set of questions,
+#     and returns the session details and the first batch of questions.
+#     """
+#     try:
+#         active_session_check = (
+#             select(QuizSession)
+#             .where(
+#                 QuizSession.user_id == current_user.id,  # type: ignore
+#                 QuizSession.course_id == id,  # type: ignore
+#                 QuizSession.is_completed == False,  # type: ignore  # noqa: E712
+#             )
+#             .limit(1)
+#         )
+
+#         if session.exec(active_session_check).first():  # type: ignore
+#             raise HTTPException(
+#                 status_code=400,
+#                 detail="An incomplete quiz session already exists. Please resume or finish it first.",
+#             )
+
+#         initial_quizzes = get_quizzes_for_session(
+#             session, id, current_user, filters.difficulty
+#         )
+
+#         if not initial_quizzes:
+#             raise HTTPException(
+#                 status_code=404,
+#                 detail="No quizzes found for this course and difficulty.",
+#             )
+
+#         initial_quiz_ids = [q.id for q in initial_quizzes]
+
+#         new_session = QuizSession(
+#             user_id=current_user.id,
+#             course_id=id,
+#             total_submitted=0,
+#             total_correct=0,
+#             is_completed=False,
+#             quiz_ids_json=initial_quiz_ids,
+#         )
+
+#         session.add(new_session)
+#         session.commit()
+#         session.refresh(new_session)
+
+#         quizzes_to_show = fetch_and_format_quizzes(session, initial_quiz_ids)
+
+#         return new_session, quizzes_to_show
+#     except Exception as e:
+#         logger.error(f"Error in start_new_quiz_session: {e}")
+#         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post(
+    "/{course_id}/quiz/start", response_model=tuple[QuizSessionPublic, QuizzesPublic]
+)
 def start_new_quiz_session(
-    id: uuid.UUID,
+    course_id: uuid.UUID,
     session: SessionDep,
     current_user: CurrentUser,
     filters: Annotated[QuizFilterParams, Depends()],
-):
+) -> Any:
     """
     Creates a new, immutable QuizSession, selects the initial set of questions,
     and returns the session details and the first batch of questions.
@@ -295,21 +358,23 @@ def start_new_quiz_session(
         active_session_check = (
             select(QuizSession)
             .where(
-                QuizSession.user_id == current_user.id,  # type: ignore
-                QuizSession.id == id,  # type: ignore
-                QuizSession.is_completed == False,  # type: ignore  # noqa: E712
+                QuizSession.user_id == current_user.id,
+                QuizSession.course_id == course_id,
+                QuizSession.is_completed == False,  # noqa: E712
             )
             .limit(1)
         )
 
-        if session.exec(active_session_check).first():  # type: ignore
+        logger.info(f"Active session check: {active_session_check}")
+
+        if session.exec(active_session_check).first():
             raise HTTPException(
                 status_code=400,
                 detail="An incomplete quiz session already exists. Please resume or finish it first.",
             )
 
-        initial_quizzes = get_quizzes_for_session(
-            session, id, current_user, filters.difficulty
+        initial_quizzes = select_quizzes_by_course_criteria(
+            session, course_id, current_user, filters.difficulty
         )
 
         if not initial_quizzes:
@@ -320,13 +385,15 @@ def start_new_quiz_session(
 
         initial_quiz_ids = [q.id for q in initial_quizzes]
 
+        logger.info(f"Initial quiz IDs: {initial_quiz_ids}")
+
         new_session = QuizSession(
             user_id=current_user.id,
-            course_id=id,
+            course_id=course_id,
             total_submitted=0,
             total_correct=0,
             is_completed=False,
-            quiz_ids_json=initial_quiz_ids,
+            quiz_ids_json=[str(q_id) for q_id in initial_quiz_ids],
         )
 
         session.add(new_session)
@@ -336,6 +403,11 @@ def start_new_quiz_session(
         quizzes_to_show = fetch_and_format_quizzes(session, initial_quiz_ids)
 
         return new_session, quizzes_to_show
+    except HTTPException:
+        # Reraise FastAPI HTTPExceptions
+        raise
     except Exception as e:
         logger.error(f"Error in start_new_quiz_session: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        # Rollback in case of database error
+        session.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error occurred.")
