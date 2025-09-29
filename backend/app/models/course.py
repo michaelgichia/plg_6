@@ -34,7 +34,7 @@ class Course(CourseBase, table=True):
     owner: User | None = Relationship(back_populates="courses")
     documents: list["Document"] = Relationship(
         back_populates="course",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
 
     created_at: datetime = Field(

@@ -37,4 +37,6 @@ class Document(DocumentBase, table=True):
     )
 
     course: Course | None = Relationship(back_populates="documents")
-    chunks: list[Chunk] = Relationship(back_populates="document", sa_relationship_kwargs={"cascade": "delete"})
+    chunks: list[Chunk] = Relationship(
+        back_populates="document", sa_relationship_kwargs={"cascade": "delete"}
+    )

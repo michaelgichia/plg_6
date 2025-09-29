@@ -17,10 +17,12 @@ class ChunkBase(SQLModel):
 class ChunkCreate(ChunkBase):
     pass
 
+
 class ChunkUpdate(SQLModel):
     text_content: str | None = None
     embedding_id: str | None = None
     document_id: uuid.UUID | None = None
+
 
 class Chunk(ChunkBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)

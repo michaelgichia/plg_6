@@ -107,6 +107,7 @@ def store_embeddings(
     ]
     index.upsert(vectors)
 
+
 async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: SessionDep):
     """Background task to parse, chunk, embed, and store PDF."""
     document = session.get(Document, document_id)
@@ -140,7 +141,9 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
         for chunk in chunks:
             # Create a Chunk record, which will auto-generate an 'id'
             chunk_record = Chunk(
-                document_id=document_id, text_content=chunk, embedding_id= uuid.uuid4().hex  # Temporary ID
+                document_id=document_id,
+                text_content=chunk,
+                embedding_id=uuid.uuid4().hex,  # Temporary ID
             )
             session.add(chunk_record)
             chunk_records.append(chunk_record)
@@ -164,15 +167,15 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
             embedding_uuid = str(uuid.uuid4())
             record.embedding_id = embedding_uuid
             _vector = {
-                    "id": embedding_uuid,
-                    "values": embedding,
-                    "metadata": {
-                        "document_id": str(document_id),
-                        "chunk_id": str(record.id),
-                        "text": record.text_content,
-                        "chunk_index": i,
-                    },
-                }
+                "id": embedding_uuid,
+                "values": embedding,
+                "metadata": {
+                    "document_id": str(document_id),
+                    "chunk_id": str(record.id),
+                    "text": record.text_content,
+                    "chunk_index": i,
+                },
+            }
             vectors_to_upsert.append(_vector)
 
         session.commit()
@@ -199,6 +202,7 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
         session.commit()
     finally:
         os.remove(file_path)
+
 
 async def handle_document_processing(
     file: UploadFile, document_id: uuid.UUID, session: SessionDep

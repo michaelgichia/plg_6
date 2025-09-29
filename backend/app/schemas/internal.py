@@ -22,6 +22,7 @@ class QuizFilterParams(PaginationParams):
     # Optionally, allow ordering direction
     order_direction: Literal["asc", "desc"] = "desc"
 
+
 def get_quiz_filters(
     limit: int = Field(5, gt=0, le=20),
     offset: int = Field(0, ge=0),

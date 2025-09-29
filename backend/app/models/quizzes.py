@@ -19,9 +19,11 @@ class QuizBase(SQLModel):
     chunk_id: uuid.UUID
     difficulty_level: DifficultyLevel
 
+
 # Properties to receive on quiz creation
 class QuizCreate(QuizBase):
     pass
+
 
 class QuizAttemptBase(SQLModel):
     user_id: uuid.UUID = Field(foreign_key="users.id")
@@ -35,6 +37,7 @@ class QuizAttemptBase(SQLModel):
 
     time_spent_seconds: float = Field(default=0.0)
 
+
 class QuizSessionBase(SQLModel):
     user_id: uuid.UUID = Field(foreign_key="users.id")
     course_id: uuid.UUID = Field(foreign_key="course.id")
@@ -42,8 +45,7 @@ class QuizSessionBase(SQLModel):
     total_submitted: int
     total_correct: int
     quiz_ids_json: list[uuid.UUID] = Field(
-        sa_column=Column(JSONB),
-        default_factory=list
+        sa_column=Column(JSONB), default_factory=list
     )
 
 
@@ -64,6 +66,7 @@ class QuizSession(QuizSessionBase, table=True):
 
     attempts: list["QuizAttempt"] = Relationship(back_populates="session")
 
+
 class QuizAttempt(QuizAttemptBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
@@ -75,6 +78,7 @@ class QuizAttempt(QuizAttemptBase, table=True):
     quiz: "Quiz" = Relationship(back_populates="attempts")
     user: "User" = Relationship(back_populates="quiz_attempts")
     session: "QuizSession" = Relationship(back_populates="attempts")
+
 
 class Quiz(QuizBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)

@@ -55,7 +55,10 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.refresh(db_item)
     return db_item
 
-def create_course(*, session: Session, course_in: CourseCreate, owner_id: uuid.UUID) -> Course:
+
+def create_course(
+    *, session: Session, course_in: CourseCreate, owner_id: uuid.UUID
+) -> Course:
     db_course = Course.model_validate(course_in, update={"owner_id": owner_id})
     session.add(db_course)
     session.commit()
