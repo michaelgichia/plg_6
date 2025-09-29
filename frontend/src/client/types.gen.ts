@@ -49,6 +49,36 @@ export type BodyLoginLoginAccessToken = {
 };
 
 /**
+ * Course
+ */
+export type Course = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Id
+     */
+    id?: string;
+    /**
+     * Owner Id
+     */
+    owner_id: string;
+    /**
+     * Created At
+     */
+    created_at?: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string;
+};
+
+/**
  * CourseCreate
  */
 export type CourseCreate = {
@@ -151,7 +181,7 @@ export type CoursesPublic = {
     /**
      * Data
      */
-    data: Array<CoursePublic>;
+    data: Array<Course>;
     /**
      * Count
      */
@@ -1350,7 +1380,7 @@ export type PostApiV1CoursesResponses = {
     /**
      * Successful Response
      */
-    200: CoursePublic;
+    200: Course;
 };
 
 export type PostApiV1CoursesResponse = PostApiV1CoursesResponses[keyof PostApiV1CoursesResponses];
@@ -1445,13 +1475,13 @@ export type PutApiV1CoursesByIdResponses = {
 
 export type PutApiV1CoursesByIdResponse = PutApiV1CoursesByIdResponses[keyof PutApiV1CoursesByIdResponses];
 
-export type GetApiV1CoursesByCourseIdDocumentsData = {
+export type GetApiV1CoursesByIdDocumentsData = {
     body?: never;
     path: {
         /**
-         * Course Id
+         * Id
          */
-        course_id: string;
+        id: string;
     };
     query?: {
         /**
@@ -1463,19 +1493,19 @@ export type GetApiV1CoursesByCourseIdDocumentsData = {
          */
         limit?: number;
     };
-    url: '/api/v1/courses/{course_id}/documents';
+    url: '/api/v1/courses/{id}/documents';
 };
 
-export type GetApiV1CoursesByCourseIdDocumentsErrors = {
+export type GetApiV1CoursesByIdDocumentsErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetApiV1CoursesByCourseIdDocumentsError = GetApiV1CoursesByCourseIdDocumentsErrors[keyof GetApiV1CoursesByCourseIdDocumentsErrors];
+export type GetApiV1CoursesByIdDocumentsError = GetApiV1CoursesByIdDocumentsErrors[keyof GetApiV1CoursesByIdDocumentsErrors];
 
-export type GetApiV1CoursesByCourseIdDocumentsResponses = {
+export type GetApiV1CoursesByIdDocumentsResponses = {
     /**
      * Response Courses-List Documents
      * Successful Response
@@ -1485,7 +1515,136 @@ export type GetApiV1CoursesByCourseIdDocumentsResponses = {
     }>;
 };
 
-export type GetApiV1CoursesByCourseIdDocumentsResponse = GetApiV1CoursesByCourseIdDocumentsResponses[keyof GetApiV1CoursesByCourseIdDocumentsResponses];
+export type GetApiV1CoursesByIdDocumentsResponse = GetApiV1CoursesByIdDocumentsResponses[keyof GetApiV1CoursesByIdDocumentsResponses];
+
+export type GetApiV1CoursesByIdQuizzesData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Order By
+         */
+        order_by?: 'created_at' | 'difficulty_level' | 'quiz_text';
+        difficulty?: DifficultyLevel;
+        /**
+         * Order Direction
+         */
+        order_direction?: 'asc' | 'desc';
+    };
+    url: '/api/v1/courses/{id}/quizzes';
+};
+
+export type GetApiV1CoursesByIdQuizzesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1CoursesByIdQuizzesError = GetApiV1CoursesByIdQuizzesErrors[keyof GetApiV1CoursesByIdQuizzesErrors];
+
+export type GetApiV1CoursesByIdQuizzesResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuizzesPublic;
+};
+
+export type GetApiV1CoursesByIdQuizzesResponse = GetApiV1CoursesByIdQuizzesResponses[keyof GetApiV1CoursesByIdQuizzesResponses];
+
+export type GetApiV1CoursesByIdIncompleteData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{id}/incomplete';
+};
+
+export type GetApiV1CoursesByIdIncompleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1CoursesByIdIncompleteError = GetApiV1CoursesByIdIncompleteErrors[keyof GetApiV1CoursesByIdIncompleteErrors];
+
+export type GetApiV1CoursesByIdIncompleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuizSessionsList;
+};
+
+export type GetApiV1CoursesByIdIncompleteResponse = GetApiV1CoursesByIdIncompleteResponses[keyof GetApiV1CoursesByIdIncompleteResponses];
+
+export type PostApiV1CoursesByCourseIdQuizStartData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Order By
+         */
+        order_by?: 'created_at' | 'difficulty_level' | 'quiz_text';
+        difficulty?: DifficultyLevel;
+        /**
+         * Order Direction
+         */
+        order_direction?: 'asc' | 'desc';
+    };
+    url: '/api/v1/courses/{course_id}/quiz/start';
+};
+
+export type PostApiV1CoursesByCourseIdQuizStartErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostApiV1CoursesByCourseIdQuizStartError = PostApiV1CoursesByCourseIdQuizStartErrors[keyof PostApiV1CoursesByCourseIdQuizStartErrors];
+
+export type PostApiV1CoursesByCourseIdQuizStartResponses = {
+    /**
+     * Response Courses-Start New Quiz Session
+     * Successful Response
+     */
+    200: [
+        QuizSessionPublic,
+        QuizzesPublic
+    ];
+};
+
+export type PostApiV1CoursesByCourseIdQuizStartResponse = PostApiV1CoursesByCourseIdQuizStartResponses[keyof PostApiV1CoursesByCourseIdQuizStartResponses];
 
 export type PostApiV1DocumentsProcessData = {
     body: BodyDocumentsProcessMultipleDocuments;
@@ -1569,165 +1728,35 @@ export type GetApiV1DocumentsByIdResponses = {
 
 export type GetApiV1DocumentsByIdResponse = GetApiV1DocumentsByIdResponses[keyof GetApiV1DocumentsByIdResponses];
 
-export type GetApiV1QuizzesByCourseIdData = {
-    body?: never;
-    path: {
-        /**
-         * Course Id
-         */
-        course_id: string;
-    };
-    query?: {
-        /**
-         * Limit
-         */
-        limit?: number;
-        /**
-         * Offset
-         */
-        offset?: number;
-        /**
-         * Order By
-         */
-        order_by?: 'created_at' | 'difficulty_level' | 'quiz_text';
-        difficulty?: DifficultyLevel;
-        /**
-         * Order Direction
-         */
-        order_direction?: 'asc' | 'desc';
-    };
-    url: '/api/v1/quizzes/{course_id}';
-};
-
-export type GetApiV1QuizzesByCourseIdErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetApiV1QuizzesByCourseIdError = GetApiV1QuizzesByCourseIdErrors[keyof GetApiV1QuizzesByCourseIdErrors];
-
-export type GetApiV1QuizzesByCourseIdResponses = {
-    /**
-     * Successful Response
-     */
-    200: QuizzesPublic;
-};
-
-export type GetApiV1QuizzesByCourseIdResponse = GetApiV1QuizzesByCourseIdResponses[keyof GetApiV1QuizzesByCourseIdResponses];
-
-export type PostApiV1QuizzesByCourseIdScoreData = {
+export type PostApiV1QuizSessionsByIdScoreData = {
     body: QuizSubmissionBatch;
-    path: {
+    path?: never;
+    query: {
         /**
-         * Course Id
+         * Session Id
          */
-        course_id: string;
+        session_id: string;
     };
-    query?: never;
-    url: '/api/v1/quizzes/{course_id}/score';
+    url: '/api/v1/quiz-sessions/{id}/score';
 };
 
-export type PostApiV1QuizzesByCourseIdScoreErrors = {
+export type PostApiV1QuizSessionsByIdScoreErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type PostApiV1QuizzesByCourseIdScoreError = PostApiV1QuizzesByCourseIdScoreErrors[keyof PostApiV1QuizzesByCourseIdScoreErrors];
+export type PostApiV1QuizSessionsByIdScoreError = PostApiV1QuizSessionsByIdScoreErrors[keyof PostApiV1QuizSessionsByIdScoreErrors];
 
-export type PostApiV1QuizzesByCourseIdScoreResponses = {
+export type PostApiV1QuizSessionsByIdScoreResponses = {
     /**
      * Successful Response
      */
     200: QuizScoreSummary;
 };
 
-export type PostApiV1QuizzesByCourseIdScoreResponse = PostApiV1QuizzesByCourseIdScoreResponses[keyof PostApiV1QuizzesByCourseIdScoreResponses];
-
-export type GetApiV1QuizzesIncompleteByCourseIdData = {
-    body?: never;
-    path: {
-        /**
-         * Course Id
-         */
-        course_id: string;
-    };
-    query?: never;
-    url: '/api/v1/quizzes/incomplete/{course_id}';
-};
-
-export type GetApiV1QuizzesIncompleteByCourseIdErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetApiV1QuizzesIncompleteByCourseIdError = GetApiV1QuizzesIncompleteByCourseIdErrors[keyof GetApiV1QuizzesIncompleteByCourseIdErrors];
-
-export type GetApiV1QuizzesIncompleteByCourseIdResponses = {
-    /**
-     * Successful Response
-     */
-    200: QuizSessionsList;
-};
-
-export type GetApiV1QuizzesIncompleteByCourseIdResponse = GetApiV1QuizzesIncompleteByCourseIdResponses[keyof GetApiV1QuizzesIncompleteByCourseIdResponses];
-
-export type PostApiV1QuizzesStartByCourseIdData = {
-    body?: never;
-    path: {
-        /**
-         * Course Id
-         */
-        course_id: string;
-    };
-    query?: {
-        /**
-         * Limit
-         */
-        limit?: number;
-        /**
-         * Offset
-         */
-        offset?: number;
-        /**
-         * Order By
-         */
-        order_by?: 'created_at' | 'difficulty_level' | 'quiz_text';
-        difficulty?: DifficultyLevel;
-        /**
-         * Order Direction
-         */
-        order_direction?: 'asc' | 'desc';
-    };
-    url: '/api/v1/quizzes/start/{course_id}';
-};
-
-export type PostApiV1QuizzesStartByCourseIdErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type PostApiV1QuizzesStartByCourseIdError = PostApiV1QuizzesStartByCourseIdErrors[keyof PostApiV1QuizzesStartByCourseIdErrors];
-
-export type PostApiV1QuizzesStartByCourseIdResponses = {
-    /**
-     * Response Quizzes-Start New Quiz Session
-     * Successful Response
-     */
-    200: [
-        QuizSessionPublic,
-        QuizzesPublic
-    ];
-};
-
-export type PostApiV1QuizzesStartByCourseIdResponse = PostApiV1QuizzesStartByCourseIdResponses[keyof PostApiV1QuizzesStartByCourseIdResponses];
+export type PostApiV1QuizSessionsByIdScoreResponse = PostApiV1QuizSessionsByIdScoreResponses[keyof PostApiV1QuizSessionsByIdScoreResponses];
 
 export type PostApiV1PrivateUsersData = {
     body: PrivateUserCreate;

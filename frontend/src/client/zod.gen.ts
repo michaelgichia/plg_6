@@ -32,6 +32,21 @@ export const zBodyLoginLoginAccessToken = z.object({
 });
 
 /**
+ * Course
+ */
+export const zCourse = z.object({
+    name: z.string().min(3).max(255),
+    description: z.optional(z.union([
+        z.string().max(1020),
+        z.null()
+    ])),
+    id: z.optional(z.uuid()),
+    owner_id: z.uuid(),
+    created_at: z.optional(z.iso.datetime()),
+    updated_at: z.optional(z.iso.datetime())
+});
+
+/**
  * CourseCreate
  */
 export const zCourseCreate = z.object({
@@ -113,7 +128,7 @@ export const zCourseWithDocuments = z.object({
  * CoursesPublic
  */
 export const zCoursesPublic = z.object({
-    data: z.array(zCoursePublic),
+    data: z.array(zCourse),
     count: z.int()
 });
 
@@ -256,7 +271,7 @@ export const zPrivateUserCreate = z.object({
  * QuizChoice
  */
 export const zQuizChoice = z.object({
-    id: z.string(),
+    id: z.uuid(),
     text: z.string()
 });
 
@@ -735,7 +750,7 @@ export const zPostApiV1CoursesData = z.object({
 /**
  * Successful Response
  */
-export const zPostApiV1CoursesResponse = zCoursePublic;
+export const zPostApiV1CoursesResponse = zCourse;
 
 export const zDeleteApiV1CoursesByIdData = z.object({
     body: z.optional(z.never()),
@@ -776,10 +791,10 @@ export const zPutApiV1CoursesByIdData = z.object({
  */
 export const zPutApiV1CoursesByIdResponse = zCoursePublic;
 
-export const zGetApiV1CoursesByCourseIdDocumentsData = z.object({
+export const zGetApiV1CoursesByIdDocumentsData = z.object({
     body: z.optional(z.never()),
     path: z.object({
-        course_id: z.string()
+        id: z.string()
     }),
     query: z.optional(z.object({
         skip: z.optional(z.int()).default(0),
@@ -791,7 +806,75 @@ export const zGetApiV1CoursesByCourseIdDocumentsData = z.object({
  * Response Courses-List Documents
  * Successful Response
  */
-export const zGetApiV1CoursesByCourseIdDocumentsResponse = z.array(z.record(z.string(), z.unknown()));
+export const zGetApiV1CoursesByIdDocumentsResponse = z.array(z.record(z.string(), z.unknown()));
+
+export const zGetApiV1CoursesByIdQuizzesData = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.object({
+        course_id: z.string(),
+        limit: z.optional(z.int().gt(0).lte(50)).default(5),
+        offset: z.optional(z.int().gte(0)).default(0),
+        order_by: z.optional(z.enum([
+            'created_at',
+            'difficulty_level',
+            'quiz_text'
+        ])),
+        difficulty: z.optional(zDifficultyLevel),
+        order_direction: z.optional(z.enum([
+            'asc',
+            'desc'
+        ]))
+    })
+});
+
+/**
+ * Successful Response
+ */
+export const zGetApiV1CoursesByIdQuizzesResponse = zQuizzesPublic;
+
+export const zGetApiV1CoursesByIdIncompleteData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zGetApiV1CoursesByIdIncompleteResponse = zQuizSessionsList;
+
+export const zPostApiV1CoursesByCourseIdQuizStartData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        course_id: z.uuid()
+    }),
+    query: z.optional(z.object({
+        limit: z.optional(z.int().gt(0).lte(50)).default(5),
+        offset: z.optional(z.int().gte(0)).default(0),
+        order_by: z.optional(z.enum([
+            'created_at',
+            'difficulty_level',
+            'quiz_text'
+        ])),
+        difficulty: z.optional(zDifficultyLevel),
+        order_direction: z.optional(z.enum([
+            'asc',
+            'desc'
+        ]))
+    }))
+});
+
+/**
+ * Response Courses-Start New Quiz Session
+ * Successful Response
+ */
+export const zPostApiV1CoursesByCourseIdQuizStartResponse = z.tuple([
+    zQuizSessionPublic,
+    zQuizzesPublic
+]);
 
 export const zPostApiV1DocumentsProcessData = z.object({
     body: zBodyDocumentsProcessMultipleDocuments,
@@ -820,87 +903,18 @@ export const zGetApiV1DocumentsByIdData = z.object({
  */
 export const zGetApiV1DocumentsByIdResponse = zDocument;
 
-export const zGetApiV1QuizzesByCourseIdData = z.object({
-    body: z.optional(z.never()),
-    path: z.object({
-        course_id: z.string()
-    }),
-    query: z.optional(z.object({
-        limit: z.optional(z.int().gt(0).lte(50)).default(5),
-        offset: z.optional(z.int().gte(0)).default(0),
-        order_by: z.optional(z.enum([
-            'created_at',
-            'difficulty_level',
-            'quiz_text'
-        ])),
-        difficulty: z.optional(zDifficultyLevel),
-        order_direction: z.optional(z.enum([
-            'asc',
-            'desc'
-        ]))
-    }))
-});
-
-/**
- * Successful Response
- */
-export const zGetApiV1QuizzesByCourseIdResponse = zQuizzesPublic;
-
-export const zPostApiV1QuizzesByCourseIdScoreData = z.object({
+export const zPostApiV1QuizSessionsByIdScoreData = z.object({
     body: zQuizSubmissionBatch,
-    path: z.object({
-        course_id: z.uuid()
-    }),
-    query: z.optional(z.never())
+    path: z.optional(z.never()),
+    query: z.object({
+        session_id: z.uuid()
+    })
 });
 
 /**
  * Successful Response
  */
-export const zPostApiV1QuizzesByCourseIdScoreResponse = zQuizScoreSummary;
-
-export const zGetApiV1QuizzesIncompleteByCourseIdData = z.object({
-    body: z.optional(z.never()),
-    path: z.object({
-        course_id: z.uuid()
-    }),
-    query: z.optional(z.never())
-});
-
-/**
- * Successful Response
- */
-export const zGetApiV1QuizzesIncompleteByCourseIdResponse = zQuizSessionsList;
-
-export const zPostApiV1QuizzesStartByCourseIdData = z.object({
-    body: z.optional(z.never()),
-    path: z.object({
-        course_id: z.uuid()
-    }),
-    query: z.optional(z.object({
-        limit: z.optional(z.int().gt(0).lte(50)).default(5),
-        offset: z.optional(z.int().gte(0)).default(0),
-        order_by: z.optional(z.enum([
-            'created_at',
-            'difficulty_level',
-            'quiz_text'
-        ])),
-        difficulty: z.optional(zDifficultyLevel),
-        order_direction: z.optional(z.enum([
-            'asc',
-            'desc'
-        ]))
-    }))
-});
-
-/**
- * Response Quizzes-Start New Quiz Session
- * Successful Response
- */
-export const zPostApiV1QuizzesStartByCourseIdResponse = z.tuple([
-    zQuizSessionPublic,
-    zQuizzesPublic
-]);
+export const zPostApiV1QuizSessionsByIdScoreResponse = zQuizScoreSummary;
 
 export const zPostApiV1PrivateUsersData = z.object({
     body: zPrivateUserCreate,

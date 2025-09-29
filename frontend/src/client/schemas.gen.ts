@@ -78,6 +78,52 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const CourseSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 3,
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1020
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['name', 'owner_id'],
+    title: 'Course'
+} as const;
+
 export const CourseCreateSchema = {
     properties: {
         name: {
@@ -241,7 +287,7 @@ export const CoursesPublicSchema = {
     properties: {
         data: {
             items: {
-                '$ref': '#/components/schemas/CoursePublic'
+                '$ref': '#/components/schemas/Course'
             },
             type: 'array',
             title: 'Data'
@@ -585,6 +631,7 @@ export const QuizChoiceSchema = {
     properties: {
         id: {
             type: 'string',
+            format: 'uuid',
             title: 'Id'
         },
         text: {
