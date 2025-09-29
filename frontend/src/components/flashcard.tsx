@@ -49,7 +49,7 @@ export default function Flashcard({courseId,}) {
           disabled={loading}
           className={`bg-blue-600 hover:bg-blue-700 text-white ${loading && 'loading'}`}
         >
-          Generate Flashcards
+          {loading ? 'Generating flashcards' : 'Generate Flashcards'}
         </Button>
       </div>
       {cards.length > 0 ? (
@@ -102,7 +102,12 @@ export default function Flashcard({courseId,}) {
             </AnimatePresence>
           </div>
 
-          <div className="flex gap-2 mt-9">
+          {/*Pagination*/}
+          <div className="flex mt-4">
+            <p>{index + 1} of {cards.length}</p>
+          </div>
+
+          <div className="flex gap-2 mt-5">
             <button
               onClick={handlePrev}
               className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
