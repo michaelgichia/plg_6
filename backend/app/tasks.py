@@ -3,7 +3,7 @@ import logging
 import random
 import uuid
 
-import openai
+from fastapi import HTTPException
 from sqlalchemy import and_
 from sqlalchemy.orm import load_only, selectinload
 from sqlmodel import Session, select
@@ -13,6 +13,7 @@ from app.models.course import Course
 from app.models.document import Document
 from app.models.embeddings import Chunk
 from app.models.quizzes import Quiz, QuizAttempt, QuizSession
+from app.prompts.quizzes import get_quiz_prompt
 from app.schemas.public import (
     DifficultyLevel,
     QuizChoice,
@@ -64,53 +65,7 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
             {concatenated_text}
             """
 
-            client = openai.AsyncOpenAI()
-            response = await client.chat.completions.create(
-                model="gpt-4o",
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": "quiz_list",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "quizzes": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "quiz": {"type": "string"},
-                                            "correct_answer": {"type": "string"},
-                                            "distraction_1": {"type": "string"},
-                                            "distraction_2": {"type": "string"},
-                                            "distraction_3": {"type": "string"},
-                                            "topic": {"type": "string"},
-                                        },
-                                        "required": [
-                                            "quiz",
-                                            "correct_answer",
-                                            "distraction_1",
-                                            "distraction_2",
-                                            "distraction_3",
-                                            "topic",
-                                        ],
-                                        "additionalProperties": False,
-                                    },
-                                }
-                            },
-                            "required": ["quizzes"],
-                            "additionalProperties": False,
-                        },
-                    },
-                },
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a quiz generator. Only output valid JSON.",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-            )
+            response = await get_quiz_prompt(prompt)
 
             try:
                 raw_content = response.choices[0].message.content
@@ -152,21 +107,36 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
 
 def score_quiz_batch(
     db: Session,
-    course_id: uuid.UUID,
+    session_id: uuid.UUID,
     submission_batch: QuizSubmissionBatch,
     current_user: CurrentUser,
 ) -> QuizScoreSummary:
     """
-    Retrieves correct answers for a batch of quiz IDs and scores them.
+    Retrieves the existing QuizSession, scores the submitted answers,
+    and updates the session's score and attempts.
     """
     try:
+        # 1. Input Validation
         if not submission_batch.submissions:
             return QuizScoreSummary(
                 total_submitted=0, total_correct=0, score_percentage=0.0, results=[]
             )
 
-        submitted_ids = [sub.quiz_id for sub in submission_batch.submissions]
+        # 2. Fetch and Validate Existing QuizSession
+        quiz_session = db.get(QuizSession, session_id)
 
+        if not quiz_session:
+            # Using an HTTPException is better practice in the service layer when raising
+            raise HTTPException(status_code=404, detail="QuizSession not found.")
+
+        # Security check: Ensure the user owns the session
+        if quiz_session.user_id != current_user.id:
+            raise HTTPException(
+                status_code=403, detail="Permission denied to score this session."
+            )
+
+        # 3. Prepare Submissions and Query for Correct Answers
+        submitted_ids = [sub.quiz_id for sub in submission_batch.submissions]
         submitted_answers: dict[uuid.UUID, str] = {
             sub.quiz_id: sub.selected_answer_text
             for sub in submission_batch.submissions
@@ -174,44 +144,35 @@ def score_quiz_batch(
 
         statement = (
             select(Quiz)
-            .where(Quiz.id.in_(submitted_ids))
-            .options(load_only(Quiz.id, Quiz.correct_answer))
+            .where(Quiz.id.in_(submitted_ids))  # type: ignore
+            .options(load_only(Quiz.id, Quiz.correct_answer))  # type: ignore
         )
 
         correct_answers_map: dict[uuid.UUID, str] = {
             q.id: q.correct_answer.strip() for q in db.exec(statement).all()
         }
 
+        # 4. Score Submissions and Create Attempts
         results: list[SingleQuizScore] = []
         total_correct = 0
-
-        quiz_session = QuizSession(
-            user_id=current_user.id,
-            course_id=course_id,
-            total_time_seconds=submission_batch.total_time_seconds,
-            total_submitted=len(submission_batch.submissions),
-            total_correct=0,
-        )
-        db.add(quiz_session)
-        db.flush()
-
-        session_id_to_use = quiz_session.id
+        total_submitted = len(submission_batch.submissions)
 
         for submitted_quiz_id, submitted_text in submitted_answers.items():
             correct_text = correct_answers_map.get(submitted_quiz_id)
 
-            if not correct_text:
+            # Check if quiz exists and the answer is provided
+            if not correct_text or not submitted_text:
                 results.append(
                     SingleQuizScore(
                         quiz_id=submitted_quiz_id,
                         is_correct=False,
-                        correct_answer_text="N/A",
-                        feedback="Quiz ID not found in database.",
+                        correct_answer_text=correct_text or "N/A",
+                        feedback="Quiz not found or no answer provided.",
                     )
                 )
                 continue
 
-            is_correct = submitted_text.strip() == correct_text
+            is_correct = clean_string(submitted_text) == clean_string(correct_text)
 
             if is_correct:
                 total_correct += 1
@@ -227,8 +188,10 @@ def score_quiz_batch(
                     feedback=feedback,
                 )
             )
+
+            # Create a QuizAttempt record
             attempt = QuizAttempt(
-                session_id=session_id_to_use,
+                session_id=session_id,  # Use the session ID from the path
                 user_id=current_user.id,
                 quiz_id=submitted_quiz_id,
                 selected_answer_text=submitted_text,
@@ -237,21 +200,33 @@ def score_quiz_batch(
             )
             db.add(attempt)
 
-        total_submitted = len(submission_batch.submissions)
+        # 5. Update and Commit Session Statistics
         score_percentage = (
             (total_correct / total_submitted) * 100 if total_submitted > 0 else 0.0
         )
 
-        quiz_session.total_correct = total_correct
+        # Update the existing session record
+        quiz_session.total_submitted += total_submitted
+        quiz_session.total_correct += total_correct
+        quiz_session.total_time_seconds += submission_batch.total_time_seconds
+        quiz_session.is_completed = True
+
         db.add(quiz_session)
         db.commit()
 
+        # 6. Return Score Summary
         return QuizScoreSummary(
-            total_submitted=total_submitted,
-            total_correct=total_correct,
-            score_percentage=round(score_percentage, 2),
+            total_submitted=quiz_session.total_submitted,  # Return updated cumulative totals
+            total_correct=quiz_session.total_correct,
+            score_percentage=round(
+                score_percentage, 2
+            ),  # Note: This percentage is for the BATCH, not the whole session
             results=results,
         )
+
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         logger.error(f"Error scoring quiz batch: {e}")
         db.rollback()
