@@ -71,7 +71,6 @@ def list_quizzes(
     public_quizzes = []
     for q in quizzes:
         result = dict(q[0])
-        logger.info(f"Result[1] {result}")
 
         all_choices = [
             result["correct_answer"],
@@ -81,13 +80,10 @@ def list_quizzes(
         ]
 
         shuffle(all_choices)
-        logger.info(f"All choices: {all_choices}")
 
         choices_with_ids = [
             QuizChoice(id=str(uuid.uuid4()), text=choice) for choice in all_choices
         ]
-
-        logger.info(f"Choices with IDs: {choices_with_ids}")
 
         public_quizzes.append(
             QuizPublic(
@@ -196,13 +192,8 @@ def start_new_quiz_session(
                 detail="No quizzes found for this course and difficulty.",
             )
 
-        logger.info(f"Initial quizzes: {initial_quizzes}")
-
         initial_quiz_ids = [str(q.id) for q in initial_quizzes]
 
-        logger.info(f"Initial quiz IDs: {initial_quiz_ids}")
-
-        # 3. Create and Commit New Session
         new_session = QuizSession(
             user_id=current_user.id,
             course_id=course_id,
@@ -211,8 +202,6 @@ def start_new_quiz_session(
             is_completed=False,
             quiz_ids_json=initial_quiz_ids,
         )
-
-        logger.info(f"New session: {new_session}")
 
         session.add(new_session)
         session.commit()

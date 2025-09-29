@@ -208,7 +208,7 @@ async def handle_document_processing(
     try:
         with open(tmp_path, "wb") as buffer:
             while True:
-                chunk = await file.read(1024)
+                chunk = await file.read(1024)  # Read in 1KB chunks
                 if not chunk:
                     break
                 buffer.write(chunk)
