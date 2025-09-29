@@ -316,7 +316,6 @@ def delete_embeddings_task(document_id: uuid.UUID):
         if pc.has_index(index_name):
             index = pc.Index(index_name)
             index.delete(filter={"document_id": str(document_id)})
-            logger.info(f"Successfully deleted embeddings for document {document_id}")
     except Exception as e:
         logger.error(f"Failed to delete embeddings for document {document_id}: {e}")
 
