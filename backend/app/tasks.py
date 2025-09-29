@@ -4,13 +4,10 @@ import random
 import uuid
 
 from fastapi import HTTPException
-from sqlalchemy import and_
 from sqlalchemy.orm import load_only, selectinload
 from sqlmodel import Session, select
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models.course import Course
-from app.models.document import Document
 from app.models.embeddings import Chunk
 from app.models.quizzes import Quiz, QuizAttempt, QuizSession
 from app.prompts.quizzes import get_quiz_prompt
@@ -233,37 +230,48 @@ def score_quiz_batch(
         raise
 
 
-def get_new_quizzes_for_course(
+def get_quizzes_for_session(
     db: Session,
-    course_id: uuid.UUID,
+    id: uuid.UUID,
     current_user: CurrentUser,
     difficulty: DifficultyLevel,
-    limit: int = 5,
 ) -> list[Quiz]:
     """
-    Selects a random or ordered set of Quizzes for a specific course
-    and difficulty level, ensuring the user owns the course.
+    Retrieves the predetermined list of Quiz objects associated with an
+    existing QuizSession, ensuring the current user owns the session.
     """
+
+    quiz_session = db.get(QuizSession, id)
+
+    if not quiz_session:
+        raise HTTPException(status_code=404, detail="Quiz session not found.")
+
+    if quiz_session.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Permission denied to access this session."
+        )
+
+    quiz_ids_str: list[uuid.UUID] = quiz_session.quiz_ids_json
+    quiz_ids: list[uuid.UUID] = [uuid.UUID(q_id) for q_id in quiz_ids_str]
+
     statement = (
         select(Quiz)
-        .join(Chunk, Quiz.chunk_id == Chunk.id)
-        .join(Document, Chunk.document_id == Document.id)
-        .join(Course, Document.course_id == Course.id)
-        .where(
-            and_(
-                Course.id == course_id,
-                Course.owner_id == current_user.id,
-                Quiz.difficulty_level == difficulty,
-            )
-        )
-        .options(selectinload(Quiz.chunk))
-        .order_by(Quiz.created_at)
-        .limit(limit)
+        .where(Quiz.id.in_(quiz_ids), Quiz.difficulty_level == difficulty)
+        .options(selectinload(Quiz.chunk))  # type: ignore[arg-type]
     )
 
-    quizzes = db.exec(statement).all()
+    quizzes_raw = db.exec(statement).all()
 
-    return list(quizzes)
+    quiz_lookup = {}
+    for r in quizzes_raw:
+        quiz = r[0] if isinstance(r, tuple) else r
+        quiz_lookup[quiz.id] = quiz
+
+    ordered_quizzes: list[Quiz] = [
+        quiz_lookup[q_id] for q_id in quiz_ids if q_id in quiz_lookup
+    ]
+
+    return ordered_quizzes
 
 
 def fetch_and_format_quizzes(db: Session, quiz_ids: list[uuid.UUID]) -> QuizzesPublic:

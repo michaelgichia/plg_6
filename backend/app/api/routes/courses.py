@@ -6,7 +6,8 @@ from random import shuffle
 from typing import Annotated, Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import and_, text
+from sqlalchemy import and_, desc, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import QueryableAttribute, selectinload
 from sqlmodel import func, select
 
@@ -19,7 +20,7 @@ from app.models.course import (
 )
 from app.models.document import Document
 from app.models.embeddings import Chunk
-from app.models.quizzes import Quiz
+from app.models.quizzes import Quiz, QuizSession
 from app.schemas.internal import QuizFilterParams
 from app.schemas.public import (
     CoursePublic,
@@ -27,7 +28,13 @@ from app.schemas.public import (
     DocumentPublic,
     QuizChoice,
     QuizPublic,
+    QuizSessionPublic,
+    QuizSessionsList,
     QuizzesPublic,
+)
+from app.tasks import (
+    fetch_and_format_quizzes,
+    get_quizzes_for_session,
 )
 
 
@@ -65,26 +72,6 @@ def read_courses(
     return CoursesPublic(data=courses, count=total_count)
 
 
-@router.get("/{id}", response_model=CourseWithDocuments)
-def read_course(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
-    """
-    Get course by ID, including its documents.
-    """
-    documents_attr = cast(QueryableAttribute[Any], Course.documents)
-
-    statement = (
-        select(Course).where(Course.id == id).options(selectinload(documents_attr))
-    )
-    course = session.exec(statement).first()
-
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-    if not current_user.is_superuser and (course.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
-
-    return course
-
-
 @router.post("/", response_model=Course)
 def create_course(
     *, session: SessionDep, current_user: CurrentUser, course_in: CourseCreate
@@ -105,6 +92,26 @@ def create_course(
         session.rollback()
         logger.error(f"Error in create_course: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{id}", response_model=CourseWithDocuments)
+def read_course(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+    """
+    Get course by ID, including its documents.
+    """
+    documents_attr = cast(QueryableAttribute[Any], Course.documents)
+
+    statement = (
+        select(Course).where(Course.id == id).options(selectinload(documents_attr))
+    )
+    course = session.exec(statement).first()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    if not current_user.is_superuser and (course.owner_id != current_user.id):
+        raise HTTPException(status_code=400, detail="Not enough permissions")
+
+    return course
 
 
 @router.put("/{id}", response_model=CoursePublic)
@@ -235,3 +242,100 @@ def list_quizzes(
         )
 
     return QuizzesPublic(data=public_quizzes, count=len(public_quizzes))
+
+
+@router.get("/{id}/incomplete", response_model=QuizSessionsList)
+def get_incomplete_sessions(
+    id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+):
+    """
+    Fetch all incomplete quiz sessions for a given course and user.
+    """
+    statement = (
+        select(QuizSession)
+        .where(
+            QuizSession.user_id == current_user.id,  # type: ignore
+            QuizSession.course_id == id,  # type: ignore
+            QuizSession.is_completed.is_(False),  # type: ignore
+        )
+        .order_by(desc(QuizSession.updated_at))  # type: ignore
+    )
+
+    try:
+        raw_results = session.exec(statement).all()  # type: ignore
+        sessions: list[QuizSession] = [
+            r[0] if not isinstance(r, QuizSession) else r for r in raw_results
+        ]
+
+        if not sessions:
+            return QuizSessionsList(data=[])
+
+        public_sessions = [QuizSessionPublic.model_validate(s) for s in sessions]
+        return QuizSessionsList(data=public_sessions)
+
+    except SQLAlchemyError as e:
+        logger.error("Database error fetching incomplete sessions", exc_info=e)
+        raise HTTPException(status_code=500, detail="Database error")
+
+
+@router.post("/{id}/quiz/start", response_model=tuple[QuizSessionPublic, QuizzesPublic])
+def start_new_quiz_session(
+    id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+    filters: Annotated[QuizFilterParams, Depends()],
+):
+    """
+    Creates a new, immutable QuizSession, selects the initial set of questions,
+    and returns the session details and the first batch of questions.
+    """
+    try:
+        active_session_check = (
+            select(QuizSession)
+            .where(
+                QuizSession.user_id == current_user.id,  # type: ignore
+                QuizSession.id == id,  # type: ignore
+                QuizSession.is_completed == False,  # type: ignore  # noqa: E712
+            )
+            .limit(1)
+        )
+
+        if session.exec(active_session_check).first():  # type: ignore
+            raise HTTPException(
+                status_code=400,
+                detail="An incomplete quiz session already exists. Please resume or finish it first.",
+            )
+
+        initial_quizzes = get_quizzes_for_session(
+            session, id, current_user, filters.difficulty
+        )
+
+        if not initial_quizzes:
+            raise HTTPException(
+                status_code=404,
+                detail="No quizzes found for this course and difficulty.",
+            )
+
+        initial_quiz_ids = [q.id for q in initial_quizzes]
+
+        new_session = QuizSession(
+            user_id=current_user.id,
+            course_id=id,
+            total_submitted=0,
+            total_correct=0,
+            is_completed=False,
+            quiz_ids_json=initial_quiz_ids,
+        )
+
+        session.add(new_session)
+        session.commit()
+        session.refresh(new_session)
+
+        quizzes_to_show = fetch_and_format_quizzes(session, initial_quiz_ids)
+
+        return new_session, quizzes_to_show
+    except Exception as e:
+        logger.error(f"Error in start_new_quiz_session: {e}")
+        raise HTTPException(status_code=400, detail=str(e))

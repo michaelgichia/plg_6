@@ -6,7 +6,7 @@ from app.api.routes import (
     items,
     login,
     private,
-    quizzes,
+    quiz_sessions,
     users,
     utils,
 )
@@ -19,7 +19,7 @@ api_router.include_router(utils.router)
 api_router.include_router(items.router)
 api_router.include_router(courses.router)
 api_router.include_router(documents.router)
-api_router.include_router(quizzes.router)
+api_router.include_router(quiz_sessions.router)
 
 
 if settings.ENVIRONMENT == "local":
