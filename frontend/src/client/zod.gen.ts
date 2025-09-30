@@ -941,18 +941,18 @@ export const zGetApiV1DocumentsByIdData = z.object({
  */
 export const zGetApiV1DocumentsByIdResponse = zDocument;
 
-export const zGetApiV1QuizSessionsData = z.object({
+export const zGetApiV1QuizSessionsByIdData = z.object({
     body: z.optional(z.never()),
-    path: z.optional(z.never()),
-    query: z.object({
-        session_id: z.uuid()
-    })
+    path: z.object({
+        id: z.uuid()
+    }),
+    query: z.optional(z.never())
 });
 
 /**
  * Successful Response
  */
-export const zGetApiV1QuizSessionsResponse = zQuizSessionPublicWithQuizzes;
+export const zGetApiV1QuizSessionsByIdResponse = zQuizSessionPublicWithQuizzes;
 
 export const zPostApiV1QuizSessionsByIdScoreData = z.object({
     body: zQuizSubmissionBatch,

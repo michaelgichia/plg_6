@@ -169,8 +169,8 @@ export async function submitQuizSession(
 
 export async function getQuizSession(id: string): Promise<Result<QuizSessionPublicWithQuizzes>> {
   try {
-    const response = await QuizSessionsService.getApiV1QuizSessions({
-      query: { session_id: id },
+    const response = await QuizSessionsService.getApiV1QuizSessionsById({
+      path: { id },
       responseValidator: async () => { },
     })
     return {

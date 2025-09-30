@@ -325,8 +325,6 @@ def start_new_quiz_session(
 
         initial_quiz_ids = [q.id for q in initial_quizzes]
 
-        logger.info(f"Initial quiz IDs: {initial_quiz_ids}")
-
         new_session = QuizSession(
             user_id=current_user.id,
             course_id=course_id,

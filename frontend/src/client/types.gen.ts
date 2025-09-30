@@ -1822,35 +1822,35 @@ export type GetApiV1DocumentsByIdResponses = {
 
 export type GetApiV1DocumentsByIdResponse = GetApiV1DocumentsByIdResponses[keyof GetApiV1DocumentsByIdResponses];
 
-export type GetApiV1QuizSessionsData = {
+export type GetApiV1QuizSessionsByIdData = {
     body?: never;
-    path?: never;
-    query: {
+    path: {
         /**
-         * Session Id
+         * Id
          */
-        session_id: string;
+        id: string;
     };
-    url: '/api/v1/quiz-sessions/';
+    query?: never;
+    url: '/api/v1/quiz-sessions/{id}';
 };
 
-export type GetApiV1QuizSessionsErrors = {
+export type GetApiV1QuizSessionsByIdErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetApiV1QuizSessionsError = GetApiV1QuizSessionsErrors[keyof GetApiV1QuizSessionsErrors];
+export type GetApiV1QuizSessionsByIdError = GetApiV1QuizSessionsByIdErrors[keyof GetApiV1QuizSessionsByIdErrors];
 
-export type GetApiV1QuizSessionsResponses = {
+export type GetApiV1QuizSessionsByIdResponses = {
     /**
      * Successful Response
      */
     200: QuizSessionPublicWithQuizzes;
 };
 
-export type GetApiV1QuizSessionsResponse = GetApiV1QuizSessionsResponses[keyof GetApiV1QuizSessionsResponses];
+export type GetApiV1QuizSessionsByIdResponse = GetApiV1QuizSessionsByIdResponses[keyof GetApiV1QuizSessionsByIdResponses];
 
 export type PostApiV1QuizSessionsByIdScoreData = {
     body: QuizSubmissionBatch;
