@@ -740,17 +740,6 @@ export const QuizSessionPublicSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Updated At'
-        },
-        total_questions_in_session: {
-            anyOf: [
-                {
-                    type: 'integer'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Total Questions In Session'
         }
     },
     type: 'object',

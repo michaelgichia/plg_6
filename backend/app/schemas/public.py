@@ -128,8 +128,6 @@ class QuizSessionPublic(SQLModel):
     created_at: datetime
     updated_at: datetime
 
-    total_questions_in_session: int | None = None
-
 
 class QuizSessionsList(SQLModel):
     data: Sequence[QuizSessionPublic]

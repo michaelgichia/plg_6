@@ -495,10 +495,6 @@ export type QuizSessionPublic = {
      * Updated At
      */
     updated_at: string;
-    /**
-     * Total Questions In Session
-     */
-    total_questions_in_session?: number | null;
 };
 
 /**

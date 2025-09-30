@@ -23,7 +23,7 @@ export default async function QuizComponent({
 
   return (
     <div className='h-full flex flex-col'>
-      <QuizStatsPage />
+      <QuizStatsPage courseId={course.id} />
       {/* {result.data.map((quiz) => (
         <div className='flex flex-col gap-6 mb-8'>
           <p className='text-lg'>

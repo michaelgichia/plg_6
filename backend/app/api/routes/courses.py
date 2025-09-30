@@ -258,7 +258,7 @@ def get_incomplete_sessions(
         .where(
             QuizSession.user_id == current_user.id,  # type: ignore
             QuizSession.course_id == id,  # type: ignore
-            QuizSession.is_completed.is_(False),  # type: ignore
+            # QuizSession.is_completed.is_(False),  # type: ignore
         )
         .order_by(desc(QuizSession.updated_at))  # type: ignore
     )

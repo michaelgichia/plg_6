@@ -322,11 +322,7 @@ export const zQuizSessionPublic = z.object({
     ])),
     is_completed: z.boolean(),
     created_at: z.iso.datetime(),
-    updated_at: z.iso.datetime(),
-    total_questions_in_session: z.optional(z.union([
-        z.int(),
-        z.null()
-    ]))
+    updated_at: z.iso.datetime()
 });
 
 /**
