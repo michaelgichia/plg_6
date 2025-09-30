@@ -1,16 +1,16 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Mic } from 'react-feather'
-import { createChatStream, getChatHistory } from '@/actions/chat'
-import { ChatMessageUI } from '@/client/client/types.gen'
-import { readStreamAsText } from '@/lib/streamResponse'
+import { getChatHistory } from '@/actions/chat'
+import { ChatPublic } from '@/client'
+import { createChatStream, readStreamAsText } from '@/lib/chat'
+import { Avatar, AvatarFallback } from './ui/avatar'
 
 export default function ChatComponent({ courseId }: { courseId: string }) {
-  const [messages, setMessages] = useState<ChatMessageUI[]>([])
+  const [messages, setMessages] = useState<ChatPublic[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -23,25 +23,32 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
     scrollToBottom()
   }, [messages])
 
-  useEffect(() => {  
+  useEffect(() => {
     getChatHistory(courseId)
-      .then(data => {
-        setMessages(data || [])
+      .then(result => {
+        if (result.ok) {
+          setMessages(result.data)
+        } else {
+          setMessages([])
+        }
       })
       .catch(error => {
         console.error('Failed to fetch chat history:', error)
+        setMessages([])
       })
-  }, [courseId]) 
+  }, [courseId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
 
-    const userMessage: ChatMessageUI = {
+    const userMessage: ChatPublic = {
       id: Date.now().toString(),
       message: input,
       is_system: false,
+      course_id: courseId,
       created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }
     setMessages(prev => [...prev, userMessage])
     const currentInput = input
@@ -50,13 +57,13 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
 
     // Create system message placeholder
     const systemMessageId = Date.now().toString() + '-system'
-    const systemMessage: ChatMessageUI = {
+    const systemMessage: ChatPublic = {
       id: systemMessageId,
       message: '',
       is_system: true,
+      course_id: courseId,
       created_at: new Date().toISOString(),
-      author: 'Course Tutor',
-      avatar: '/tutor-session.png',
+      updated_at: new Date().toISOString(),
     }
     setMessages(prev => [...prev, systemMessage])
 
@@ -68,44 +75,36 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
       }
 
       let fullResponse = ''
-      let buffer = ''
 
       for await (const chunk of readStreamAsText(stream)) {
-
         if (chunk) {
           fullResponse += chunk
-          buffer += chunk
 
-          // Update state only when buffer reaches a threshold or ends
-          if (buffer.length > 30) {
-            setMessages(prev =>
-              prev.map(msg =>
-                msg.id === systemMessageId
-                  ? { ...msg, message: fullResponse }
-                  : msg
-              )
-            )
-            buffer = ''
-          }
-        }
-        
-        // Final update for any remaining chunk
-        if (buffer.length > 0) {
           setMessages(prev =>
             prev.map(msg =>
               msg.id === systemMessageId
-                ? { ...msg, message: fullResponse.trim() }
+                ? { ...msg, message: fullResponse }
                 : msg
             )
           )
-          buffer = ''
+
+          await new Promise(resolve => setTimeout(resolve, 50))
         }
       }
+      
+      // Final update to ensure all content is displayed
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === systemMessageId
+            ? { ...msg, message: fullResponse.trim() }
+            : msg
+        )
+      )
     } catch (error) {
       console.error('Chat error:', error)
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === systemMessageId 
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === systemMessageId
             ? { ...msg, message: 'Sorry, I encountered an error. Please try again.' }
             : msg
         )
@@ -126,7 +125,7 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
     <div className='h-[calc(100vh-10rem)] flex flex-col'>
       {/* Chat Messages */}
       <div className='flex-1 overflow-y-auto p-6 space-y-4'>
-        <div className="space-y-4">  
+        <div className="space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -137,20 +136,14 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
               {message.is_system ? (
                 <div className='flex items-start gap-3 max-w-4xl'>
                   <Avatar className='h-8 w-8 mt-1 flex-shrink-0'>
-                    <AvatarImage src={message.avatar || '/placeholder.svg'} />
                     <AvatarFallback className='bg-slate-700 text-white text-xs'>
                       CT
                     </AvatarFallback>
                   </Avatar>
                   <div className='min-w-0 flex-1'>
-                    {message.author && (
-                      <div className='text-sm text-slate-600 mb-1'>
-                        {message.author}
-                      </div>
-                    )}
                     <div className='bg-slate-800 rounded-lg p-3 text-slate-100'>
                       {message.message === '' ? (
-                        <div className="flex space-x-1">
+                        <div className="flex space-x-1 px-1">
                           <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
                           <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
                           <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
