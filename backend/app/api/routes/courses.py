@@ -244,8 +244,8 @@ def list_quizzes(
     return QuizzesPublic(data=public_quizzes, count=len(public_quizzes))
 
 
-@router.get("/{id}/incomplete", response_model=QuizSessionsList)
-def get_incomplete_sessions(
+@router.get("/{id}/attempts", response_model=QuizSessionsList)
+def get_attempts_sessions(
     id: uuid.UUID,
     session: SessionDep,
     current_user: CurrentUser,
@@ -258,7 +258,6 @@ def get_incomplete_sessions(
         .where(
             QuizSession.user_id == current_user.id,  # type: ignore
             QuizSession.course_id == id,  # type: ignore
-            # QuizSession.is_completed.is_(False),  # type: ignore
         )
         .order_by(desc(QuizSession.updated_at))  # type: ignore
     )

@@ -38,7 +38,7 @@ export async function getAttemptedQuizzes(
   courseId: string,
 ): Promise<Result<QuizSessionPublic[]>> {
   try {
-    const response = await CoursesService.getApiV1CoursesByIdIncomplete({
+    const response = await CoursesService.getApiV1CoursesByIdAttempts({
       path: {id: courseId},
       responseValidator: async () => {},
     })

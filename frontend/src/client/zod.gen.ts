@@ -829,7 +829,7 @@ export const zGetApiV1CoursesByIdQuizzesData = z.object({
  */
 export const zGetApiV1CoursesByIdQuizzesResponse = zQuizzesPublic;
 
-export const zGetApiV1CoursesByIdIncompleteData = z.object({
+export const zGetApiV1CoursesByIdAttemptsData = z.object({
     body: z.optional(z.never()),
     path: z.object({
         id: z.uuid()
@@ -840,7 +840,7 @@ export const zGetApiV1CoursesByIdIncompleteData = z.object({
 /**
  * Successful Response
  */
-export const zGetApiV1CoursesByIdIncompleteResponse = zQuizSessionsList;
+export const zGetApiV1CoursesByIdAttemptsResponse = zQuizSessionsList;
 
 export const zPostApiV1CoursesByCourseIdQuizStartData = z.object({
     body: z.optional(z.never()),

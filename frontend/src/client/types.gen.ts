@@ -1560,7 +1560,7 @@ export type GetApiV1CoursesByIdQuizzesResponses = {
 
 export type GetApiV1CoursesByIdQuizzesResponse = GetApiV1CoursesByIdQuizzesResponses[keyof GetApiV1CoursesByIdQuizzesResponses];
 
-export type GetApiV1CoursesByIdIncompleteData = {
+export type GetApiV1CoursesByIdAttemptsData = {
     body?: never;
     path: {
         /**
@@ -1569,26 +1569,26 @@ export type GetApiV1CoursesByIdIncompleteData = {
         id: string;
     };
     query?: never;
-    url: '/api/v1/courses/{id}/incomplete';
+    url: '/api/v1/courses/{id}/attempts';
 };
 
-export type GetApiV1CoursesByIdIncompleteErrors = {
+export type GetApiV1CoursesByIdAttemptsErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetApiV1CoursesByIdIncompleteError = GetApiV1CoursesByIdIncompleteErrors[keyof GetApiV1CoursesByIdIncompleteErrors];
+export type GetApiV1CoursesByIdAttemptsError = GetApiV1CoursesByIdAttemptsErrors[keyof GetApiV1CoursesByIdAttemptsErrors];
 
-export type GetApiV1CoursesByIdIncompleteResponses = {
+export type GetApiV1CoursesByIdAttemptsResponses = {
     /**
      * Successful Response
      */
     200: QuizSessionsList;
 };
 
-export type GetApiV1CoursesByIdIncompleteResponse = GetApiV1CoursesByIdIncompleteResponses[keyof GetApiV1CoursesByIdIncompleteResponses];
+export type GetApiV1CoursesByIdAttemptsResponse = GetApiV1CoursesByIdAttemptsResponses[keyof GetApiV1CoursesByIdAttemptsResponses];
 
 export type PostApiV1CoursesByCourseIdQuizStartData = {
     body?: never;
