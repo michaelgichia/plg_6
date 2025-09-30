@@ -6,5 +6,6 @@ from .course import Course  # noqa: F401
 from .document import Document  # noqa: F401
 from .item import Item  # noqa: F401
 from .user import User  # noqa: F401
+from .chat import Chat  # noqa: F401
 
-__all__ = ["SQLModel", "User", "Item", "Course", "Document"]
+__all__ = ["SQLModel", "User", "Item", "Course", "Document", "Chat"]

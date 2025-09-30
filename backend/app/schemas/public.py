@@ -31,3 +31,12 @@ class CoursePublic(SQLModel):
 class CoursesPublic(SQLModel):
     data: list["CoursePublic"]
     count: int
+
+# Public model for API responses
+class ChatPublic(SQLModel):
+  id: uuid.UUID
+  message: str
+  course_id: uuid.UUID
+  is_system: bool
+  created_at: datetime
+  updated_at: datetime

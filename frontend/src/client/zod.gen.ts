@@ -32,6 +32,25 @@ export const zBodyLoginLoginAccessToken = z.object({
 });
 
 /**
+ * ChatMessage
+ */
+export const zChatMessage = z.object({
+    message: z.string()
+});
+
+/**
+ * ChatPublic
+ */
+export const zChatPublic = z.object({
+    id: z.uuid(),
+    message: z.string(),
+    course_id: z.uuid(),
+    is_system: z.boolean(),
+    created_at: z.iso.datetime(),
+    updated_at: z.iso.datetime()
+});
+
+/**
  * CourseCreate
  */
 export const zCourseCreate = z.object({
@@ -686,6 +705,30 @@ export const zGetApiV1CoursesByCourseIdDocumentsData = z.object({
  * Successful Response
  */
 export const zGetApiV1CoursesByCourseIdDocumentsResponse = z.array(z.record(z.string(), z.unknown()));
+
+export const zPostApiV1ChatByCourseIdStreamData = z.object({
+    body: zChatMessage,
+    path: z.object({
+        course_id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+export const zGetApiV1ChatByCourseIdHistoryData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        course_id: z.uuid()
+    }),
+    query: z.optional(z.object({
+        limit: z.optional(z.int()).default(50)
+    }))
+});
+
+/**
+ * Response 200 Chat-Get Chat History
+ * List of chat messages
+ */
+export const zGetApiV1ChatByCourseIdHistoryResponse = z.array(zChatPublic);
 
 export const zPostApiV1DocumentsProcessData = z.object({
     body: zBodyDocumentsProcessMultipleDocuments,

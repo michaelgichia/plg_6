@@ -78,6 +78,54 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const ChatMessageSchema = {
+    properties: {
+        message: {
+            type: 'string',
+            title: 'Message'
+        }
+    },
+    type: 'object',
+    required: ['message'],
+    title: 'ChatMessage'
+} as const;
+
+export const ChatPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        message: {
+            type: 'string',
+            title: 'Message'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        is_system: {
+            type: 'boolean',
+            title: 'Is System'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'message', 'course_id', 'is_system', 'created_at', 'updated_at'],
+    title: 'ChatPublic'
+} as const;
+
 export const CourseCreateSchema = {
     properties: {
         name: {
