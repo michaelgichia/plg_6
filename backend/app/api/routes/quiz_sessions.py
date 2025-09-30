@@ -32,21 +32,24 @@ def get_quiz_session(
     """
     API endpoint to retrieve a specific QuizSession identified by the session_id.
     """
-
-    statement = (
-        select(QuizSession)
-        .where(QuizSession.id == session_id)
-        .options(
-            selectinload(QuizSession.quizzes)  # type: ignore
+    try:
+        statement = (
+            select(QuizSession)
+            .where(QuizSession.id == session_id)
+            .options(
+                selectinload(QuizSession.quizzes)  # type: ignore
+            )
         )
-    )
-    quiz_session = session.exec(statement).first()
-    if not quiz_session:
-        raise HTTPException(status_code=404, detail="Quiz session not found")
-    if quiz_session.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        quiz_session = session.exec(statement).first()
+        if not quiz_session:
+            raise HTTPException(status_code=404, detail="Quiz session not found")
+        if quiz_session.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Forbidden")
 
-    return quiz_session
+        return quiz_session
+    except Exception as e:
+        logger.error(f"Error in get_quiz_session: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/{id}/score", response_model=QuizScoreSummary)

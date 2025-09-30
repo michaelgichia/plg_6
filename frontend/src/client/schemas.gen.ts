@@ -749,6 +749,65 @@ export const QuizSessionPublicSchema = {
 or completed quiz attempts.`
 } as const;
 
+export const QuizSessionPublicWithQuizzesSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        total_submitted: {
+            type: 'integer',
+            title: 'Total Submitted'
+        },
+        total_correct: {
+            type: 'integer',
+            title: 'Total Correct'
+        },
+        score_percentage: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Score Percentage'
+        },
+        is_completed: {
+            type: 'boolean',
+            title: 'Is Completed'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        quizzes: {
+            items: {
+                '$ref': '#/components/schemas/QuizPublic'
+            },
+            type: 'array',
+            title: 'Quizzes',
+            default: []
+        }
+    },
+    type: 'object',
+    required: ['id', 'course_id', 'total_submitted', 'total_correct', 'is_completed', 'created_at', 'updated_at'],
+    title: 'QuizSessionPublicWithQuizzes'
+} as const;
+
 export const QuizSessionsListSchema = {
     properties: {
         data: {

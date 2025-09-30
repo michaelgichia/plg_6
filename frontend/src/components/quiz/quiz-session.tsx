@@ -1,6 +1,5 @@
 import React from 'react'
 
-
 import {CourseWithDocuments} from '@/client'
 import {getQuizzes} from '@/actions/quizzes'
 

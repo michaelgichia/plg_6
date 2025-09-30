@@ -326,6 +326,24 @@ export const zQuizSessionPublic = z.object({
 });
 
 /**
+ * QuizSessionPublicWithQuizzes
+ */
+export const zQuizSessionPublicWithQuizzes = z.object({
+    id: z.uuid(),
+    course_id: z.uuid(),
+    total_submitted: z.int(),
+    total_correct: z.int(),
+    score_percentage: z.optional(z.union([
+        z.number(),
+        z.null()
+    ])),
+    is_completed: z.boolean(),
+    created_at: z.iso.datetime(),
+    updated_at: z.iso.datetime(),
+    quizzes: z.optional(z.array(zQuizPublic)).default([])
+});
+
+/**
  * QuizSessionsList
  */
 export const zQuizSessionsList = z.object({
@@ -922,6 +940,19 @@ export const zGetApiV1DocumentsByIdData = z.object({
  * Successful Response
  */
 export const zGetApiV1DocumentsByIdResponse = zDocument;
+
+export const zGetApiV1QuizSessionsData = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.object({
+        session_id: z.uuid()
+    })
+});
+
+/**
+ * Successful Response
+ */
+export const zGetApiV1QuizSessionsResponse = zQuizSessionPublicWithQuizzes;
 
 export const zPostApiV1QuizSessionsByIdScoreData = z.object({
     body: zQuizSubmissionBatch,

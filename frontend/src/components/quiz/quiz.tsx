@@ -5,9 +5,8 @@ import {CourseWithDocuments} from '@/client'
 import {getQuizzes} from '@/actions/quizzes'
 
 import ErrorBox from '@/components/ui/ErrorBox'
-import {Button} from '@/components/ui/button'
 import PageLoader from '@/components/ui/page-loader'
-import { ChevronRight } from 'react-feather'
+import QuizStartComponent from './quiz-start'
 
 const QuizStatsPage = dynamic(() => import('./quiz-stats'), {
   ssr: true,
@@ -35,14 +34,16 @@ export default async function QuizComponent({
         <div className='mx-auto max-w-7xl'>
           {/* Stats Cards */}
           <QuizStatsPage courseId={course.id} />
-          <div className='flex justify-end'>
-            <form>
+          <QuizStartComponent courseId={course.id} />
+          {/* <div className='flex justify-end'>
+            <form action={startQuizSession}>
+              <input type='hidden' name='course_id' value={course.id} />
               <Button variant='default' type='submit' size='xl'>
                 <span>Start Quiz</span>
                 <ChevronRight className='ml-2 h-6 w-6' />
               </Button>
             </form>
-          </div>
+          </div> */}
           {/* Quiz Attempts Section */}
           <QuizAttempts courseId={course.id} />
         </div>

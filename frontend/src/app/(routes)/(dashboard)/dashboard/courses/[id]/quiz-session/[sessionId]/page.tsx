@@ -1,5 +1,3 @@
-import React from 'react'
-
 import {getQuizzes} from '@/actions/quizzes'
 
 import { Separator } from "@/components/ui/separator"
@@ -10,6 +8,7 @@ import ErrorBox from '@/components/ui/ErrorBox'
 export default async function Page(props: {params: Promise<{id: string}>}) {
   const params = await props.params
   const id = params.id
+
 
   const result = await getQuizzes(id)
 

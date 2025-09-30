@@ -498,6 +498,48 @@ export type QuizSessionPublic = {
 };
 
 /**
+ * QuizSessionPublicWithQuizzes
+ */
+export type QuizSessionPublicWithQuizzes = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Total Submitted
+     */
+    total_submitted: number;
+    /**
+     * Total Correct
+     */
+    total_correct: number;
+    /**
+     * Score Percentage
+     */
+    score_percentage?: number | null;
+    /**
+     * Is Completed
+     */
+    is_completed: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Quizzes
+     */
+    quizzes?: Array<QuizPublic>;
+};
+
+/**
  * QuizSessionsList
  */
 export type QuizSessionsList = {
@@ -1779,6 +1821,36 @@ export type GetApiV1DocumentsByIdResponses = {
 };
 
 export type GetApiV1DocumentsByIdResponse = GetApiV1DocumentsByIdResponses[keyof GetApiV1DocumentsByIdResponses];
+
+export type GetApiV1QuizSessionsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Session Id
+         */
+        session_id: string;
+    };
+    url: '/api/v1/quiz-sessions/';
+};
+
+export type GetApiV1QuizSessionsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1QuizSessionsError = GetApiV1QuizSessionsErrors[keyof GetApiV1QuizSessionsErrors];
+
+export type GetApiV1QuizSessionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuizSessionPublicWithQuizzes;
+};
+
+export type GetApiV1QuizSessionsResponse = GetApiV1QuizSessionsResponses[keyof GetApiV1QuizSessionsResponses];
 
 export type PostApiV1QuizSessionsByIdScoreData = {
     body: QuizSubmissionBatch;
