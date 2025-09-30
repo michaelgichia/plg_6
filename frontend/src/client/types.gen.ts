@@ -508,6 +508,32 @@ export type QuizSessionsList = {
 };
 
 /**
+ * QuizStats
+ */
+export type QuizStats = {
+    /**
+     * Best Total Submitted
+     */
+    best_total_submitted: number;
+    /**
+     * Best Total Correct
+     */
+    best_total_correct: number;
+    /**
+     * Best Score Percentage
+     */
+    best_score_percentage: number;
+    /**
+     * Average Score
+     */
+    average_score: number;
+    /**
+     * Attempts
+     */
+    attempts: number;
+};
+
+/**
  * QuizSubmissionBatch
  * Container for multiple quiz submissions.
  */
@@ -1641,6 +1667,36 @@ export type PostApiV1CoursesByCourseIdQuizStartResponses = {
 };
 
 export type PostApiV1CoursesByCourseIdQuizStartResponse = PostApiV1CoursesByCourseIdQuizStartResponses[keyof PostApiV1CoursesByCourseIdQuizStartResponses];
+
+export type GetApiV1CoursesByCourseIdStatsData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/stats';
+};
+
+export type GetApiV1CoursesByCourseIdStatsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1CoursesByCourseIdStatsError = GetApiV1CoursesByCourseIdStatsErrors[keyof GetApiV1CoursesByCourseIdStatsErrors];
+
+export type GetApiV1CoursesByCourseIdStatsResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuizStats;
+};
+
+export type GetApiV1CoursesByCourseIdStatsResponse = GetApiV1CoursesByCourseIdStatsResponses[keyof GetApiV1CoursesByCourseIdStatsResponses];
 
 export type PostApiV1DocumentsProcessData = {
     body: BodyDocumentsProcessMultipleDocuments;

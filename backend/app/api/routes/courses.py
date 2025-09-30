@@ -6,9 +6,10 @@ from random import shuffle
 from typing import Annotated, Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import and_, desc, text
+from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import QueryableAttribute, selectinload
+from sqlalchemy.sql import and_, text
 from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
@@ -30,6 +31,7 @@ from app.schemas.public import (
     QuizPublic,
     QuizSessionPublic,
     QuizSessionsList,
+    QuizStats,
     QuizzesPublic,
 )
 from app.tasks import (
@@ -349,3 +351,70 @@ def start_new_quiz_session(
         # Rollback in case of database error
         session.rollback()
         raise HTTPException(status_code=500, detail="Internal server error occurred.")
+
+
+@router.get("/{course_id}/stats", response_model=QuizStats)
+def get_quiz_stats(
+    course_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> QuizStats:
+    """
+    Fetches course statistics: overall average, total attempts, and the full
+    details of the single best-scoring quiz session.
+    """
+
+    # Base filter condition
+    user_course_filter = and_(
+        QuizSession.user_id == current_user.id,  # type: ignore
+        QuizSession.course_id == course_id,  # type: ignore
+        QuizSession.is_completed == True,  # noqa: E712 # type: ignore
+    )
+
+    best_session_statement = (
+        select(
+            QuizSession.total_submitted,
+            QuizSession.total_correct,
+            QuizSession.score_percentage,
+        )
+        .where(user_course_filter)
+        .order_by(desc(QuizSession.score_percentage))
+        .limit(1)
+    )
+
+    best_session_stats = session.exec(best_session_statement).one_or_none()
+
+    overall_stats_statement = select(
+        func.count(QuizSession.id).label("attempts"),
+        func.avg(QuizSession.score_percentage).label("average_score"),
+    ).where(user_course_filter)
+
+    overall_results = session.exec(overall_stats_statement).one_or_none()
+
+    if not overall_results or overall_results[0] == 0:
+        return QuizStats(
+            best_total_submitted=0,
+            best_total_correct=0,
+            best_score_percentage=0.0,
+            average_score=0.0,
+            attempts=0,
+        )
+
+    attempts, average_score = overall_results
+
+    if best_session_stats:
+        best_total_submitted, best_total_correct, best_score_percentage = (
+            best_session_stats
+        )
+    else:
+        best_total_submitted = 0
+        best_total_correct = 0
+        best_score_percentage = 0.0
+
+    return QuizStats(
+        best_total_submitted=best_total_submitted,
+        best_total_correct=best_total_correct,
+        best_score_percentage=best_score_percentage,
+        average_score=average_score or 0.0,
+        attempts=attempts,
+    )

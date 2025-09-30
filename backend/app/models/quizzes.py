@@ -45,7 +45,7 @@ class QuizSessionBase(SQLModel):
     total_submitted: int
     total_correct: int
     quiz_ids_json: list[str] = Field(sa_column=Column(JSONB), default_factory=list)
-    score_percentage: float | None = None
+    score_percentage: float | None = 0
 
 
 class QuizSession(QuizSessionBase, table=True):

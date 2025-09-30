@@ -333,6 +333,17 @@ export const zQuizSessionsList = z.object({
 });
 
 /**
+ * QuizStats
+ */
+export const zQuizStats = z.object({
+    best_total_submitted: z.int(),
+    best_total_correct: z.int(),
+    best_score_percentage: z.number(),
+    average_score: z.number(),
+    attempts: z.number()
+});
+
+/**
  * SingleQuizSubmission
  * The user's answer for one question.
  */
@@ -871,6 +882,19 @@ export const zPostApiV1CoursesByCourseIdQuizStartResponse = z.tuple([
     zQuizSessionPublic,
     zQuizzesPublic
 ]);
+
+export const zGetApiV1CoursesByCourseIdStatsData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        course_id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zGetApiV1CoursesByCourseIdStatsResponse = zQuizStats;
 
 export const zPostApiV1DocumentsProcessData = z.object({
     body: zBodyDocumentsProcessMultipleDocuments,

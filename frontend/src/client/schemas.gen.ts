@@ -764,6 +764,34 @@ export const QuizSessionsListSchema = {
     title: 'QuizSessionsList'
 } as const;
 
+export const QuizStatsSchema = {
+    properties: {
+        best_total_submitted: {
+            type: 'integer',
+            title: 'Best Total Submitted'
+        },
+        best_total_correct: {
+            type: 'integer',
+            title: 'Best Total Correct'
+        },
+        best_score_percentage: {
+            type: 'number',
+            title: 'Best Score Percentage'
+        },
+        average_score: {
+            type: 'number',
+            title: 'Average Score'
+        },
+        attempts: {
+            type: 'number',
+            title: 'Attempts'
+        }
+    },
+    type: 'object',
+    required: ['best_total_submitted', 'best_total_correct', 'best_score_percentage', 'average_score', 'attempts'],
+    title: 'QuizStats'
+} as const;
+
 export const QuizSubmissionBatchSchema = {
     properties: {
         submissions: {

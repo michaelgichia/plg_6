@@ -111,6 +111,14 @@ class QuizScoreSummary(SQLModel):
     results: Sequence[SingleQuizScore]
 
 
+class QuizStats(SQLModel):
+    best_total_submitted: int
+    best_total_correct: int
+    best_score_percentage: float
+    average_score: float
+    attempts: float
+
+
 class QuizSessionPublic(SQLModel):
     """
     Public schema for a QuizSession, used to show the user their incomplete

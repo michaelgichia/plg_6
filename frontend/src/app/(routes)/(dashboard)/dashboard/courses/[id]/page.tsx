@@ -5,7 +5,7 @@ import ErrorBox from '@/components/ui/ErrorBox'
 import {Tabs, TabsContent, TabsList, StyledTabList} from '@/components/ui/tabs'
 import PageLoader from '@/components/ui/page-loader'
 
-const QuizComponent = dynamic(() => import('@/components/quiz/quiz-tab'), {
+const QuizComponent = dynamic(() => import('@/components/quiz/quiz'), {
   ssr: true,
   loading: () => <PageLoader />,
 })

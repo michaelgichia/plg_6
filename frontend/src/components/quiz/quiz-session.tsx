@@ -4,11 +4,11 @@ import React from 'react'
 import {CourseWithDocuments} from '@/client'
 import {getQuizzes} from '@/actions/quizzes'
 
-// import { Separator } from "@/components/ui/separator"
-// import {Checkbox} from '@/components/ui/checkbox'
-// import {Label} from '@/components/ui/label'
+import { Separator } from "@/components/ui/separator"
+import {Checkbox} from '@/components/ui/checkbox'
+import {Label} from '@/components/ui/label'
 import ErrorBox from '@/components/ui/ErrorBox'
-import QuizStatsPage from './quiz-stats'
+
 
 export default async function QuizComponent({
   course,
@@ -23,8 +23,7 @@ export default async function QuizComponent({
 
   return (
     <div className='h-full flex flex-col'>
-      <QuizStatsPage courseId={course.id} />
-      {/* {result.data.map((quiz) => (
+      {result.data.map((quiz) => (
         <div className='flex flex-col gap-6 mb-8'>
           <p className='text-lg'>
             {quiz.quiz_text}
@@ -41,7 +40,7 @@ export default async function QuizComponent({
           </ul>
           <Separator />
         </div>
-      ))} */}
+      ))}
     </div>
   )
 }
