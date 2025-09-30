@@ -139,3 +139,7 @@ class QuizSessionPublic(SQLModel):
 
 class QuizSessionsList(SQLModel):
     data: Sequence[QuizSessionPublic]
+
+
+class QuizSessionPublicWithQuizzes(QuizSessionPublic):
+    quizzes: Sequence[QuizPublic] = []
