@@ -49,6 +49,46 @@ export type BodyLoginLoginAccessToken = {
 };
 
 /**
+ * ChatMessage
+ */
+export type ChatMessage = {
+    /**
+     * Message
+     */
+    message: string;
+};
+
+/**
+ * ChatPublic
+ */
+export type ChatPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Is System
+     */
+    is_system: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+};
+
+/**
  * CourseCreate
  */
 export type CourseCreate = {
@@ -1294,6 +1334,86 @@ export type GetApiV1CoursesByCourseIdDocumentsResponses = {
 };
 
 export type GetApiV1CoursesByCourseIdDocumentsResponse = GetApiV1CoursesByCourseIdDocumentsResponses[keyof GetApiV1CoursesByCourseIdDocumentsResponses];
+
+export type PostApiV1ChatByCourseIdStreamData = {
+    body: ChatMessage;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/chat/{course_id}/stream';
+};
+
+export type PostApiV1ChatByCourseIdStreamErrors = {
+    /**
+     * Not authenticated
+     */
+    401: unknown;
+    /**
+     * Course not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostApiV1ChatByCourseIdStreamError = PostApiV1ChatByCourseIdStreamErrors[keyof PostApiV1ChatByCourseIdStreamErrors];
+
+export type PostApiV1ChatByCourseIdStreamResponses = {
+    /**
+     * Successful streaming response
+     */
+    200: unknown;
+};
+
+export type GetApiV1ChatByCourseIdHistoryData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/chat/{course_id}/history';
+};
+
+export type GetApiV1ChatByCourseIdHistoryErrors = {
+    /**
+     * Not authenticated
+     */
+    401: unknown;
+    /**
+     * Course not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1ChatByCourseIdHistoryError = GetApiV1ChatByCourseIdHistoryErrors[keyof GetApiV1ChatByCourseIdHistoryErrors];
+
+export type GetApiV1ChatByCourseIdHistoryResponses = {
+    /**
+     * Response 200 Chat-Get Chat History
+     * List of chat messages
+     */
+    200: Array<ChatPublic>;
+};
+
+export type GetApiV1ChatByCourseIdHistoryResponse = GetApiV1ChatByCourseIdHistoryResponses[keyof GetApiV1ChatByCourseIdHistoryResponses];
 
 export type PostApiV1DocumentsProcessData = {
     body: BodyDocumentsProcessMultipleDocuments;

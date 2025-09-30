@@ -5,7 +5,7 @@ import ErrorBox from '@/components/ui/ErrorBox'
 import {Tabs, TabsContent, TabsList, StyledTabList} from '@/components/ui/tabs'
 import PageLoader from '@/components/ui/page-loader'
 
-const QuizComponent = dynamic(() => import('@/components/quiz'), {
+const ChatComponent = dynamic(() => import('@/components/chat'), {
   ssr: true,
   loading: () => <PageLoader />,
 })
@@ -24,23 +24,17 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
   return (
     <>
       <Tabs
-        defaultValue='quiz'
+        defaultValue='chat'
         className='w-full h-full border-r-[1px] border-slate-700 overflow-y-hidden'
       >
         <TabsList className='w-full justify-start bg-transparent border-b border-slate-700 rounded-none h-12 p-0'>
-          <StyledTabList name='quiz' />
+          <StyledTabList name='chat' />
           <StyledTabList name='qa' />
           <StyledTabList name='flashcard' />
           <StyledTabList name='podcast' />
         </TabsList>
-        <TabsContent value='quiz' className='p-6'>
-          <QuizComponent course={course} />
-        </TabsContent>
-
-        <TabsContent value='qa' className='p-6'>
-          <div className='text-center text-slate-400 py-12'>
-            Q/A content will be displayed here
-          </div>
+        <TabsContent value='chat' className='p-6'>
+          <ChatComponent courseId={id} />
         </TabsContent>
 
         <TabsContent value='flashcard' className='p-6'>
