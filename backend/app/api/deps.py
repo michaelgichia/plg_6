@@ -2,7 +2,7 @@ from collections.abc import Generator
 from typing import Annotated
 
 import jwt
-from fastapi import Depends, Cookie, HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
@@ -27,30 +27,18 @@ SessionDep = Annotated[Session, Depends(get_db)]
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
-def decode_token(token: str):
+def get_current_user(session: SessionDep, token: TokenDep) -> User:
     try:
+        print(f"Token: {token}")
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
-    except (InvalidTokenError, ValidationError) as exc:
+    except (InvalidTokenError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    return token_data
-
-
-def get_current_user(session: SessionDep, token: TokenDep, access_token: str | None = Cookie(default=None)) -> User:
-    # Maybe need a rework
-    try:
-        token_data = decode_token(token)
-    except HTTPException:
-        try:
-            token_data = decode_token(access_token)
-        except Exception as exc:
-            raise exc
-
     user = session.get(User, token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

@@ -603,6 +603,22 @@ export const PrivateUserCreateSchema = {
     title: 'PrivateUserCreate'
 } as const;
 
+export const QAItemSchema = {
+    properties: {
+        question: {
+            type: 'string',
+            title: 'Question'
+        },
+        answer: {
+            type: 'string',
+            title: 'Answer'
+        }
+    },
+    type: 'object',
+    required: ['question', 'answer'],
+    title: 'QAItem'
+} as const;
+
 export const TokenSchema = {
     properties: {
         access_token: {

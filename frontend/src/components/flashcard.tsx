@@ -2,7 +2,7 @@
 
 import React, {useState} from "react";
 import {motion, AnimatePresence} from "framer-motion";
-import {getFlashcard} from "@/lib/flashcards";
+import {getFlashcards} from "@/lib/flashcards";
 
 import './flashcard.css';
 import {Button} from "@/components/ui/button";
@@ -30,7 +30,8 @@ export default function Flashcard({courseId,}) {
   const generateFlashcards = async () => {
     setLoading(true)
     try {
-      const flashcards = await getFlashcard(courseId) || []
+      const flashcardsRaw = await getFlashcards(courseId);
+      const flashcards = flashcardsRaw.data || [];
       if (flashcards.length > 0) {
         setFlashcards(flashcards)
       }

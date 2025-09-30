@@ -47,7 +47,6 @@ export const createClient = (config: Config = {}): Client => {
       ...options,
       axios: options.axios ?? _config.axios ?? instance,
       headers: mergeHeaders(_config.headers, options.headers),
-      baseURL: process.env.NEXT_PUBLIC_API_URL,
     };
 
     if (opts.security) {

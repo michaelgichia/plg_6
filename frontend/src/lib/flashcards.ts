@@ -1,15 +1,25 @@
-import {FlashcardPublic} from '@/client'
-import {getAccessToken} from "@/lib/utils";
+import {
+  GetApiV1CoursesByCourseIdFlashcardsResponses as FlashcardResponse
+} from "@/client";
+import {Result} from '@/lib/result'
+import {mapApiError} from '@/lib/mapApiError'
 
-export const getFlashcard = async (id: string): Promise<FlashcardPublic[]> => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/flashcards/course/${id}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAccessToken()}` },
-    credentials: 'include',
-  })
-  if (!res.ok) {
-    throw new Error('API request failed')
+export async function getFlashcards(
+  id: string,
+): Promise<Result<FlashcardResponse>> {
+  try {
+    const res = await fetch(`/api/courses/${id}/flashcards`, {
+      method: 'GET',
+      headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
+    })
+
+    if (!res.ok) throw new Error(`Failed to fetch course ${id} flashcards`)
+    return {ok: true, data: (await res.json()) as FlashcardResponse}
+  } catch (error) {
+    return {
+      ok: false,
+      error: mapApiError(error),
+    }
   }
-  return (await res.json()) as FlashcardPublic[]
-
 }

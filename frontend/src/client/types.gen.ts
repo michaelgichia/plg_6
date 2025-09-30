@@ -136,17 +136,6 @@ export type CoursePublic = {
     documents: Array<DocumentPublic>;
 };
 
-export type FlashcardPublic = {
-    /**
-     * Question
-     */
-    question: string;
-    /**
-     * Answer
-     */
-    answer: string
-}
-
 /**
  * CourseUpdate
  */
@@ -405,6 +394,20 @@ export type PrivateUserCreate = {
      * Is Verified
      */
     is_verified?: boolean;
+};
+
+/**
+ * QAItem
+ */
+export type QaItem = {
+    /**
+     * Question
+     */
+    question: string;
+    /**
+     * Answer
+     */
+    answer: string;
 };
 
 /**
@@ -1346,6 +1349,37 @@ export type GetApiV1CoursesByCourseIdDocumentsResponses = {
 
 export type GetApiV1CoursesByCourseIdDocumentsResponse = GetApiV1CoursesByCourseIdDocumentsResponses[keyof GetApiV1CoursesByCourseIdDocumentsResponses];
 
+export type GetApiV1CoursesByCourseIdFlashcardsData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/flashcards';
+};
+
+export type GetApiV1CoursesByCourseIdFlashcardsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1CoursesByCourseIdFlashcardsError = GetApiV1CoursesByCourseIdFlashcardsErrors[keyof GetApiV1CoursesByCourseIdFlashcardsErrors];
+
+export type GetApiV1CoursesByCourseIdFlashcardsResponses = {
+    /**
+     * Response Courses-Generate Flashcards By Course Id
+     * Successful Response
+     */
+    200: Array<QaItem>;
+};
+
+export type GetApiV1CoursesByCourseIdFlashcardsResponse = GetApiV1CoursesByCourseIdFlashcardsResponses[keyof GetApiV1CoursesByCourseIdFlashcardsResponses];
+
 export type PostApiV1ChatByCourseIdStreamData = {
     body: ChatMessage;
     path: {
@@ -1449,6 +1483,35 @@ export type PostApiV1DocumentsProcessResponses = {
     200: unknown;
 };
 
+export type DeleteApiV1DocumentsByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/documents/{id}';
+};
+
+export type DeleteApiV1DocumentsByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteApiV1DocumentsByIdError = DeleteApiV1DocumentsByIdErrors[keyof DeleteApiV1DocumentsByIdErrors];
+
+export type DeleteApiV1DocumentsByIdResponses = {
+    /**
+     * Response Documents-Delete Document
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type GetApiV1DocumentsByIdData = {
     body?: never;
     path: {
@@ -1479,36 +1542,6 @@ export type GetApiV1DocumentsByIdResponses = {
 
 export type GetApiV1DocumentsByIdResponse = GetApiV1DocumentsByIdResponses[keyof GetApiV1DocumentsByIdResponses];
 
-export type GetApiV1FlashcardsByCourseIdData = {
-    body?: never;
-    path: {
-        /**
-         * Id
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/v1/flashcards/{id}';
-};
-
-export type GetApiV1FlashcardsByCourseIdErrors = {
-    /**
-     * Page not found Error
-     */
-    404: PageNotFoundError;
-};
-
-export type GetApiV1FlashcardsByCourseIdError = GetApiV1FlashcardsByCourseIdErrors[keyof GetApiV1FlashcardsByCourseIdErrors];
-
-export type GetApiV1FlashcardsByCourseIdResponses = {
-    /**
-     * Successful Response
-     */
-    200: Document;
-};
-
-export type GetApiV1FlashcardsByCourseIdResponse = GetApiV1FlashcardsByCourseIdResponses[keyof GetApiV1FlashcardsByCourseIdResponses];
-
 export type PostApiV1PrivateUsersData = {
     body: PrivateUserCreate;
     path?: never;
@@ -1533,7 +1566,3 @@ export type PostApiV1PrivateUsersResponses = {
 };
 
 export type PostApiV1PrivateUsersResponse = PostApiV1PrivateUsersResponses[keyof PostApiV1PrivateUsersResponses];
-
-export type ClientOptions = {
-        baseURL: `${string}://${string}` | (string & {});
-};

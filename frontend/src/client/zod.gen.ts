@@ -162,14 +162,6 @@ export const zDocument = z.object({
     updated_at: z.optional(z.iso.datetime())
 });
 
-/*
- * Flashcard
- */
-export const zFlashcard = z.object({
-    question: z.string(),
-    answer: z.string(),
-})
-
 /**
  * ValidationError
  */
@@ -258,6 +250,14 @@ export const zPrivateUserCreate = z.object({
     password: z.string(),
     full_name: z.string(),
     is_verified: z.optional(z.boolean()).default(false)
+});
+
+/**
+ * QAItem
+ */
+export const zQaItem = z.object({
+    question: z.string(),
+    answer: z.string()
 });
 
 /**
@@ -706,6 +706,20 @@ export const zGetApiV1CoursesByCourseIdDocumentsData = z.object({
  */
 export const zGetApiV1CoursesByCourseIdDocumentsResponse = z.array(z.record(z.string(), z.unknown()));
 
+export const zGetApiV1CoursesByCourseIdFlashcardsData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        course_id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Response Courses-Generate Flashcards By Course Id
+ * Successful Response
+ */
+export const zGetApiV1CoursesByCourseIdFlashcardsResponse = z.array(zQaItem);
+
 export const zPostApiV1ChatByCourseIdStreamData = z.object({
     body: zChatMessage,
     path: z.object({
@@ -756,19 +770,6 @@ export const zGetApiV1DocumentsByIdData = z.object({
  * Successful Response
  */
 export const zGetApiV1DocumentsByIdResponse = zDocument;
-
-export const zGetApiV1FlashcardsByCourseIdData = z.object({
-    body: z.optional(z.never()),
-    path: z.object({
-        id: z.uuid()
-    }),
-    query: z.optional(z.never())
-});
-
-/**
- * Successful Response
- */
-export const zGetApiV1FlashcardsByCourseIdResponse = zFlashcard;
 
 export const zPostApiV1PrivateUsersData = z.object({
     body: zPrivateUserCreate,
