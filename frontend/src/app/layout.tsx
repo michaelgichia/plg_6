@@ -1,16 +1,19 @@
 import './globals.css'
 
 import type {Metadata} from 'next'
-import {Roboto_Mono, Roboto} from 'next/font/google'
+import {DM_Sans, DM_Mono} from 'next/font/google'
 import {Toaster} from '@/components/ui/sonner'
+import {ThemeProvider} from 'next-themes'
 
-const roboto = Roboto({
-  variable: '--font-source-sans-3',
-  subsets: ['latin'],
+const dmSans = DM_Sans({
+  variable: '--font-dn-serif',
+  subsets: ['latin', 'latin-ext'],
+  weight: '300'
 })
 
-const robotoMono = Roboto_Mono({
-  variable: '--font-source-sans-3-mono',
+const dmSansMono = DM_Mono({
+  weight: '400',
+  variable: '--font-dn-serif-mono',
   subsets: ['latin'],
 })
 
@@ -26,11 +29,11 @@ export default async function RootLayout({
 }) {
   return (
     <html lang='en'>
-      <body
-        className={`${roboto.variable} ${robotoMono.variable} antialiased`}
-      >
-        <main>{children}</main>
-        <Toaster />
+      <body className={`${dmSans.variable} ${dmSansMono.variable} antialiased`}>
+        <ThemeProvider attribute='class' defaultTheme='light' enableSystem>
+          <main>{children}</main>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   )

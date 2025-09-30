@@ -32,7 +32,7 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
         defaultValue='quiz'
         className='w-full h-full border-r-[1px] border-slate-700 overflow-y-hidden'
       >
-        <TabsList className='w-full justify-start bg-transparent border-b border-slate-700 rounded-none h-12 p-0'>
+        <TabsList className='w-full justify-start bg-transparent border-b border-slate-300 rounded-none h-12 p-0'>
           <StyledTabList name='quiz' />
           <StyledTabList name='qa' />
           <StyledTabList name='flashcard' />

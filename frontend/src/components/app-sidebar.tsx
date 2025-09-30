@@ -25,6 +25,7 @@ import {
 
 import {logout} from '@/actions/auth'
 import Link from 'next/link'
+import { ThemeToggle } from './theme-toggle'
 export function AppSidebar({displayName = 'User'}: {displayName?: string}) {
   return (
     <Sidebar>
@@ -112,6 +113,9 @@ export function AppSidebar({displayName = 'User'}: {displayName?: string}) {
                       Sign out
                     </button>
                   </form>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <ThemeToggle />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
