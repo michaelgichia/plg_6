@@ -26,41 +26,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/quiz-sessions", tags=["quiz-sessions"])
 
 
-# @router.get("/{id}", response_model=QuizSessionPublicWithQuizzes)
-# def get_quiz_session(
-#     id: uuid.UUID,
-#     session: SessionDep,
-#     current_user: CurrentUser,
-# ):
-#     """
-#     API endpoint to retrieve a specific QuizSession identified by the session_id.
-#     """
-#     try:
-#         statement = select(QuizSession).where(
-#             QuizSession.user_id == current_user.id, QuizSession.id == id
-#         )
-#         quiz_session = session.exec(statement).first()
-#         logger.info(f"Quiz session: {quiz_session}")
-
-#         if not quiz_session:
-#             raise HTTPException(status_code=404, detail="Quiz session not found")
-
-#         if quiz_session.user_id != current_user.id:
-#             raise HTTPException(status_code=403, detail="Forbidden")
-
-#         quiz_uuids = [uuid.UUID(q_id) for q_id in quiz_session.quiz_ids_json]
-#         quizzes_to_show = fetch_and_format_quizzes(session, quiz_uuids)
-
-#         return QuizSessionPublicWithQuizzes(
-#             **quiz_session.model_dump(),
-#             quizzes=quizzes_to_show.data,
-#         )
-
-#     except Exception as e:
-#         logger.error(f"Error in get_quiz_session: {e}")
-#         raise HTTPException(status_code=500, detail="Internal server error")
-
-
 @router.get("/{id}", response_model=QuizSessionPublicWithResults)
 def get_quiz_session_optimized(
     id: uuid.UUID,

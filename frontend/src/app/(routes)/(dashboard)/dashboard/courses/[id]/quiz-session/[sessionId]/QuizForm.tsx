@@ -78,8 +78,6 @@ export default function QuizForm({
     )
   }
 
-  console.log({state})
-
   if (!session) return null
   const {is_completed, quizzes} = session
 
@@ -165,7 +163,6 @@ export default function QuizForm({
                     }
 
                     let labelClass = 'text-sm/snug'
-
                     if (isScored) {
                       const isSelected =
                         result.selected_answer_text === choice.text
@@ -183,14 +180,8 @@ export default function QuizForm({
 
                     return (
                       <div className='flex gap-3 mb-4' key={choice.id}>
-                        <Checkbox
-                          id={choice.id}
-                          value={choice.id}
-                          name={`choice-${quiz.id}`}
-                          checked={checkboxProps.checked}
-                          disabled={checkboxProps.isScored}
-                        />
-                        <Label htmlFor={choice.id}>
+                        <Checkbox {...checkboxProps} />
+                        <Label htmlFor={choice.text}>
                           <span className={labelClass}>{choice.text}</span>
                         </Label>
                       </div>
