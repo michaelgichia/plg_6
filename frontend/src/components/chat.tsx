@@ -13,6 +13,7 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
   const [messages, setMessages] = useState<ChatPublic[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showContinueButton, setShowContinueButton] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -38,52 +39,69 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
       })
   }, [courseId])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
-
-    const userMessage: ChatPublic = {
-      id: Date.now().toString(),
-      message: input,
-      is_system: false,
-      course_id: courseId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-    setMessages(prev => [...prev, userMessage])
-    const currentInput = input
-    setInput('')
+  const handleChatRequest = async (message: string, isContinuation: boolean = false, targetMessageId?: string) => {
     setIsLoading(true)
+    
+    let systemMessageId: string
 
-    // Create system message placeholder
-    const systemMessageId = Date.now().toString() + '-system'
-    const systemMessage: ChatPublic = {
-      id: systemMessageId,
-      message: '',
-      is_system: true,
-      course_id: courseId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+    if (isContinuation) {
+      // For continuation, use the existing message ID and hide continue button
+      systemMessageId = targetMessageId!
+      setShowContinueButton(null)
+    } else {
+      // For new messages, add user message and create system placeholder
+      const userMessage: ChatPublic = {
+        id: Date.now().toString(),
+        message: message,
+        is_system: false,
+        course_id: courseId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+      setMessages(prev => [...prev, userMessage])
+      setInput('')
+
+      // Create system message placeholder
+      systemMessageId = Date.now().toString() + '-system'
+      const systemMessage: ChatPublic = {
+        id: systemMessageId,
+        message: '',
+        is_system: true,
+        course_id: courseId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+      setMessages(prev => [...prev, systemMessage])
     }
-    setMessages(prev => [...prev, systemMessage])
 
     try {
-      const stream = await createChatStream(courseId, currentInput)
+      const stream = await createChatStream(courseId, message, isContinuation)
 
       if (!stream) {
         throw new Error('No response stream received from server.')
       }
 
-      let fullResponse = ''
+      let responseChunk = ''
 
       for await (const chunk of readStreamAsText(stream)) {
         if (chunk) {
-          fullResponse += chunk
+          responseChunk += chunk
 
+          // Check for truncation indicator
+          if (chunk.includes('[Response was truncated. Ask me to continue for more details.]')) {
+            setShowContinueButton(systemMessageId)
+          }
+
+          // Update message (append for continuation, replace for new)
           setMessages(prev =>
             prev.map(msg =>
               msg.id === systemMessageId
-                ? { ...msg, message: fullResponse }
+                ? { 
+                    ...msg, 
+                    message: isContinuation 
+                      ? msg.message.replace(/\n\n\[Response was truncated\. Ask me to continue for more details\.\]$/, '') + responseChunk 
+                      : responseChunk 
+                  }
                 : msg
             )
           )
@@ -92,26 +110,49 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
         }
       }
       
-      // Final update to ensure all content is displayed
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.id === systemMessageId
-            ? { ...msg, message: fullResponse.trim() }
-            : msg
+      // Final update to ensure all content is properly trimmed
+      if (!isContinuation) {
+        setMessages(prev =>
+          prev.map(msg =>
+            msg.id === systemMessageId
+              ? { ...msg, message: responseChunk.trim() }
+              : msg
+          )
         )
-      )
+      }
     } catch (error) {
       console.error('Chat error:', error)
+      const errorMessage = isContinuation 
+        ? '\n\nError continuing response. Please try again.'
+        : 'Sorry, I encountered an error. Please try again.'
+      
       setMessages(prev =>
         prev.map(msg =>
           msg.id === systemMessageId
-            ? { ...msg, message: 'Sorry, I encountered an error. Please try again.' }
+            ? { 
+                ...msg, 
+                message: isContinuation 
+                  ? msg.message + errorMessage 
+                  : errorMessage 
+              }
             : msg
         )
       )
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim() || isLoading) return
+    
+    const currentInput = input
+    await handleChatRequest(currentInput, false)
+  }
+
+  const handleContinue = async (messageId: string) => {
+    await handleChatRequest("continue", true, messageId)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -152,6 +193,27 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
                         <div className="whitespace-pre-wrap">{message.message}</div>
                       )}
                     </div>
+                    {/* Continue Button */}
+                    {showContinueButton === message.id && (
+                      <div className="mt-2">
+                        <Button
+                          onClick={() => handleContinue(message.id)}
+                          disabled={isLoading}
+                          size="sm"
+                          variant="outline"
+                          className="bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600 hover:text-white"
+                        >
+                          {isLoading ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                              <span>Continuing...</span>
+                            </div>
+                          ) : (
+                            'Continue Response'
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (

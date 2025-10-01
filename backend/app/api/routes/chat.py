@@ -271,7 +271,13 @@ async def generate_chat_response(
             ).first()
             
             if last_system_msg:
-                last_system_msg.message = (last_system_msg.message or "") + full_response
+                # Remove truncation indicator from previous message before appending
+                current_message = last_system_msg.message or ""
+                cleaned_message = current_message.replace(
+                    "\n\n[Response was truncated. Ask me to continue for more details.]", 
+                    ""
+                )
+                last_system_msg.message = cleaned_message + full_response
                 session.add(last_system_msg)
                 session.commit()
         else:
