@@ -1,13 +1,10 @@
-from types import CoroutineType
-from typing import Any
-
 from openai.types.chat import ChatCompletion
 
 from app.llm_clients.openai_client import client
 
 
-async def get_quiz_prompt(prompt: str) -> CoroutineType[Any, Any, ChatCompletion]:
-    return client.chat.completions.create(
+async def get_quiz_prompt(prompt: str) -> ChatCompletion:
+    return await client.chat.completions.create(
         model="gpt-4o",
         response_format={
             "type": "json_schema",

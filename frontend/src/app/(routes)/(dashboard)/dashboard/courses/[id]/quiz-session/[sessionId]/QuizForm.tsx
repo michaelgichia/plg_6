@@ -32,13 +32,25 @@ export default function QuizForm({
   const [isLoading, setIsLoading] = useState(false)
   const [session, setSession] = useState<QuizSessionPublicWithResults>()
 
+  const fetchQuizSession = async (_id: string, _sessionId: string) => {
+    try {
+      const result = await getQuizSession(_id, _sessionId)
+      if (result.ok) {
+        setSession(result.data)
+      } else {
+        toast.error('Failed to fetch course details. Please try again.')
+      }
+    } catch (error) {
+      console.error('Failed to fetch course:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleOnSubmit = (_state: any, formData: FormData) => {
     submitQuizSession(state, formData)
       .then((result) => {
-        console.log(result)
-        // if (result.ok) {
-        //   setSession(result.data)
-        // }
+        fetchQuizSession(id, sessionId)
       })
       .catch(() => {
         toast.error('Failed to delete document. Please try again.')
@@ -54,20 +66,7 @@ export default function QuizForm({
     },
   )
 
-  const fetchQuizSession = async (_id: string, _sessionId: string) => {
-    try {
-      const result = await getQuizSession(_id, _sessionId)
-      if (result.ok) {
-        setSession(result.data)
-      } else {
-        toast.error('Failed to fetch course details. Please try again.')
-      }
-    } catch (error) {
-      console.error('Failed to fetch course:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+
 
   useEffect(() => {
     setIsLoading(true)

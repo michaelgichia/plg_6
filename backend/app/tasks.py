@@ -66,9 +66,11 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
             """
 
             response = await get_quiz_prompt(prompt)
+            logger.info(f"This is the response: {response}")
 
             try:
                 raw_content = response.choices[0].message.content
+                logger.info(f"This is the raw_content: {raw_content}")
                 parsed = json.loads(raw_content)
                 quiz_list = parsed.get("quizzes", [])
                 if not isinstance(quiz_list, list):
