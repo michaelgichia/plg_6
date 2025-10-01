@@ -31,8 +31,22 @@ export default function QuizForm({
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [session, setSession] = useState<QuizSessionPublicWithResults>()
+
+  const handleOnSubmit = (_state: any, formData: FormData) => {
+    submitQuizSession(state, formData)
+      .then((result) => {
+        console.log(result)
+        // if (result.ok) {
+        //   setSession(result.data)
+        // }
+      })
+      .catch(() => {
+        toast.error('Failed to delete document. Please try again.')
+      })
+  }
+
   const [state, submitAction] = useActionState<ActionState, FormData>(
-    submitQuizSession as any,
+    handleOnSubmit as any,
     {
       ok: false,
       message: null,
@@ -81,8 +95,9 @@ export default function QuizForm({
   if (!session) return null
   const {is_completed, quizzes} = session
 
+  console.log("[state]", state)
   const isQuizInError = (quizId: string) => {
-    return state.error && state.error.field === `choice-${quizId}`
+    return state && state?.error && state?.error.field === `choice-${quizId}`
   }
 
   const getErrorMessage = (quizId: string) => {
@@ -211,11 +226,11 @@ export default function QuizForm({
             )
           })}
 
-          {!state.ok && state.error && state.error.code !== 'VALIDATION' && (
+          {state && !state.ok && state.error && state.error.code !== 'VALIDATION' && (
             <ErrorBox error={state.error} />
           )}
 
-          {!state.ok && state.error && state.error.field === 'submissions' && (
+          {state && !state.ok && state.error && state.error.field === 'submissions' && (
             <ErrorBox error={state.error} />
           )}
         </div>
