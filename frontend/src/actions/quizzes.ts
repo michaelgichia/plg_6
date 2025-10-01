@@ -5,7 +5,7 @@ import {
   QuizPublic,
   QuizScoreSummary,
   QuizSessionPublic,
-  QuizSessionPublicWithQuizzes,
+  QuizSessionPublicWithResults,
   QuizSessionsService,
   QuizStats,
   QuizzesPublic,
@@ -15,6 +15,8 @@ import { validateSubmissions } from '@/lib/form'
 
 import { mapApiError } from '@/lib/mapApiError'
 import { Result } from '@/lib/result'
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 /**
  * Fetch all quizzes.
@@ -99,6 +101,7 @@ export async function startQuizSession(
   _state: unknown,
   formatData: FormData,
 ): Promise<Result<[QuizSessionPublic, QuizzesPublic]>> {
+  let session;
   try {
     const courseId = formatData.get('courseId') as string
     const response = await CoursesService.postApiV1CoursesByCourseIdQuizStart({
@@ -106,16 +109,16 @@ export async function startQuizSession(
       responseValidator: async () => { },
     })
 
-    return {
-      ok: true,
-      data: response.data,
-    }
+    console.log("[response.data]", response.data)
+    session = response.data[0];
   } catch (error) {
     return {
       ok: false,
       error: mapApiError(error),
     }
   }
+
+  redirect(`/dashboard/courses/${session.course_id}/quiz-session/${session.id}`)
 }
 
 /**
@@ -151,11 +154,13 @@ export async function submitQuizSession(
       responseValidator: async () => { },
     });
 
+    console.log("[response.data,]", response.data)
     return {
       ok: true,
       data: response.data,
     };
   } catch (error) {
+    console.log(error);
     return {
       ok: false,
       error: mapApiError(error),
@@ -167,7 +172,7 @@ export async function submitQuizSession(
  * Fetch a single quiz by ID.
  * Returns a Result<QuizPublic>.
  */
-export async function getQuizSession(id: string): Promise<Result<QuizSessionPublicWithQuizzes>> {
+export async function getQuizSession(id: string): Promise<Result<QuizSessionPublicWithResults>> {
   try {
     const response = await QuizSessionsService.getApiV1QuizSessionsById({
       path: { id },

@@ -412,7 +412,7 @@ def get_quiz_stats(
     return QuizStats(
         best_total_submitted=best_total_submitted,
         best_total_correct=best_total_correct,
-        best_score_percentage=best_score_percentage,
-        average_score=average_score or 0.0,
+        best_score_percentage=round(best_score_percentage or 0.0),
+        average_score=round(average_score or 0.0),
         attempts=attempts,
     )

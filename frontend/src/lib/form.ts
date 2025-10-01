@@ -86,6 +86,18 @@ export function validateSubmissions(
     }];
   }
 
+  if(!raw.submissions || raw.submissions.length === 0) {
+    return [{
+      ok: false,
+      error: {
+        code: 'VALIDATION',
+        type: 'Submission',
+        message: 'No submissions found in the form data.',
+        field: 'submissions',
+      },
+    }];
+  }
+
   const submissionErrors: ValidationError[] = []
 
   for(const submission of raw.submissions) {
