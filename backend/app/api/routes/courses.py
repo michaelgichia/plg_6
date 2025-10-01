@@ -171,13 +171,13 @@ async def list_documents(
     ]
 
 
-@router.get("/{course_id}/flashcards", response_model=list[QAItem])
-def generate_flashcards_by_course_id(session: SessionDep, current_user: CurrentUser, course_id: uuid.UUID) -> list[QAItem]:
+@router.get("/{id}/flashcards", response_model=list[QAItem])
+def generate_flashcards_by_course_id(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> list[QAItem]:
     """
     Generate flashcards via course ID
     """
     statement = (
-        select(Course).where(Course.id == course_id).options(selectinload(Course.documents))
+        select(Course).where(Course.id == id).options(selectinload(Course.documents))
     )
     course = session.exec(statement).first()
     if not course:
