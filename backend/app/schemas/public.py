@@ -170,5 +170,28 @@ class QuizSessionsList(BaseModel):
     data: list[QuizSessionPublic]
 
 
+class QuizAttemptPublic(PydanticBase):
+    """
+    Public schema for a single QuizAttempt record.
+    Used to return the full history/results when a session is complete.
+    """
+
+    quiz_id: uuid.UUID
+    selected_answer_text: str
+    is_correct: bool
+    correct_answer_text: str
+    time_spent_seconds: float
+    created_at: datetime
+
+
 class QuizSessionPublicWithQuizzes(QuizSessionPublic):
     quizzes: list[QuizPublic] = Field(default_factory=list)
+
+
+class QuizSessionPublicWithResults(QuizSessionPublicWithQuizzes):
+    """
+    Expanded schema that includes quiz attempts (results)
+    when the session is marked as completed.
+    """
+
+    results: list[QuizAttemptPublic] = Field(default_factory=list)

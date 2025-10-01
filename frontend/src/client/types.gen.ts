@@ -403,6 +403,38 @@ export type PrivateUserCreate = {
 };
 
 /**
+ * QuizAttemptPublic
+ * Public schema for a single QuizAttempt record.
+ * Used to return the full history/results when a session is complete.
+ */
+export type QuizAttemptPublic = {
+    /**
+     * Quiz Id
+     */
+    quiz_id: string;
+    /**
+     * Selected Answer Text
+     */
+    selected_answer_text: string;
+    /**
+     * Is Correct
+     */
+    is_correct: boolean;
+    /**
+     * Correct Answer Text
+     */
+    correct_answer_text: string;
+    /**
+     * Time Spent Seconds
+     */
+    time_spent_seconds: number;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
  * QuizChoice
  */
 export type QuizChoice = {
@@ -497,9 +529,11 @@ export type QuizSessionPublic = {
 };
 
 /**
- * QuizSessionPublicWithQuizzes
+ * QuizSessionPublicWithResults
+ * Expanded schema that includes quiz attempts (results)
+ * when the session is marked as completed.
  */
-export type QuizSessionPublicWithQuizzes = {
+export type QuizSessionPublicWithResults = {
     /**
      * Id
      */
@@ -536,6 +570,10 @@ export type QuizSessionPublicWithQuizzes = {
      * Quizzes
      */
     quizzes?: Array<QuizPublic>;
+    /**
+     * Results
+     */
+    results?: Array<QuizAttemptPublic>;
 };
 
 /**
@@ -1846,7 +1884,7 @@ export type GetApiV1QuizSessionsByIdResponses = {
     /**
      * Successful Response
      */
-    200: QuizSessionPublicWithQuizzes;
+    200: QuizSessionPublicWithResults;
 };
 
 export type GetApiV1QuizSessionsByIdResponse = GetApiV1QuizSessionsByIdResponses[keyof GetApiV1QuizSessionsByIdResponses];

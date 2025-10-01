@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from sqlalchemy import Column, func
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import relationship
 from sqlmodel import Field, Relationship, SQLModel, text
 
 from app.schemas.public import DifficultyLevel
@@ -63,7 +64,14 @@ class QuizSession(QuizSessionBase, table=True):
     )
     is_completed: bool = Field(default=False)
 
-    attempts: list["QuizAttempt"] = Relationship(back_populates="session")
+    attempts: list["QuizAttempt"] = Relationship(
+        back_populates="session",
+        sa_relationship=relationship(
+            "QuizAttempt",
+            back_populates="session",
+            lazy="selectin",
+        ),
+    )
 
 
 class QuizAttempt(QuizAttemptBase, table=True):

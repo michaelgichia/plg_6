@@ -56,19 +56,16 @@ export default function QuizForm({
                 className={`flex flex-col gap-6 mb-8 p-4 ${errorClass}`}
                 key={quiz.id}
               >
-                {/* Question Text */}
                 <p className='text-lg'>{quiz.quiz_text}</p>
 
                 <input type='hidden' name='quizId' value={quiz.id} />
 
-                {/* Error Message specific to this quiz */}
                 {errorMessage && (
                   <p className='text-sm text-red-600 font-medium'>
-                    ⚠️ {errorMessage}
+                    {errorMessage}
                   </p>
                 )}
 
-                {/* Quiz Choices */}
                 <ul className={errorMessage ? 'text-red-600' : ''}>
                   {quiz.choices.map((choice) => (
                     <div className='flex gap-3 mb-4' key={choice.id}>
@@ -76,8 +73,6 @@ export default function QuizForm({
                         id={choice.id}
                         value={choice.id}
                         name={`choice-${quiz.id}`}
-                        // You might pass an `isInvalid` prop to your Checkbox component here
-                        // if it supports visual error states.
                       />
                       <Label htmlFor={choice.id}>
                         <span className='capitalize text-sm/snug'>

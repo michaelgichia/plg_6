@@ -877,8 +877,9 @@ export class DocumentsService {
 
 export class QuizSessionsService {
     /**
-     * Get Quiz Session
-     * API endpoint to retrieve a specific QuizSession identified by the session_id.
+     * Get Quiz Session Optimized
+     * Retrieves a QuizSession, eagerly loading attempts ONLY if completed,
+     * or just the session and quizzes if in progress.
      */
     public static getApiV1QuizSessionsById<ThrowOnError extends boolean = true>(options: Options<GetApiV1QuizSessionsByIdData, ThrowOnError>) {
         return (options.client ?? client).get<GetApiV1QuizSessionsByIdResponses, GetApiV1QuizSessionsByIdErrors, ThrowOnError>({

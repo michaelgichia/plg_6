@@ -268,6 +268,20 @@ export const zPrivateUserCreate = z.object({
 });
 
 /**
+ * QuizAttemptPublic
+ * Public schema for a single QuizAttempt record.
+ * Used to return the full history/results when a session is complete.
+ */
+export const zQuizAttemptPublic = z.object({
+    quiz_id: z.uuid(),
+    selected_answer_text: z.string(),
+    is_correct: z.boolean(),
+    correct_answer_text: z.string(),
+    time_spent_seconds: z.number(),
+    created_at: z.iso.datetime()
+});
+
+/**
  * QuizChoice
  */
 export const zQuizChoice = z.object({
@@ -325,9 +339,11 @@ export const zQuizSessionPublic = z.object({
 });
 
 /**
- * QuizSessionPublicWithQuizzes
+ * QuizSessionPublicWithResults
+ * Expanded schema that includes quiz attempts (results)
+ * when the session is marked as completed.
  */
-export const zQuizSessionPublicWithQuizzes = z.object({
+export const zQuizSessionPublicWithResults = z.object({
     id: z.uuid(),
     course_id: z.uuid(),
     total_submitted: z.int(),
@@ -339,7 +355,8 @@ export const zQuizSessionPublicWithQuizzes = z.object({
     is_completed: z.boolean(),
     created_at: z.iso.datetime(),
     updated_at: z.iso.datetime(),
-    quizzes: z.optional(z.array(zQuizPublic))
+    quizzes: z.optional(z.array(zQuizPublic)),
+    results: z.optional(z.array(zQuizAttemptPublic))
 });
 
 /**
@@ -951,7 +968,7 @@ export const zGetApiV1QuizSessionsByIdData = z.object({
 /**
  * Successful Response
  */
-export const zGetApiV1QuizSessionsByIdResponse = zQuizSessionPublicWithQuizzes;
+export const zGetApiV1QuizSessionsByIdResponse = zQuizSessionPublicWithResults;
 
 export const zPostApiV1QuizSessionsByIdScoreData = z.object({
     body: zQuizSubmissionBatch,

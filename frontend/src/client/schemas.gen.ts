@@ -627,6 +627,42 @@ export const PrivateUserCreateSchema = {
     title: 'PrivateUserCreate'
 } as const;
 
+export const QuizAttemptPublicSchema = {
+    properties: {
+        quiz_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Quiz Id'
+        },
+        selected_answer_text: {
+            type: 'string',
+            title: 'Selected Answer Text'
+        },
+        is_correct: {
+            type: 'boolean',
+            title: 'Is Correct'
+        },
+        correct_answer_text: {
+            type: 'string',
+            title: 'Correct Answer Text'
+        },
+        time_spent_seconds: {
+            type: 'number',
+            title: 'Time Spent Seconds'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['quiz_id', 'selected_answer_text', 'is_correct', 'correct_answer_text', 'time_spent_seconds', 'created_at'],
+    title: 'QuizAttemptPublic',
+    description: `Public schema for a single QuizAttempt record.
+Used to return the full history/results when a session is complete.`
+} as const;
+
 export const QuizChoiceSchema = {
     properties: {
         id: {
@@ -748,7 +784,7 @@ export const QuizSessionPublicSchema = {
     description: 'Public schema for a QuizSession.'
 } as const;
 
-export const QuizSessionPublicWithQuizzesSchema = {
+export const QuizSessionPublicWithResultsSchema = {
     properties: {
         id: {
             type: 'string',
@@ -799,11 +835,20 @@ export const QuizSessionPublicWithQuizzesSchema = {
             },
             type: 'array',
             title: 'Quizzes'
+        },
+        results: {
+            items: {
+                '$ref': '#/components/schemas/QuizAttemptPublic'
+            },
+            type: 'array',
+            title: 'Results'
         }
     },
     type: 'object',
     required: ['id', 'course_id', 'total_submitted', 'total_correct', 'is_completed', 'created_at', 'updated_at'],
-    title: 'QuizSessionPublicWithQuizzes'
+    title: 'QuizSessionPublicWithResults',
+    description: `Expanded schema that includes quiz attempts (results)
+when the session is marked as completed.`
 } as const;
 
 export const QuizSessionsListSchema = {

@@ -14,6 +14,7 @@ export default async function Page(props: {
     return <ErrorBox error={result.error} />
   }
 
+  console.log({result})
   const quizzes = result.data.quizzes || []
 
   return (
