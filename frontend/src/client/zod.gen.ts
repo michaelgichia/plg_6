@@ -128,7 +128,7 @@ export const zCourseWithDocuments = z.object({
  * CoursesPublic
  */
 export const zCoursesPublic = z.object({
-    data: z.array(zCourse),
+    data: z.array(zCoursePublic),
     count: z.int()
 });
 
@@ -308,8 +308,7 @@ export const zQuizScoreSummary = z.object({
 
 /**
  * QuizSessionPublic
- * Public schema for a QuizSession, used to show the user their incomplete
- * or completed quiz attempts.
+ * Public schema for a QuizSession.
  */
 export const zQuizSessionPublic = z.object({
     id: z.uuid(),
@@ -340,7 +339,7 @@ export const zQuizSessionPublicWithQuizzes = z.object({
     is_completed: z.boolean(),
     created_at: z.iso.datetime(),
     updated_at: z.iso.datetime(),
-    quizzes: z.optional(z.array(zQuizPublic)).default([])
+    quizzes: z.optional(z.array(zQuizPublic))
 });
 
 /**
@@ -358,7 +357,7 @@ export const zQuizStats = z.object({
     best_total_correct: z.int(),
     best_score_percentage: z.number(),
     average_score: z.number(),
-    attempts: z.number()
+    attempts: z.int()
 });
 
 /**

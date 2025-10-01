@@ -10,7 +10,6 @@ import ErrorBox from '@/components/ui/ErrorBox'
 
 export default function QuizStartComponent({courseId}: {courseId: string}) {
   const [state, formAction, isPending] = useActionState(startQuizSession, null)
-  console.log({state})
 
   if(state && !state?.ok) {
     return <ErrorBox error={state?.error} />

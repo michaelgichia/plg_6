@@ -287,7 +287,7 @@ export const CoursesPublicSchema = {
     properties: {
         data: {
             items: {
-                '$ref': '#/components/schemas/Course'
+                '$ref': '#/components/schemas/CoursePublic'
             },
             type: 'array',
             title: 'Data'
@@ -745,8 +745,7 @@ export const QuizSessionPublicSchema = {
     type: 'object',
     required: ['id', 'course_id', 'total_submitted', 'total_correct', 'is_completed', 'created_at', 'updated_at'],
     title: 'QuizSessionPublic',
-    description: `Public schema for a QuizSession, used to show the user their incomplete
-or completed quiz attempts.`
+    description: 'Public schema for a QuizSession.'
 } as const;
 
 export const QuizSessionPublicWithQuizzesSchema = {
@@ -799,8 +798,7 @@ export const QuizSessionPublicWithQuizzesSchema = {
                 '$ref': '#/components/schemas/QuizPublic'
             },
             type: 'array',
-            title: 'Quizzes',
-            default: []
+            title: 'Quizzes'
         }
     },
     type: 'object',
@@ -842,7 +840,7 @@ export const QuizStatsSchema = {
             title: 'Average Score'
         },
         attempts: {
-            type: 'number',
+            type: 'integer',
             title: 'Attempts'
         }
     },

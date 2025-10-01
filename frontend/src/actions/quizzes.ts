@@ -10,6 +10,8 @@ import {
   QuizStats,
   QuizzesPublic,
 } from '@/client'
+import { extractRawSubmissions } from '@/lib/data-extraction'
+import { validateSubmissions } from '@/lib/form'
 
 import { mapApiError } from '@/lib/mapApiError'
 import { Result } from '@/lib/result'
@@ -98,29 +100,11 @@ export async function startQuizSession(
   formatData: FormData,
 ): Promise<Result<[QuizSessionPublic, QuizzesPublic]>> {
   try {
-    // const payload = zGetApiV1QuizSessionsData.safeParse({
-    //   courseId: formatData.get('courseId'),
-    // })
-    // console.log("[Course ]", payload)
-
-    // if (!payload.success) {
-    //   return {
-    //     ok: false,
-    //     error: {
-    //       code: 'VALIDATION',
-    //       message: 'Validation failed',
-    //       details: payload.error.message,
-    //     },
-    //   }
-    // }
-
     const courseId = formatData.get('courseId') as string
-    console.log("[courseId ]", courseId)
     const response = await CoursesService.postApiV1CoursesByCourseIdQuizStart({
       path: { course_id: courseId },
-      responseValidator: async () => {},
+      responseValidator: async () => { },
     })
-    console.log("[response ]", response)
 
     return {
       ok: true,
@@ -142,31 +126,47 @@ export async function submitQuizSession(
   _state: unknown,
   formData: FormData,
 ): Promise<Result<QuizScoreSummary>> {
+
+  const rawData = extractRawSubmissions(formData);
+  const validationResult = validateSubmissions(rawData);
+
+  for(const error of validationResult) {
+    if (!error.ok) {
+      return { ok: false, error: error.error } as Result<QuizScoreSummary>;
+    }
+  }
+
+  const { sessionId, submissions } = rawData;
+
   try {
-    const quizId = formData.get('quizId') as string
-    const answers = formData.get('answers') as string
     const response = await QuizSessionsService.postApiV1QuizSessionsByIdScore({
       query: {
-        session_id: quizId,
+        session_id: sessionId,
       },
       body: {
-        submissions: JSON.parse(answers),
-        total_time_seconds: 0,
+        submissions: submissions,
+        total_time_seconds: 60000,
       },
+      requestValidator: async () => { },
       responseValidator: async () => { },
-    })
+    });
+
     return {
       ok: true,
       data: response.data,
-    }
+    };
   } catch (error) {
     return {
       ok: false,
       error: mapApiError(error),
-    }
+    };
   }
 }
 
+/**
+ * Fetch a single quiz by ID.
+ * Returns a Result<QuizPublic>.
+ */
 export async function getQuizSession(id: string): Promise<Result<QuizSessionPublicWithQuizzes>> {
   try {
     const response = await QuizSessionsService.getApiV1QuizSessionsById({

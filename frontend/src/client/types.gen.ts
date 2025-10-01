@@ -181,7 +181,7 @@ export type CoursesPublic = {
     /**
      * Data
      */
-    data: Array<Course>;
+    data: Array<CoursePublic>;
     /**
      * Count
      */
@@ -459,8 +459,7 @@ export type QuizScoreSummary = {
 
 /**
  * QuizSessionPublic
- * Public schema for a QuizSession, used to show the user their incomplete
- * or completed quiz attempts.
+ * Public schema for a QuizSession.
  */
 export type QuizSessionPublic = {
     /**

@@ -69,12 +69,36 @@ def submit_and_score_quiz_batch(
     API endpoint to receive a batch of user answers and score a specific
     QuizSession identified by the session_id.
     """
+    try:
+        statement = select(
+            QuizSession,
+        ).where(
+            QuizSession.user_id == current_user.id,
+            QuizSession.id == session_id,
+        )
+        quiz_session = session.exec(statement).first()
 
-    score_summary = score_quiz_batch(
-        session_id=session_id,
-        db=session,
-        submission_batch=submission_batch,
-        current_user=current_user,
-    )
+        if not quiz_session:
+            raise HTTPException(
+                status_code=404, detail="Quiz session not found for the current user"
+            )
 
-    return score_summary
+        if quiz_session.is_completed:
+            raise HTTPException(
+                status_code=400, detail="Quiz session is already completed"
+            )
+
+        score_summary = score_quiz_batch(
+            session_id=session_id,
+            db=session,
+            submission_batch=submission_batch,
+            current_user=current_user,
+        )
+        return score_summary
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(f"Error in submit_and_score_quiz_batch: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")

@@ -9,12 +9,12 @@ export function mapApiError(err: unknown): APIError {
         ? `HTTP_${err.response.status}`
         : 'AXIOS_ERROR',
       message:
-        get(err, 'response.data.detail') ??
-        get(err, 'response.error.response.data') ??
+        get(err as any, 'response.data.detail') ??
+        get(err as any, 'response.error.response.data') ??
         'Something went wrong',
       status: err.response?.status,
-      details: get(err, 'response.data') ??
-        get(err, 'response.error.response.data') ??
+      details: get(err as any, 'response.data') ??
+        get(err as any, 'response.error.response.data') ??
         'Something went wrong',
     }
   }

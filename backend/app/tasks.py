@@ -105,16 +105,142 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
         logger.error(f"Error generating quizzes for document {document_id}: {e}")
 
 
+# def score_quiz_batch(
+#     db: Session,
+#     session_id: uuid.UUID,
+#     submission_batch: QuizSubmissionBatch,
+#     current_user: CurrentUser,
+# ) -> QuizScoreSummary:
+#     """
+#     Retrieves the existing QuizSession, scores the submitted answers,
+#     and updates the session's score and attempts.
+#     """
+#     try:
+#         # 1. Input Validation
+#         if not submission_batch.submissions:
+#             return QuizScoreSummary(
+#                 total_submitted=0, total_correct=0, score_percentage=0.0, results=[]
+#             )
+
+#         # 2. Fetch and Validate Existing QuizSession
+#         quiz_session = db.get(QuizSession, session_id)
+
+#         if not quiz_session:
+#             # Using an HTTPException is better practice in the service layer when raising
+#             raise HTTPException(status_code=404, detail="QuizSession not found.")
+
+#         # Security check: Ensure the user owns the session
+#         if quiz_session.user_id != current_user.id:
+#             raise HTTPException(
+#                 status_code=403, detail="Permission denied to score this session."
+#             )
+
+#         # 3. Prepare Submissions and Query for Correct Answers
+#         submitted_ids = [sub.quiz_id for sub in submission_batch.submissions]
+#         submitted_answers: dict[uuid.UUID, str] = {
+#             sub.quiz_id: sub.selected_answer_text
+#             for sub in submission_batch.submissions
+#         }
+
+#         statement = (
+#             select(Quiz)
+#             .where(Quiz.id.in_(submitted_ids))  # type: ignore
+#             .options(load_only(Quiz.id, Quiz.correct_answer))  # type: ignore
+#         )
+
+#         correct_answers_map: dict[uuid.UUID, str] = {
+#             q.id: q.correct_answer.strip() for q in db.exec(statement).all()
+#         }
+
+#         # 4. Score Submissions and Create Attempts
+#         results: list[SingleQuizScore] = []
+#         total_correct = 0
+#         total_submitted = len(submission_batch.submissions)
+
+#         for submitted_quiz_id, submitted_text in submitted_answers.items():
+#             correct_text = correct_answers_map.get(submitted_quiz_id)
+
+#             # Check if quiz exists and the answer is provided
+#             if not correct_text or not submitted_text:
+#                 results.append(
+#                     SingleQuizScore(
+#                         quiz_id=submitted_quiz_id,
+#                         is_correct=False,
+#                         correct_answer_text=correct_text or "N/A",
+#                         feedback="Quiz not found or no answer provided.",
+#                     )
+#                 )
+#                 continue
+
+#             is_correct = clean_string(submitted_text) == clean_string(correct_text)
+
+#             if is_correct:
+#                 total_correct += 1
+#                 feedback = "Correct! Well done."
+#             else:
+#                 feedback = "Incorrect. Review the material."
+
+#             results.append(
+#                 SingleQuizScore(
+#                     quiz_id=submitted_quiz_id,
+#                     is_correct=is_correct,
+#                     correct_answer_text=correct_text,
+#                     feedback=feedback,
+#                 )
+#             )
+
+#             # Create a QuizAttempt record
+#             attempt = QuizAttempt(
+#                 session_id=session_id,  # Use the session ID from the path
+#                 user_id=current_user.id,
+#                 quiz_id=submitted_quiz_id,
+#                 selected_answer_text=submitted_text,
+#                 is_correct=is_correct,
+#                 correct_answer_text=correct_text,
+#             )
+#             db.add(attempt)
+
+#         # 5. Update and Commit Session Statistics
+#         score_percentage = (
+#             (total_correct / total_submitted) * 100 if total_submitted > 0 else 0.0
+#         )
+
+#         # Update the existing session record
+#         quiz_session.total_submitted += total_submitted
+#         quiz_session.total_correct += total_correct
+#         quiz_session.total_time_seconds += submission_batch.total_time_seconds
+#         quiz_session.is_completed = True
+
+#         db.add(quiz_session)
+#         db.commit()
+
+#         # 6. Return Score Summary
+#         return QuizScoreSummary(
+#             total_submitted=quiz_session.total_submitted,  # Return updated cumulative totals
+#             total_correct=quiz_session.total_correct,
+#             score_percentage=round(
+#                 score_percentage, 2
+#             ),  # Note: This percentage is for the BATCH, not the whole session
+#             results=results,
+#         )
+
+#     except HTTPException:
+#         db.rollback()
+#         raise
+#     except Exception as e:
+#         logger.error(f"Error scoring quiz batch: {e}")
+#         db.rollback()
+#         raise
+
+# ... (omitted imports and function definition) ...
+
+
 def score_quiz_batch(
     db: Session,
     session_id: uuid.UUID,
     submission_batch: QuizSubmissionBatch,
     current_user: CurrentUser,
 ) -> QuizScoreSummary:
-    """
-    Retrieves the existing QuizSession, scores the submitted answers,
-    and updates the session's score and attempts.
-    """
     try:
         # 1. Input Validation
         if not submission_batch.submissions:
@@ -144,13 +270,24 @@ def score_quiz_batch(
 
         statement = (
             select(Quiz)
-            .where(Quiz.id.in_(submitted_ids))  # type: ignore
-            .options(load_only(Quiz.id, Quiz.correct_answer))  # type: ignore
+            .where(Quiz.id.in_(submitted_ids))
+            .options(load_only(Quiz.id, Quiz.correct_answer))
         )
 
         correct_answers_map: dict[uuid.UUID, str] = {
             q.id: q.correct_answer.strip() for q in db.exec(statement).all()
         }
+
+        # 🎯 FIX: Check for missing quizzes immediately after fetching from DB
+        missing_ids = set(submitted_ids) - set(correct_answers_map.keys())
+
+        if missing_ids:
+            # Raise an HTTPException if the client submitted IDs that don't exist
+            # or are not queryable by the current user/session context.
+            raise HTTPException(
+                status_code=404,
+                detail=f"One or more quiz IDs were not found in the database: {list(missing_ids)}",
+            )
 
         # 4. Score Submissions and Create Attempts
         results: list[SingleQuizScore] = []
@@ -158,21 +295,22 @@ def score_quiz_batch(
         total_submitted = len(submission_batch.submissions)
 
         for submitted_quiz_id, submitted_text in submitted_answers.items():
-            correct_text = correct_answers_map.get(submitted_quiz_id)
+            # Since we checked for missing IDs above, we can safely use the map here
+            correct_text = correct_answers_map[
+                submitted_quiz_id
+            ]  # Access safely with []
 
-            # Check if quiz exists and the answer is provided
-            if not correct_text or not submitted_text:
-                results.append(
-                    SingleQuizScore(
-                        quiz_id=submitted_quiz_id,
-                        is_correct=False,
-                        correct_answer_text=correct_text or "N/A",
-                        feedback="Quiz not found or no answer provided.",
-                    )
+            # Check if submitted_text is provided (logic error if it's missing)
+            if not submitted_text:
+                # Raise 400 Bad Request if the submission is invalid
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Selected answer text is missing for quiz ID {submitted_quiz_id}.",
                 )
-                continue
 
             is_correct = clean_string(submitted_text) == clean_string(correct_text)
+
+            # ... (Rest of scoring and QuizAttempt creation logic) ...
 
             if is_correct:
                 total_correct += 1
@@ -189,9 +327,8 @@ def score_quiz_batch(
                 )
             )
 
-            # Create a QuizAttempt record
             attempt = QuizAttempt(
-                session_id=session_id,  # Use the session ID from the path
+                session_id=session_id,
                 user_id=current_user.id,
                 quiz_id=submitted_quiz_id,
                 selected_answer_text=submitted_text,
@@ -225,12 +362,14 @@ def score_quiz_batch(
         )
 
     except HTTPException:
+        # Crucial: Rollback before re-raising HTTPExceptions (already correct)
         db.rollback()
         raise
     except Exception as e:
-        logger.error(f"Error scoring quiz batch: {e}")
+        logger.error(f"Error scoring quiz batch: {e}", exc_info=True)
         db.rollback()
-        raise
+        # Raise generic exception to be caught and translated to a 500 error in the router
+        raise Exception("Internal error during quiz scoring.")
 
 
 def get_quizzes_for_session(

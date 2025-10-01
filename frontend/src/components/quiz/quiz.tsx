@@ -32,19 +32,8 @@ export default async function QuizComponent({
     <div className='h-full flex flex-col'>
       <div className='min-h-screen p-6'>
         <div className='mx-auto max-w-7xl'>
-          {/* Stats Cards */}
           <QuizStatsPage courseId={course.id} />
           <QuizStartComponent courseId={course.id} />
-          {/* <div className='flex justify-end'>
-            <form action={startQuizSession}>
-              <input type='hidden' name='course_id' value={course.id} />
-              <Button variant='default' type='submit' size='xl'>
-                <span>Start Quiz</span>
-                <ChevronRight className='ml-2 h-6 w-6' />
-              </Button>
-            </form>
-          </div> */}
-          {/* Quiz Attempts Section */}
           <QuizAttempts courseId={course.id} />
         </div>
       </div>
