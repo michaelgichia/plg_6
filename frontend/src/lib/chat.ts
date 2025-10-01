@@ -1,8 +1,8 @@
-export const createChatStream = async (courseId: string, message: string) => {
+export const createChatStream = async (courseId: string, message: string, continueResponse: boolean = false) => {
   const response = await fetch(`/api/v1/chat/${courseId}/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, continue_response: continueResponse }),
     credentials: 'include',
   })
 
