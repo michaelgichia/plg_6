@@ -368,5 +368,23 @@ async def get_chat_history(
         .limit(limit)
     ).all()
 
+     # Generate Athena greeting if no messages exist
+    if not messages:
+        greeting_text = f"Hi! I'm Athena, your AI tutor for {course.name}. I'm ready to help you understand the course materials and answer any questions you have. What would you like to learn about today?"
+        
+        # Create and save greeting message
+        greeting_data = ChatCreate(
+            message=greeting_text,
+            is_system=True,
+            course_id=course_id,
+        )
+        greeting_msg = Chat(**greeting_data.model_dump())
+        session.add(greeting_msg)
+        session.commit()
+        session.refresh(greeting_msg)
+        
+        # Return greeting as first message
+        return [ChatPublic(**greeting_msg.model_dump())]
+
     # Convert to ChatPublic
     return [ChatPublic(**msg.model_dump()) for msg in messages] if messages else []
