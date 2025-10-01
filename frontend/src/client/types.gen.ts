@@ -397,6 +397,20 @@ export type PrivateUserCreate = {
 };
 
 /**
+ * QAItem
+ */
+export type QaItem = {
+    /**
+     * Question
+     */
+    question: string;
+    /**
+     * Answer
+     */
+    answer: string;
+};
+
+/**
  * Token
  */
 export type Token = {
@@ -1334,6 +1348,37 @@ export type GetApiV1CoursesByCourseIdDocumentsResponses = {
 };
 
 export type GetApiV1CoursesByCourseIdDocumentsResponse = GetApiV1CoursesByCourseIdDocumentsResponses[keyof GetApiV1CoursesByCourseIdDocumentsResponses];
+
+export type GetApiV1CoursesByCourseIdFlashcardsData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{course_id}/flashcards';
+};
+
+export type GetApiV1CoursesByCourseIdFlashcardsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1CoursesByCourseIdFlashcardsError = GetApiV1CoursesByCourseIdFlashcardsErrors[keyof GetApiV1CoursesByCourseIdFlashcardsErrors];
+
+export type GetApiV1CoursesByCourseIdFlashcardsResponses = {
+    /**
+     * Response Courses-Generate Flashcards By Course Id
+     * Successful Response
+     */
+    200: Array<QaItem>;
+};
+
+export type GetApiV1CoursesByCourseIdFlashcardsResponse = GetApiV1CoursesByCourseIdFlashcardsResponses[keyof GetApiV1CoursesByCourseIdFlashcardsResponses];
 
 export type PostApiV1ChatByCourseIdStreamData = {
     body: ChatMessage;

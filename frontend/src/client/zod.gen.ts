@@ -253,6 +253,14 @@ export const zPrivateUserCreate = z.object({
 });
 
 /**
+ * QAItem
+ */
+export const zQaItem = z.object({
+    question: z.string(),
+    answer: z.string()
+});
+
+/**
  * Token
  */
 export const zToken = z.object({
@@ -697,6 +705,20 @@ export const zGetApiV1CoursesByCourseIdDocumentsData = z.object({
  * Successful Response
  */
 export const zGetApiV1CoursesByCourseIdDocumentsResponse = z.array(z.record(z.string(), z.unknown()));
+
+export const zGetApiV1CoursesByCourseIdFlashcardsData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        course_id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Response Courses-Generate Flashcards By Course Id
+ * Successful Response
+ */
+export const zGetApiV1CoursesByCourseIdFlashcardsResponse = z.array(zQaItem);
 
 export const zPostApiV1ChatByCourseIdStreamData = z.object({
     body: zChatMessage,

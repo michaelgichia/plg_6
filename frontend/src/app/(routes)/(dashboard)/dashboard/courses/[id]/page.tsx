@@ -4,6 +4,7 @@ import {getCourse} from '@/actions/courses'
 import ErrorBox from '@/components/ui/ErrorBox'
 import {Tabs, TabsContent, TabsList, StyledTabList} from '@/components/ui/tabs'
 import PageLoader from '@/components/ui/page-loader'
+import Flashcard from '@/components/flashcard';
 
 const ChatComponent = dynamic(() => import('@/components/chat'), {
   ssr: true,
@@ -37,11 +38,10 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
           <ChatComponent courseId={id} />
         </TabsContent>
 
-        <TabsContent value='flashcard' className='p-6'>
-          <div className='text-center text-slate-400 py-12'>
-            Flashcard content will be displayed here
-          </div>
-        </TabsContent>
+
+      <TabsContent value='flashcard' className='p-6'>
+        <Flashcard courseId={id}/>
+      </TabsContent>
 
         <TabsContent value='podcast' className='p-6'>
           <div className='text-center text-slate-400 py-12'>
