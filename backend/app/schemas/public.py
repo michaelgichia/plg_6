@@ -1,5 +1,6 @@
 """
-Centralized Pydantic/response schemas for Course and Document to avoid circular imports.
+Centralized Pydantic/response schemas for all entities (Course, Document, Quiz, Session).
+This file should only contain Pydantic models (BaseModel/SQLModel for schema use).
 """
 
 import uuid
@@ -7,9 +8,24 @@ from collections.abc import Sequence
 from datetime import datetime
 from enum import Enum, StrEnum
 
-from sqlmodel import Field, SQLModel
+from pydantic import BaseModel, Field
 
-from app.models.course import Course
+# ----------------------------------------------------------------------
+# Base Configuration Class (Apply once)
+# ----------------------------------------------------------------------
+
+
+class PydanticBase(BaseModel):
+    """Base class for all public response schemas."""
+
+    model_config = {
+        "from_attributes": True,  # Enables ORM mode: allows assignment from attributes
+    }
+
+
+# ----------------------------------------------------------------------
+# Document and Course Schemas
+# ----------------------------------------------------------------------
 
 
 class DocumentStatus(str, Enum):
@@ -19,7 +35,7 @@ class DocumentStatus(str, Enum):
     FAILED = "failed"
 
 
-class DocumentPublic(SQLModel):
+class DocumentPublic(PydanticBase):
     id: uuid.UUID
     course_id: uuid.UUID
     updated_at: datetime
@@ -27,23 +43,27 @@ class DocumentPublic(SQLModel):
     status: DocumentStatus
 
 
-class CoursePublic(SQLModel):
+class CoursePublic(PydanticBase):
     id: uuid.UUID
     owner_id: uuid.UUID
     name: str
     description: str | None = None
-    documents: Sequence["DocumentPublic"]
+    documents: list[DocumentPublic]
     created_at: datetime
     updated_at: datetime
 
 
-class CoursesPublic(SQLModel):
-    data: Sequence["Course"]
+class CoursesPublic(BaseModel):
+    data: Sequence[CoursePublic]
     count: int
 
 
+# ----------------------------------------------------------------------
+# Quiz and Chunk Schemas
+# ----------------------------------------------------------------------
+
+
 class DifficultyLevel(StrEnum):
-    # Quiz difficulty levels
     EASY = "easy"
     MEDIUM = "medium"
     HARD = "hard"
@@ -51,49 +71,56 @@ class DifficultyLevel(StrEnum):
     ALL = "all"
 
 
-class QuizChoice(SQLModel):
+class QuizChoice(PydanticBase):
+    # Note: Using uuid.UUID as the type for 'id' is good.
     id: uuid.UUID
     text: str
 
 
-class QuizPublic(SQLModel):
+class QuizPublic(PydanticBase):
     id: uuid.UUID
     quiz_text: str
-    choices: Sequence[QuizChoice]
+    choices: list[QuizChoice]
 
 
-class QuizzesPublic(SQLModel):
-    data: Sequence["QuizPublic"]
+class QuizzesPublic(BaseModel):
+    data: list[QuizPublic]
     count: int
 
 
-class ChunkPublic(SQLModel):
+class ChunkPublic(PydanticBase):
     id: uuid.UUID
     document_id: uuid.UUID
     text_content: str
-    quizzes: Sequence["QuizPublic"]
+    # Nested quizzes
+    quizzes: list[QuizPublic]
 
 
-class ChunksPublic(SQLModel):
-    data: Sequence["ChunkPublic"]
+class ChunksPublic(BaseModel):
+    data: list[ChunkPublic]
     count: int
 
 
-class SingleQuizSubmission(SQLModel):
+# ----------------------------------------------------------------------
+# Quiz Submission and Scoring Schemas
+# ----------------------------------------------------------------------
+
+
+class SingleQuizSubmission(PydanticBase):
     """The user's answer for one question."""
 
     quiz_id: uuid.UUID
     selected_answer_text: str
 
 
-class QuizSubmissionBatch(SQLModel):
+class QuizSubmissionBatch(PydanticBase):
     """Container for multiple quiz submissions."""
 
-    submissions: Sequence[SingleQuizSubmission]
+    submissions: list[SingleQuizSubmission]
     total_time_seconds: float = Field(default=0.0)
 
 
-class SingleQuizScore(SQLModel):
+class SingleQuizScore(PydanticBase):
     """The result for a single question."""
 
     quiz_id: uuid.UUID
@@ -102,28 +129,30 @@ class SingleQuizScore(SQLModel):
     feedback: str
 
 
-class QuizScoreSummary(SQLModel):
+class QuizScoreSummary(PydanticBase):
     """The overall score for the batch of submissions."""
 
     total_submitted: int
     total_correct: int
     score_percentage: float
-    results: Sequence[SingleQuizScore]
+    results: list[SingleQuizScore]
 
 
-class QuizStats(SQLModel):
+# ----------------------------------------------------------------------
+# Quiz Session and Stats Schemas
+# ----------------------------------------------------------------------
+
+
+class QuizStats(PydanticBase):
     best_total_submitted: int
     best_total_correct: int
     best_score_percentage: float
     average_score: float
-    attempts: float
+    attempts: int
 
 
-class QuizSessionPublic(SQLModel):
-    """
-    Public schema for a QuizSession, used to show the user their incomplete
-    or completed quiz attempts.
-    """
+class QuizSessionPublic(PydanticBase):
+    """Public schema for a QuizSession."""
 
     id: uuid.UUID
     course_id: uuid.UUID
@@ -137,9 +166,9 @@ class QuizSessionPublic(SQLModel):
     updated_at: datetime
 
 
-class QuizSessionsList(SQLModel):
-    data: Sequence[QuizSessionPublic]
+class QuizSessionsList(BaseModel):
+    data: list[QuizSessionPublic]
 
 
 class QuizSessionPublicWithQuizzes(QuizSessionPublic):
-    quizzes: Sequence[QuizPublic] = []
+    quizzes: list[QuizPublic] = Field(default_factory=list)
