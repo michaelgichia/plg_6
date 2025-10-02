@@ -3,17 +3,69 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Mic } from 'react-feather'
+import { Mic, Copy, RotateCcw, Check } from 'react-feather'
 import { getChatHistory } from '@/actions/chat'
 import { ChatPublic } from '@/client'
 import { createChatStream, readStreamAsText } from '@/lib/chat'
 import { Avatar, AvatarFallback } from './ui/avatar'
 
+interface MessageActionsProps {
+  messageId: string
+  messageText: string
+  isSystemMessage: boolean
+  isLoading: boolean
+  copiedMessageId: string | null
+  onCopy: (messageText: string, messageId: string) => void
+  onRegenerate?: (messageId: string) => void
+  className?: string
+}
+
+function MessageActions({ 
+  messageId, 
+  messageText, 
+  isSystemMessage, 
+  isLoading, 
+  copiedMessageId, 
+  onCopy, 
+  onRegenerate,
+  className = "" 
+}: MessageActionsProps) {
+  return (
+    <div className={`flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${className}`}>
+      <Button
+        onClick={() => onCopy(messageText, messageId)}
+        size="sm"
+        variant="ghost"
+        className="h-7 px-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+      >
+        {copiedMessageId === messageId ? (
+          <Check className="h-3 w-3" />
+        ) : (
+          <Copy className="h-3 w-3" />
+        )}
+      </Button>
+      {isSystemMessage && onRegenerate && (
+        <Button
+          onClick={() => onRegenerate(messageId)}
+          disabled={isLoading}
+          size="sm"
+          variant="ghost"
+          className="h-7 px-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700 disabled:opacity-50"
+        >
+          <RotateCcw className="h-3 w-3" />
+        </Button>
+      )}
+    </div>
+  )
+}
+
 export default function ChatComponent({ courseId }: { courseId: string }) {
   const [messages, setMessages] = useState<ChatPublic[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [loadingState, setLoadingState] = useState<'thinking' | 'searching' | 'generating' | null>(null)
   const [showContinueButton, setShowContinueButton] = useState<string | null>(null)
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -41,6 +93,7 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
 
   const handleChatRequest = async (message: string, isContinuation: boolean = false, targetMessageId?: string) => {
     setIsLoading(true)
+    setLoadingState('thinking')
     
     let systemMessageId: string
 
@@ -48,6 +101,7 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
       // For continuation, use the existing message ID and hide continue button
       systemMessageId = targetMessageId!
       setShowContinueButton(null)
+      setLoadingState('generating') // Continuation goes straight to generating
     } else {
       // For new messages, add user message and create system placeholder
       const userMessage: ChatPublic = {
@@ -72,6 +126,11 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
         updated_at: new Date().toISOString(),
       }
       setMessages(prev => [...prev, systemMessage])
+      
+      // Progress through loading states
+      setLoadingState('searching')
+      await new Promise(resolve => setTimeout(resolve, 500)) // Brief pause to show "searching"
+      setLoadingState('generating')
     }
 
     try {
@@ -140,6 +199,7 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
       )
     } finally {
       setIsLoading(false)
+      setLoadingState(null)
     }
   }
 
@@ -153,6 +213,31 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
 
   const handleContinue = async (messageId: string) => {
     await handleChatRequest("continue", true, messageId)
+  }
+
+  const handleCopyMessage = async (messageText: string, messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(messageText)
+      setCopiedMessageId(messageId)
+      // Reset copy state after 2 seconds
+      setTimeout(() => setCopiedMessageId(null), 2000)
+    } catch (error) {
+      console.error('Failed to copy message:', error)
+    }
+  }
+
+  const handleRegenerateResponse = async (messageId: string) => {
+    // Find the user message that corresponds to this system response
+    const messageIndex = messages.findIndex(msg => msg.id === messageId)
+    if (messageIndex > 0) {
+      const userMessage = messages[messageIndex - 1]
+      if (userMessage && !userMessage.is_system) {
+        // Remove the current system response
+        setMessages(prev => prev.filter(msg => msg.id !== messageId))
+        // Regenerate with the same user question
+        await handleChatRequest(userMessage.message, false)
+      }
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -175,7 +260,7 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
               }`}
             >
               {message.is_system ? (
-                <div className='flex items-start gap-3 max-w-4xl'>
+                <div className='flex items-start gap-3 max-w-4xl group'>
                   <Avatar className='h-8 w-8 mt-1 flex-shrink-0'>
                     <AvatarFallback className='bg-slate-700 text-white text-xs'>
                       CT
@@ -184,15 +269,37 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
                   <div className='min-w-0 flex-1'>
                     <div className='bg-slate-800 rounded-lg p-3 text-slate-100'>
                       {message.message === '' ? (
-                        <div className="flex space-x-1 px-1">
-                          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-                          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
+                        <div className="flex items-center space-x-3">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
+                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
+                          </div>
+                          <span className="text-slate-400 text-sm">
+                            {loadingState === 'thinking' && 'Athena is thinking...'}
+                            {loadingState === 'searching' && 'Searching course materials...'}
+                            {loadingState === 'generating' && 'Generating response...'}
+                            {!loadingState && 'Processing...'}
+                          </span>
                         </div>
                       ) : (
                         <div className="whitespace-pre-wrap">{message.message}</div>
                       )}
                     </div>
+                    
+                    {/* Message Actions */}
+                    {message.message && (
+                      <MessageActions
+                        messageId={message.id}
+                        messageText={message.message}
+                        isSystemMessage={true}
+                        isLoading={isLoading}
+                        copiedMessageId={copiedMessageId}
+                        onCopy={handleCopyMessage}
+                        onRegenerate={handleRegenerateResponse}
+                      />
+                    )}
+
                     {/* Continue Button */}
                     {showContinueButton === message.id && (
                       <div className="mt-2">
@@ -217,10 +324,23 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
                   </div>
                 </div>
               ) : (
-                <div className='bg-blue-600 rounded-lg px-4 py-2 max-w-md text-white'>
-                  <div className="whitespace-pre-wrap">{message.message}</div>
+                <div className="group max-w-md">
+                  <div className='bg-blue-600 rounded-lg px-4 py-2 text-white'>
+                    <div className="whitespace-pre-wrap">{message.message}</div>
+                  </div>
+                  {/* User Message Actions */}
+                  <MessageActions
+                    messageId={message.id}
+                    messageText={message.message!}
+                    isSystemMessage={false}
+                    isLoading={isLoading}
+                    copiedMessageId={copiedMessageId}
+                    onCopy={handleCopyMessage}
+                    className="justify-end mt-1"
+                  />
                 </div>
-              )}
+              )
+            }
             </div>
           ))}
           <div ref={messagesEndRef} />
@@ -252,13 +372,18 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
           </div>
           <Button
             type="submit"
-            className='bg-blue-600 hover:bg-blue-700 text-white min-w-[80px]'
+            className='bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]'
             disabled={isLoading || !input.trim()}
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Sending</span>
+                <span className="text-sm">
+                  {loadingState === 'thinking' && 'Thinking'}
+                  {loadingState === 'searching' && 'Searching'}
+                  {loadingState === 'generating' && 'Generating'}
+                  {!loadingState && 'Sending'}
+                </span>
               </div>
             ) : (
               'Send'
