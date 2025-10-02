@@ -137,8 +137,8 @@ def score_quiz_batch(
 
         statement = (
             select(Quiz)
-            .where(Quiz.id.in_(submitted_ids))
-            .options(load_only(Quiz.id, Quiz.correct_answer))
+            .where(Quiz.id.in_(submitted_ids))  # type: ignore
+            .options(load_only(Quiz.id, Quiz.correct_answer))  # type: ignore
         )
 
         correct_answers_map: dict[uuid.UUID, str] = {
@@ -193,24 +193,24 @@ def score_quiz_batch(
             )
             db.add(attempt)
 
-        score_percentage = (
-            (total_correct / total_submitted) * 100 if total_submitted > 0 else 0.0
-        )
-
         quiz_session.total_submitted += total_submitted
         quiz_session.total_correct += total_correct
         quiz_session.total_time_seconds += submission_batch.total_time_seconds
+        overall_score_percentage = (
+            (quiz_session.total_correct / quiz_session.total_submitted) * 100
+            if quiz_session.total_submitted > 0
+            else 0.0
+        )
+        quiz_session.score_percentage = round(overall_score_percentage, 1)
         quiz_session.is_completed = True
 
         db.add(quiz_session)
         db.commit()
 
         return QuizScoreSummary(
-            total_submitted=quiz_session.total_submitted,  # Return updated cumulative totals
+            total_submitted=quiz_session.total_submitted,
             total_correct=quiz_session.total_correct,
-            score_percentage=round(
-                score_percentage, 2
-            ),  # Note: This percentage is for the BATCH, not the whole session
+            score_percentage=quiz_session.score_percentage,
             results=results,
         )
 
@@ -275,7 +275,7 @@ def fetch_and_format_quizzes(db: Session, quiz_ids: list[uuid.UUID]) -> QuizzesP
     if not quiz_ids:
         return QuizzesPublic(data=[], count=0)
 
-    statement = select(Quiz).where(Quiz.id.in_(quiz_ids)).order_by(Quiz.created_at)
+    statement = select(Quiz).where(Quiz.id.in_(quiz_ids)).order_by(Quiz.created_at)  # type: ignore
     quizzes = db.exec(statement).all()
     quiz_lookup = {quiz.id: quiz for quiz in quizzes}
 
