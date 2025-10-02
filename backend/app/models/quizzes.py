@@ -1,11 +1,11 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, func
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
-from sqlmodel import Field, Relationship, SQLModel, text
+from sqlmodel import Column, Field, ForeignKey, Relationship, SQLModel, text
 
 from app.schemas.public import DifficultyLevel
 
@@ -29,8 +29,13 @@ class QuizCreate(QuizBase):
 class QuizAttemptBase(SQLModel):
     user_id: uuid.UUID = Field(foreign_key="users.id")
     session_id: uuid.UUID = Field(foreign_key="quizsession.id")
-    quiz_id: uuid.UUID = Field(foreign_key="quiz.id")
-
+    quiz_id: uuid.UUID = Field(
+        sa_column=Column(
+            UUID(as_uuid=True),
+            ForeignKey("quiz.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+    )
     selected_answer_text: str
 
     is_correct: bool
@@ -110,4 +115,6 @@ class Quiz(QuizBase, table=True):
         },
     )
 
-    attempts: list["QuizAttempt"] = Relationship(back_populates="quiz")
+    attempts: list["QuizAttempt"] = Relationship(
+        back_populates="quiz", sa_relationship_kwargs={"cascade": "delete"}
+    )
