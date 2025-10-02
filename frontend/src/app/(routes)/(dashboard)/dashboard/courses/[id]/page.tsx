@@ -4,13 +4,14 @@ import {getCourse} from '@/actions/courses'
 import ErrorBox from '@/components/ui/ErrorBox'
 import {Tabs, TabsContent, TabsList, StyledTabList} from '@/components/ui/tabs'
 import PageLoader from '@/components/ui/page-loader'
+import Flashcard from '@/components/flashcard';
 
 const QuizComponent = dynamic(() => import('@/components/quiz/quiz'), {
   ssr: true,
   loading: () => <PageLoader />,
 })
 
-const QAComponent = dynamic(() => import('@/components/q-and-a'), {
+const ChatComponent = dynamic(() => import('@/components/chat'), {
   ssr: true,
   loading: () => <PageLoader />,
 })
@@ -24,6 +25,7 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
   if (!result.ok) {
     return <ErrorBox error={result.error} />
   }
+
   const course = result.data
 
   return (
@@ -34,7 +36,7 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
       >
         <TabsList className='w-full justify-start bg-transparent border-b border-slate-300 rounded-none h-12 p-0'>
           <StyledTabList name='quiz' />
-          <StyledTabList name='qa' />
+          <StyledTabList name='chat' />
           <StyledTabList name='flashcard' />
           <StyledTabList name='podcast' />
         </TabsList>
@@ -42,15 +44,13 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
           <QuizComponent course={course} />
         </TabsContent>
 
-        <TabsContent value='qa' className='p-6'>
-          <QAComponent course={course} />
+        <TabsContent value='chat' className='p-6'>
+          <ChatComponent courseId={id} />
         </TabsContent>
 
-        <TabsContent value='flashcard' className='p-6'>
-          <div className='text-center text-slate-400 py-12'>
-            Flashcard content will be displayed here
-          </div>
-        </TabsContent>
+      <TabsContent value='flashcard' className='p-6'>
+        <Flashcard courseId={id}/>
+      </TabsContent>
 
         <TabsContent value='podcast' className='p-6'>
           <div className='text-center text-slate-400 py-12'>

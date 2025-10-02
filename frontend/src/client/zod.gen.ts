@@ -32,6 +32,32 @@ export const zBodyLoginLoginAccessToken = z.object({
 });
 
 /**
+ * ChatMessage
+ */
+export const zChatMessage = z.object({
+    message: z.string()
+});
+
+/**
+ * ChatPublic
+ */
+export const zChatPublic = z.object({
+    id: z.uuid(),
+    course_id: z.uuid(),
+    total_submitted: z.int(),
+    total_correct: z.int(),
+    score_percentage: z.optional(z.union([
+        z.number(),
+        z.null()
+    ])),
+    is_completed: z.boolean(),
+    created_at: z.iso.datetime(),
+    updated_at: z.iso.datetime(),
+    message: z.string(),
+    is_system: z.boolean()
+});
+
+/**
  * Course
  */
 export const zCourse = z.object({
@@ -265,6 +291,14 @@ export const zPrivateUserCreate = z.object({
     password: z.string(),
     full_name: z.string(),
     is_verified: z.optional(z.boolean()).default(false)
+});
+
+/**
+ * QAItem
+ */
+export const zQaItem = z.object({
+    question: z.string(),
+    answer: z.string()
 });
 
 /**
@@ -929,6 +963,44 @@ export const zGetApiV1CoursesByCourseIdStatsData = z.object({
  * Successful Response
  */
 export const zGetApiV1CoursesByCourseIdStatsResponse = zQuizStats;
+
+export const zGetApiV1CoursesByIdFlashcardsData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Response Courses-Generate Flashcards By Course Id
+ * Successful Response
+ */
+export const zGetApiV1CoursesByIdFlashcardsResponse = z.array(zQaItem);
+
+export const zPostApiV1ChatByCourseIdStreamData = z.object({
+    body: zChatMessage,
+    path: z.object({
+        course_id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+export const zGetApiV1ChatByCourseIdHistoryData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        course_id: z.uuid()
+    }),
+    query: z.optional(z.object({
+        limit: z.optional(z.int()).default(50)
+    }))
+});
+
+/**
+ * Response 200 Chat-Get Chat History
+ * List of chat messages
+ */
+export const zGetApiV1ChatByCourseIdHistoryResponse = z.array(zChatPublic);
 
 export const zPostApiV1DocumentsProcessData = z.object({
     body: zBodyDocumentsProcessMultipleDocuments,

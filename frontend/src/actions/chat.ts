@@ -1,67 +1,28 @@
 'use server'
 
-import {CoursesService} from '@/client'
-import {get} from '@/utils'
+import {ChatPublic} from '@/client'
+import {ChatService} from '@/client/sdk.gen'
+import {Result} from '@/lib/result'
+import {mapApiError} from '@/lib/mapApiError'
 
-export interface ChatMessage {
-  id: string
-  is_system: boolean
-  message: string
-  author?: string
-  avatar?: string
-}
-
-const mockApiRequest = (): Promise<{id: string, message: string}> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const data = { message: "This is system message", id: Date.now().toString() };
-      resolve(data);
-    }, 2000);
-  });
-}
-
-export async function sendChat({ id, message }: {id?: string, message: string}): Promise<ChatMessage | undefined> {
+export async function getChatHistory(courseId: string): Promise<Result<ChatPublic[]>> {
   try {
-    // change the api call when chat api is ready
-    const response = await mockApiRequest();
+    const response = await ChatService.getApiV1ChatByCourseIdHistory({
+      path: {course_id: courseId},
+      headers: {credentials: 'include'},
+      responseValidator: async () => {},
+      requestValidator: async () => {},
+    })
+
     return {
-      id: response.id,
-      message: response.message,
-      is_system: true
-    };
-  } catch (error) {
-    console.error(error)
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
-
-    throw new Error(errorMsg)
-  }
-}
-
-const mockHistoryApiRequest = (): Promise<{messages: ChatMessage[]}> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const data = { messages: []};
-      resolve(data);
-    }, 2000);
-  });
-}
-
-export async function getHistory({ cursor }: {cursor?: string}): Promise<ChatMessage[]> {
-  try {
-    const response = await mockHistoryApiRequest()
-    return [];
-  } catch (error) {
-    console.error(error)
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
-
-    throw new Error(errorMsg)
+      ok: true,
+      data: response.data ?? [],
+    }
+  } catch (err) {
+    console.log('Error fetching chat history:', err)
+    return {
+      ok: false,
+      error: mapApiError(err),
+    }
   }
 }

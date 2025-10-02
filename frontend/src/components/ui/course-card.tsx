@@ -31,9 +31,9 @@ export default function CourseCard({
           <Link
             href={{
               pathname: '/dashboard/courses/[id]',
-              query: {id: course.id, tab: 'quiz'},
+              query: {id: course.id, tab: 'chat'},
             }}
-            as={`/dashboard/courses/${course.id}?tab=quiz`}
+            as={`/dashboard/courses/${course.id}?tab=chat`}
           >
             <span className='text-xs inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-muted-foreground hover:text-cyan-500 pointer hover:border-cyan-500'>
               <ArrowUpRight className='size-3' />

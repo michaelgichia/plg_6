@@ -195,3 +195,12 @@ class QuizSessionPublicWithResults(QuizSessionPublicWithQuizzes):
     """
 
     results: list[QuizAttemptPublic] = Field(default_factory=list)
+
+
+class ChatPublic(QuizSessionPublic):
+    id: uuid.UUID
+    message: str
+    course_id: uuid.UUID
+    is_system: bool
+    created_at: datetime
+    updated_at: datetime

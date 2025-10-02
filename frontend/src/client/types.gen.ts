@@ -49,6 +49,62 @@ export type BodyLoginLoginAccessToken = {
 };
 
 /**
+ * ChatMessage
+ */
+export type ChatMessage = {
+    /**
+     * Message
+     */
+    message: string;
+};
+
+/**
+ * ChatPublic
+ */
+export type ChatPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Total Submitted
+     */
+    total_submitted: number;
+    /**
+     * Total Correct
+     */
+    total_correct: number;
+    /**
+     * Score Percentage
+     */
+    score_percentage?: number | null;
+    /**
+     * Is Completed
+     */
+    is_completed: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Is System
+     */
+    is_system: boolean;
+};
+
+/**
  * Course
  */
 export type Course = {
@@ -400,6 +456,20 @@ export type PrivateUserCreate = {
      * Is Verified
      */
     is_verified?: boolean;
+};
+
+/**
+ * QAItem
+ */
+export type QaItem = {
+    /**
+     * Question
+     */
+    question: string;
+    /**
+     * Answer
+     */
+    answer: string;
 };
 
 /**
@@ -1776,6 +1846,117 @@ export type GetApiV1CoursesByCourseIdStatsResponses = {
 };
 
 export type GetApiV1CoursesByCourseIdStatsResponse = GetApiV1CoursesByCourseIdStatsResponses[keyof GetApiV1CoursesByCourseIdStatsResponses];
+
+export type GetApiV1CoursesByIdFlashcardsData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{id}/flashcards';
+};
+
+export type GetApiV1CoursesByIdFlashcardsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1CoursesByIdFlashcardsError = GetApiV1CoursesByIdFlashcardsErrors[keyof GetApiV1CoursesByIdFlashcardsErrors];
+
+export type GetApiV1CoursesByIdFlashcardsResponses = {
+    /**
+     * Response Courses-Generate Flashcards By Course Id
+     * Successful Response
+     */
+    200: Array<QaItem>;
+};
+
+export type GetApiV1CoursesByIdFlashcardsResponse = GetApiV1CoursesByIdFlashcardsResponses[keyof GetApiV1CoursesByIdFlashcardsResponses];
+
+export type PostApiV1ChatByCourseIdStreamData = {
+    body: ChatMessage;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/v1/chat/{course_id}/stream';
+};
+
+export type PostApiV1ChatByCourseIdStreamErrors = {
+    /**
+     * Not authenticated
+     */
+    401: unknown;
+    /**
+     * Course not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostApiV1ChatByCourseIdStreamError = PostApiV1ChatByCourseIdStreamErrors[keyof PostApiV1ChatByCourseIdStreamErrors];
+
+export type PostApiV1ChatByCourseIdStreamResponses = {
+    /**
+     * Successful streaming response
+     */
+    200: unknown;
+};
+
+export type GetApiV1ChatByCourseIdHistoryData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/chat/{course_id}/history';
+};
+
+export type GetApiV1ChatByCourseIdHistoryErrors = {
+    /**
+     * Not authenticated
+     */
+    401: unknown;
+    /**
+     * Course not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1ChatByCourseIdHistoryError = GetApiV1ChatByCourseIdHistoryErrors[keyof GetApiV1ChatByCourseIdHistoryErrors];
+
+export type GetApiV1ChatByCourseIdHistoryResponses = {
+    /**
+     * Response 200 Chat-Get Chat History
+     * List of chat messages
+     */
+    200: Array<ChatPublic>;
+};
+
+export type GetApiV1ChatByCourseIdHistoryResponse = GetApiV1ChatByCourseIdHistoryResponses[keyof GetApiV1ChatByCourseIdHistoryResponses];
 
 export type PostApiV1DocumentsProcessData = {
     body: BodyDocumentsProcessMultipleDocuments;

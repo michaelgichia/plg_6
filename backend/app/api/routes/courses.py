@@ -1,11 +1,17 @@
+import json
 import logging
 import uuid
 from collections.abc import Sequence
 from datetime import datetime, timezone
+from http import HTTPStatus
 from random import shuffle
 from typing import Annotated, Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_pinecone import PineconeVectorStore
 from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import QueryableAttribute, selectinload
@@ -18,6 +24,7 @@ from app.models.course import (
     Course,
     CourseCreate,
     CourseUpdate,
+    QAItem,
 )
 from app.models.document import Document
 from app.models.embeddings import Chunk
@@ -38,6 +45,16 @@ from app.tasks import (
     fetch_and_format_quizzes,
     select_quizzes_by_course_criteria,
 )
+
+INDEX_NAME = "developer-quickstart-py"
+MODEL = "gpt-4o-mini"
+EMBEDDINGS = OpenAIEmbeddings()
+PROMPT = """You are an assistant for question-answering tasks.
+Use the following retrieved context to generate as many as possible flashcard self-test questions (more than 20) in the JSON template provided below.
+Do not find questions outside the provided context, return an empty array if you can't find. Do not use any external knowledge or information not present in the context.
+
+template: [{"question": "the question", "answer": "the answer to the question"}]
+"""
 
 
 class CourseWithDocuments(CoursePublic):
@@ -416,3 +433,53 @@ def get_quiz_stats(
         average_score=round(average_score or 0.0),
         attempts=attempts,
     )
+
+
+@router.get("/{id}/flashcards", response_model=list[QAItem])
+def generate_flashcards_by_course_id(
+    session: SessionDep, current_user: CurrentUser, id: uuid.UUID
+) -> list[QAItem]:
+    """
+    Generate flashcards via course ID
+    """
+    statement = (
+        select(Course).where(Course.id == id).options(selectinload(Course.documents))
+    )
+    course = session.exec(statement).first()
+    if not course:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Course not found",
+        )
+    if not current_user.is_superuser and (course.owner_id != current_user.id):
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Not enough permissions"
+        )
+    # Connect to an existing Pinecone index
+    try:
+        vectorstore = PineconeVectorStore.from_existing_index(
+            index_name=INDEX_NAME, embedding=EMBEDDINGS, text_key="text"
+        )
+    except ValueError:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Document index can not be retrieved",
+        )
+    retriever = vectorstore.as_retriever(
+        search_type="similarity",
+        search_kwargs={"k": 5},
+        filter={"course_id": course.id},
+    )
+    llm = ChatOpenAI(temperature=0.7, model_name=MODEL)
+    memory = ConversationBufferMemory(memory_key="chat_history", return_meessage=True)
+    conversation_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm, retriever=retriever, memory=memory
+    )
+    result = conversation_chain.invoke({"question": PROMPT})
+    try:
+        return json.loads(result["answer"])
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Flashcards could not be returned",
+        )

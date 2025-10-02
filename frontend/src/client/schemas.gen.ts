@@ -78,6 +78,77 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const ChatMessageSchema = {
+    properties: {
+        message: {
+            type: 'string',
+            title: 'Message'
+        }
+    },
+    type: 'object',
+    required: ['message'],
+    title: 'ChatMessage'
+} as const;
+
+export const ChatPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        total_submitted: {
+            type: 'integer',
+            title: 'Total Submitted'
+        },
+        total_correct: {
+            type: 'integer',
+            title: 'Total Correct'
+        },
+        score_percentage: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Score Percentage'
+        },
+        is_completed: {
+            type: 'boolean',
+            title: 'Is Completed'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        message: {
+            type: 'string',
+            title: 'Message'
+        },
+        is_system: {
+            type: 'boolean',
+            title: 'Is System'
+        }
+    },
+    type: 'object',
+    required: ['id', 'course_id', 'total_submitted', 'total_correct', 'is_completed', 'created_at', 'updated_at', 'message', 'is_system'],
+    title: 'ChatPublic'
+} as const;
+
 export const CourseSchema = {
     properties: {
         name: {
@@ -625,6 +696,22 @@ export const PrivateUserCreateSchema = {
     type: 'object',
     required: ['email', 'password', 'full_name'],
     title: 'PrivateUserCreate'
+} as const;
+
+export const QAItemSchema = {
+    properties: {
+        question: {
+            type: 'string',
+            title: 'Question'
+        },
+        answer: {
+            type: 'string',
+            title: 'Answer'
+        }
+    },
+    type: 'object',
+    required: ['question', 'answer'],
+    title: 'QAItem'
 } as const;
 
 export const QuizAttemptPublicSchema = {

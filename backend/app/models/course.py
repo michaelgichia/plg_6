@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -36,6 +37,7 @@ class Course(CourseBase, table=True):
         back_populates="course",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
+    chats: list["Chat"] = Relationship(back_populates="course")
 
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
@@ -47,3 +49,8 @@ class Course(CourseBase, table=True):
         sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")},
         index=True,
     )
+
+
+class QAItem(BaseModel):
+    question: str
+    answer: str

@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    chat,
     courses,
     documents,
     items,
@@ -18,9 +19,9 @@ api_router.include_router(users.router)
 api_router.include_router(utils.router)
 api_router.include_router(items.router)
 api_router.include_router(courses.router)
+api_router.include_router(chat.router)
 api_router.include_router(documents.router)
 api_router.include_router(quiz_sessions.router)
-
 
 if settings.ENVIRONMENT == "local":
     api_router.include_router(private.router)
