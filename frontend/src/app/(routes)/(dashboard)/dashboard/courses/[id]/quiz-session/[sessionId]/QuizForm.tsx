@@ -11,7 +11,7 @@ import ErrorBox from '@/components/ui/ErrorBox'
 import {getQuizSession} from '@/lib/quizzes'
 import {toast} from 'sonner'
 import {useRouter} from 'next/navigation'
-import {ChevronLeft} from 'react-feather'
+import {ChevronLeft, Loader} from 'react-feather'
 
 const CORRECT_COLOR = 'bg-green-50 border-green-500'
 const INCORRECT_COLOR = 'bg-red-50 border-red-500'
@@ -23,8 +23,15 @@ interface ActionState {
   error: any | null
 }
 
-export default function QuizForm({sessionId, courseId}: {sessionId: string, courseId: string}) {
+export default function QuizForm({
+  sessionId,
+  courseId,
+}: {
+  sessionId: string
+  courseId: string
+}) {
   const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [session, setSession] = useState<QuizSessionPublicWithResults>()
   const router = useRouter()
 
@@ -39,17 +46,22 @@ export default function QuizForm({sessionId, courseId}: {sessionId: string, cour
     } catch (error) {
     } finally {
       setIsLoading(false)
+      setIsSubmitting(false)
     }
   }
 
   const handleOnSubmit = (_state: any, formData: FormData) => {
+    setIsSubmitting(true)
     submitQuizSession(state, formData)
       .then(async (result) => {
-        await fetchQuizSession(courseId, sessionId);
-        return result;
+        await fetchQuizSession(courseId, sessionId)
+        return result
       })
       .catch(() => {
         toast.error('Failed to delete document. Please try again.')
+      })
+      .finally(() => {
+        setIsSubmitting(false)
       })
   }
 
@@ -173,7 +185,7 @@ export default function QuizForm({sessionId, courseId}: {sessionId: string, cour
                       disabled: isScored,
                     }
 
-                    let labelClass = 'text-sm/snug'
+                    let labelClass = 'text-sm/snug capitalize'
                     if (isScored) {
                       const isSelected =
                         result.selected_answer_text === choice.text
@@ -244,9 +256,20 @@ export default function QuizForm({sessionId, courseId}: {sessionId: string, cour
           >
             <ChevronLeft /> Back
           </Button>
-          {!is_completed && <Button type='submit'>Submit Answers</Button>}
+          {isSubmitting && (
+            <Button disabled>
+              <Loader className='animate-spin' />
+              Submitting Answers...
+            </Button>
+          )}
 
-          {is_completed && <Button disabled>Quiz Session Completed</Button>}
+          {!isSubmitting && !is_completed && (
+            <Button type='submit'>Submit Answers</Button>
+          )}
+
+          {!isSubmitting && is_completed && (
+            <Button disabled>Quiz Session Completed</Button>
+          )}
         </div>
       </form>
     </>

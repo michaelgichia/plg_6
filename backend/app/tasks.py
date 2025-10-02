@@ -49,18 +49,31 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
             DifficultyLevel.HARD,
         ]:
             prompt = f"""
-            Generate a set of multiple-choice quizzes based on the following text.
-            Each quiz should be at '{difficulty_level}' difficulty.
+            1. Task context: You are an expert quiz question generator for educational content. Your goal is to create multiple-choice questions that thoroughly test a user's understanding of the provided text.
+            2. Tone context: The response must be professional, strictly formatted, and follow all JSON schema rules exactly.
+            3. Background data: The text provided below contains the source material for the quiz questions.
+            4. Detailed task description & rules:
+              - Generate between 5 and 10 multiple-choice quizzes for the provided text.
+              - Each quiz must be strictly at the '{difficulty_level}' difficulty level.
+              - **Each quiz must have exactly 4 choices** (one correct answer and three distractors).
+              - Ensure the **distraction choices are highly plausible**, requiring genuine understanding to be answered correctly. They should be related to the topic but demonstrably incorrect based on the text.
+              - All choices (correct and incorrect) should be **full, descriptive sentences or phrases**, not just single words.
+              - The primary output must be a single JSON object containing a property called 'quizzes'.
 
-            Each quiz object must include:
-              - quiz: string (the quiz question)
-              - correct_answer: string
-              - distraction_1: string
-              - distraction_2: string
-              - distraction_3: string
-              - topic: string (short topic or category)
+            5. Output Structure (JSON Schema Rules):
+            Each object in the 'quizzes' array must include the following fields:
 
-            Return only a JSON array of quiz objects.
+            - **quiz**: string (The multiple-choice question itself.)
+            - **correct_answer**: string (The text of the correct choice.)
+            - **distraction_1**: string (A plausible, incorrect choice.)
+            - **distraction_2**: string (A plausible, incorrect choice.)
+            - **distraction_3**: string (A plausible, incorrect choice.)
+            - **topic**: string (A short, 2-3 word category/topic for the quiz.)
+            - **feedback**: string (Specific, helpful explanation **for a user who selects an incorrect answer**. This should clarify why the correct answer is right based on the text.)
+
+            6. Output formatting:
+            Return only a single JSON object.
+
             Text:
             {concatenated_text}
             """
