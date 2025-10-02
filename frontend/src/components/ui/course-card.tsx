@@ -26,7 +26,7 @@ export default function CourseCard({
   return (
     <Card className={cn('bg-muted/20 py-4 justify-between', className)}>
       <CardHeader className='[.border-b]:pb-4'>
-        <CardTitle className='text-lg break-word'>{course.name}</CardTitle>
+        <CardTitle className='text-lg break-word line-clamp-3'>{course.name}</CardTitle>
         <div data-slot='card-action'>
           <Link
             href={{
