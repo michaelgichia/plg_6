@@ -71,7 +71,7 @@ export function AppSidebar({ displayName = 'User' }: { displayName?: string }) {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link href='/dashboard/courses/create'>
-                    <Button>
+                    <Button className='mt-4 mb-4'>
                       <Plus />
                       <span>Add Course</span>
                     </Button>
