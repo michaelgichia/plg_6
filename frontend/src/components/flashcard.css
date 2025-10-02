@@ -1,0 +1,25 @@
+.flashcard-q {
+  background: #18181B;
+  background: linear-gradient(125deg, rgba(24, 24, 27, 1) 0%, rgba(96, 96, 107, 1) 100%);
+}
+
+.flashcard-a {
+  background: #FD1D1D;
+  background: linear-gradient(125deg, rgba(253, 29, 29, 1) 50%, rgba(252, 176, 69, 1) 100%);
+}
+
+.loading::after {
+  content: '';
+  display: inline-block;
+  width: 1.5ch;              /* space for up to 3 dots */
+  animation: dots 1.5s steps(4, end) infinite;
+  text-align: left;          /* keeps dots starting from left */
+}
+
+@keyframes dots {
+  0%   { content: '';   }
+  25%  { content: '.';  }
+  50%  { content: '..'; }
+  75%  { content: '...';}
+  100% { content: '';   }
+}

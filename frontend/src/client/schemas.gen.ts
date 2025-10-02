@@ -78,6 +78,54 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const ChatMessageSchema = {
+    properties: {
+        message: {
+            type: 'string',
+            title: 'Message'
+        }
+    },
+    type: 'object',
+    required: ['message'],
+    title: 'ChatMessage'
+} as const;
+
+export const ChatPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        message: {
+            type: 'string',
+            title: 'Message'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        is_system: {
+            type: 'boolean',
+            title: 'Is System'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'message', 'course_id', 'is_system', 'created_at', 'updated_at'],
+    title: 'ChatPublic'
+} as const;
+
 export const CourseCreateSchema = {
     properties: {
         name: {
@@ -106,24 +154,6 @@ export const CourseCreateSchema = {
 
 export const CoursePublicSchema = {
     properties: {
-        name: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 3,
-            title: 'Name'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 1020
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -133,10 +163,42 @@ export const CoursePublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Owner Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        documents: {
+            items: {
+                '$ref': '#/components/schemas/DocumentPublic'
+            },
+            type: 'array',
+            title: 'Documents'
         }
     },
     type: 'object',
-    required: ['name', 'id', 'owner_id'],
+    required: ['id', 'owner_id', 'name', 'created_at', 'updated_at', 'documents'],
     title: 'CoursePublic'
 } as const;
 
@@ -174,24 +236,6 @@ export const CourseUpdateSchema = {
 
 export const CourseWithDocumentsSchema = {
     properties: {
-        name: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 3,
-            title: 'Name'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 1020
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -201,6 +245,31 @@ export const CourseWithDocumentsSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Owner Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
         },
         documents: {
             items: {
@@ -212,7 +281,7 @@ export const CourseWithDocumentsSchema = {
         }
     },
     type: 'object',
-    required: ['name', 'id', 'owner_id'],
+    required: ['id', 'owner_id', 'name', 'created_at', 'updated_at'],
     title: 'CourseWithDocuments'
 } as const;
 
@@ -283,10 +352,15 @@ export const DocumentSchema = {
             '$ref': '#/components/schemas/DocumentStatus',
             default: 'pending'
         },
-        uploaded_at: {
+        created_at: {
             type: 'string',
             format: 'date-time',
-            title: 'Uploaded At'
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
         }
     },
     type: 'object',
@@ -296,33 +370,48 @@ export const DocumentSchema = {
 
 export const DocumentPublicSchema = {
     properties: {
-        title: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 1,
-            title: 'Title'
-        },
         id: {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        filename: {
+            type: 'string',
+            title: 'Filename'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
         },
         course_id: {
             type: 'string',
             format: 'uuid',
             title: 'Course Id'
         },
-        uploaded_at: {
+        updated_at: {
             type: 'string',
             format: 'date-time',
-            title: 'Uploaded At'
+            title: 'Updated At'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
         },
         status: {
-            '$ref': '#/components/schemas/DocumentStatus'
+            type: 'string',
+            title: 'Status'
         }
     },
     type: 'object',
-    required: ['title', 'id', 'course_id', 'uploaded_at', 'status'],
+    required: ['id', 'filename', 'course_id', 'updated_at', 'created_at', 'status'],
     title: 'DocumentPublic'
 } as const;
 
@@ -512,6 +601,22 @@ export const PrivateUserCreateSchema = {
     type: 'object',
     required: ['email', 'password', 'full_name'],
     title: 'PrivateUserCreate'
+} as const;
+
+export const QAItemSchema = {
+    properties: {
+        question: {
+            type: 'string',
+            title: 'Question'
+        },
+        answer: {
+            type: 'string',
+            title: 'Answer'
+        }
+    },
+    type: 'object',
+    required: ['question', 'answer'],
+    title: 'QAItem'
 } as const;
 
 export const TokenSchema = {

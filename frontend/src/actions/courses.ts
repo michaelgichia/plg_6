@@ -1,81 +1,121 @@
 'use server'
 
 import {redirect} from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 
-import {CoursePublic, CoursesService} from '@/client'
+import {CoursePublic, CoursesService, CourseWithDocuments} from '@/client'
 import {zCourseCreate} from '@/client/zod.gen'
-import {get} from '@/utils'
 
-export async function getCourses(): Promise<CoursePublic[] | undefined> {
+import {mapApiError} from '@/lib/mapApiError'
+import {Result} from '@/lib/result'
+
+/**
+ * Fetch all courses.
+ * Returns a Result<CoursePublic[]> that must be checked with `res.ok`.
+ */
+export async function getCourses(): Promise<Result<CoursePublic[]>> {
   try {
-    const response = await CoursesService.getApiV1Courses()
-    return response.data?.data ?? []
-  } catch (error) {
-    console.error(error)
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
+    const response = await CoursesService.getApiV1Courses({
+      responseValidator: async () => {},
+    })
 
-    throw new Error(errorMsg)
+    return {
+      ok: true,
+      data: response.data?.data ?? [],
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      error: mapApiError(err),
+    }
   }
 }
 
-export async function getCourse(id: string): Promise<CoursePublic | undefined> {
+/**
+ * Fetch a single course by ID.
+ * Returns a Result<CoursePublic>.
+ */
+export async function getCourse(
+  id: string,
+): Promise<Result<CourseWithDocuments>> {
   try {
-    const response = await CoursesService.getApiV1CoursesById({path: {id}})
-    return response.data
-  } catch (error) {
-    const errorMsg = get(
-      error as Record<string, never>,
-      'detail',
-      'API request failed',
-    )
+    const response = await CoursesService.getApiV1CoursesById({
+      path: {id},
+      responseValidator: async () => {},
+    })
 
-    throw new Error(errorMsg)
+    return {
+      ok: true,
+      data: response.data,
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      error: mapApiError(err),
+    }
   }
 }
 
-export type IState = {
-  errors?: {
-    name?: string[]
-    description?: string[]
-  }
-  message?: string | null
-  success: boolean | null
-  course?: CoursePublic
-}
-
-export async function createCourse(_state: IState, formData: FormData) {
-  let course: CoursePublic | undefined
+/**
+ * Create a course from FormData.
+ * Returns a Result<CoursePublic> that must be checked with `res.ok`.
+ * If successful, it redirects to the dashboard page.
+ */
+export async function createCourse(
+  _state: unknown,
+  formData: FormData,
+): Promise<Result<CoursePublic>> {
+  let response
   try {
     const payload = zCourseCreate.safeParse({
       name: formData.get('name'),
       description: formData.get('description'),
     })
+
     if (!payload.success) {
       return {
-        success: false,
-        message: 'Validation failed',
-        errors: payload.error.flatten().fieldErrors,
+        ok: false,
+        error: {
+          code: 'VALIDATION',
+          message: 'Validation failed',
+          details: payload.error.message,
+        },
       }
     }
 
-    const response = await CoursesService.postApiV1Courses({
+    response = await CoursesService.postApiV1Courses({
       body: payload.data,
+      responseValidator: async () => {},
     })
-    course = response.data
-  } catch (error) {
+  } catch (err) {
     return {
-      success: false,
-      message: get(
-        error as Record<string, never>,
-        'detail',
-        'API request failed',
-      ),
+      ok: false,
+      error: mapApiError(err),
     }
   }
+  // Redirect after creation — safe to redirect only on success
+  redirect(`/dashboard/courses/create?courseId=${response.data.id}`)
+}
 
-  redirect(`/dashboard/courses/create?courseId=${course?.id}`)
+export async function deleteCourse(
+  _state: unknown,
+  formData: FormData,
+): Promise<Result<null>> {
+  try {
+    const id = formData.get('id') as string
+
+    await CoursesService.deleteApiV1CoursesById({path: {id}})
+
+    revalidatePath('/dashboard')
+
+    return {
+      ok: true,
+      data: null,
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      error: mapApiError(err),
+    }
+  }
 }

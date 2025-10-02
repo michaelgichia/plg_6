@@ -57,10 +57,21 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("flex-1 outline-none", className)}
+      className={cn("flex-1 outline-none h-full", className)}
       {...props}
     />
   )
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+function StyledTabList({name}: {name: string}) {
+  return (
+    <TabsTrigger
+      value={name}
+      className='capitalize data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 data-[state=active]:text-black rounded-none px-6 py-3 text-zinc-700'
+    >
+      {name}
+    </TabsTrigger>
+  )
+}
+
+export { Tabs, TabsList, TabsTrigger, TabsContent, StyledTabList }

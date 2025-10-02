@@ -14,12 +14,15 @@ class DocumentStatus(str, Enum):
     COMPLETED = "completed"
     FAILED = "failed"
 
+
 class DocumentBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
+
 
 # Properties to receive on document creation
 class DocumentCreate(DocumentBase):
     pass
+
 
 class Document(DocumentBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -30,16 +33,13 @@ class Document(DocumentBase, table=True):
     filename: str
     status: DocumentStatus = Field(default=DocumentStatus.PENDING)
 
-    uploaded_at: datetime = Field(
+    created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")}
+        sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")},
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")},
     )
 
     course: Course | None = Relationship(back_populates="documents")
-
-
-class DocumentPublic(DocumentBase):
-    id: uuid.UUID
-    course_id: uuid.UUID
-    uploaded_at: datetime
-    status: DocumentStatus

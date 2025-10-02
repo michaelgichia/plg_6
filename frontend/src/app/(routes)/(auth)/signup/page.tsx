@@ -25,8 +25,8 @@ export default function SignUpPage() {
   const router = useRouter()
   const [isPending, setIsPending] = useState(false)
   const [state, setState] = useState<IAuthState>({
-    message: null,
-    success: false,
+    error: undefined,
+    ok: false,
   })
 
   const form = useForm<SignUpSchema>({
@@ -44,9 +44,13 @@ export default function SignUpPage() {
     try {
       setIsPending(true)
       const response = await register(data)
-      setState(response)
-      if (response?.success) {
+      if (response.ok) {
         router.push('/login')
+      } else {
+        setState({
+          error: response.error,
+          ok: false,
+        })
       }
     } catch {
       // Do nothing
@@ -144,8 +148,8 @@ export default function SignUpPage() {
               />
 
               {/* Server error */}
-              {state && !state.success && (
-                <div className='text-red-500 text-sm'>{state.message}</div>
+              {state && !state.ok && (
+                <div className='text-red-500 text-sm'>{state.error?.message}</div>
               )}
 
               {/* Submit Button */}

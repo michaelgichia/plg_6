@@ -3,18 +3,21 @@ import os
 import shutil
 import tempfile
 import uuid
-import aiofiles
+from asyncio.log import logger
+from datetime import datetime, timezone
 from typing import Any
 
-from asyncio.log import logger
+import aiofiles
 import openai
 from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pinecone import Pinecone, ServerlessSpec
 from pypdf import PdfReader
+from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
 from app.api.deps import CurrentUser, SessionDep
+from app.models.common import Message
 from app.models.course import Course
 from app.models.document import Document, DocumentStatus
 
@@ -35,6 +38,7 @@ pc = Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENV_NAME)
 task_status: dict[str, str] = {}
 
 async_openai_client = openai.AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 def ensure_index_exists():
     """Ensure Pinecone index exists with the correct dimension, recreate if wrong."""
@@ -65,6 +69,7 @@ def chunk_text(text: str):
     )
     return splitter.split_text(text)
 
+
 async def embed_chunks(chunks: list[str]) -> list[list[float]]:
     try:
         # Use the asynchronous client
@@ -76,8 +81,13 @@ async def embed_chunks(chunks: list[str]) -> list[list[float]]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Embedding generation failed: {e}")
 
+
 def store_embeddings(
-    chunks: list[str], embeddings: list[list[float]], course_id: str, index
+    chunks: list[str],
+    embeddings: list[list[float]],
+    course_id: str,
+    document_id: str,
+    index,
 ):
     vectors = [
         {
@@ -85,6 +95,7 @@ def store_embeddings(
             "values": embedding,
             "metadata": {
                 "course_id": course_id,
+                "document_id": document_id,
                 "text": chunk,
                 "chunk_index": i,
             },
@@ -92,6 +103,7 @@ def store_embeddings(
         for i, (chunk, embedding) in enumerate(zip(chunks, embeddings, strict=False))
     ]
     index.upsert(vectors)
+
 
 async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: SessionDep):
     """Background task to parse, chunk, embed, and store PDF."""
@@ -127,7 +139,10 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
             embeddings.extend(await embed_chunks(batch))
             await asyncio.sleep(0)
 
-        store_embeddings(chunks, embeddings, str(document.course_id), index)
+        store_embeddings(
+            chunks, embeddings, str(document.course_id), str(document.id), index
+        )
+        document.updated_at = datetime.now(timezone.utc)
         document.status = DocumentStatus.COMPLETED
         document.chunk_count = len(chunks)
         session.add(document)
@@ -141,10 +156,9 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
     finally:
         os.remove(file_path)
 
+
 async def handle_document_processing(
-    file: UploadFile,
-    document_id: uuid.UUID,
-    session: SessionDep
+    file: UploadFile, document_id: uuid.UUID, session: SessionDep
 ):
     """
     Background task to handle all blocking I/O:
@@ -177,6 +191,7 @@ async def handle_document_processing(
     finally:
         # Clean up the temporary file and directory
         shutil.rmtree(tmp_dir)
+
 
 @router.post("/process")
 async def process_multiple_documents(
@@ -227,14 +242,12 @@ async def process_multiple_documents(
 
         # The key change: Asynchronously read and write the file in the endpoint.
         # This ensures the stream is consumed before the endpoint returns.
-        async with aiofiles.open(tmp_path, 'wb') as buffer:
+        async with aiofiles.open(tmp_path, "wb") as buffer:
             while chunk := await file.read(1024):
                 await buffer.write(chunk)
 
         # 3. Add the background task, passing the path to the saved file.
-        background_tasks.add_task(
-            process_pdf_task, tmp_path, db_document.id, session
-        )
+        background_tasks.add_task(process_pdf_task, tmp_path, db_document.id, session)
 
         results.append(
             {
@@ -245,6 +258,7 @@ async def process_multiple_documents(
         )
 
     return {"message": "Processing started for multiple files", "documents": results}
+
 
 @router.get("/{id}", response_model=Document)
 def read_document(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
@@ -266,3 +280,50 @@ def read_document(session: SessionDep, current_user: CurrentUser, id: uuid.UUID)
 
     return document
 
+
+# Background task for deleting embeddings
+def delete_embeddings_task(document_id: uuid.UUID):
+    """Background task to delete embeddings from Pinecone."""
+    try:
+        if pc.has_index(index_name):
+            index = pc.Index(index_name)
+            index.delete(filter={"document_id": str(document_id)})
+            logger.info(f"Successfully deleted embeddings for document {document_id}")
+    except Exception as e:
+        logger.error(f"Failed to delete embeddings for document {document_id}: {e}")
+
+
+@router.delete("/{id}")
+def delete_document(
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: uuid.UUID,
+    background_tasks: BackgroundTasks,  # Inject BackgroundTasks
+) -> Any:
+    """Delete a document by its ID, ensuring the user has permissions."""
+
+    document = session.exec(
+        select(Document).where(Document.id == id).options(selectinload(Document.course)) # type: ignore
+    ).first()
+
+    if not document:
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found or you do not have permission to delete it.",
+        )
+
+    if not current_user.is_superuser and (document.course.owner_id != current_user.id):
+        raise HTTPException(
+            status_code=403,
+            detail="Not enough permissions to delete this document.",
+        )
+
+    background_tasks.add_task(delete_embeddings_task, id)
+
+    session.delete(document)
+    session.commit()
+
+    # 3. Return an immediate response
+    return Message(
+        message="Document deleted successfully. Embeddings are being removed in the background."
+    )
