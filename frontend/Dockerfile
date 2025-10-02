@@ -41,9 +41,6 @@
 # COPY --from=build-stage /app/.next/static ./.next/static
 # COPY --from=build-stage /app/public ./public
 
-# # Expose port
-# EXPOSE 3000
-
 # # Start the application
 # CMD ["node", "server.js"]
 # Stage 0, "build-stage", based on Node.js, to build and compile the frontend
@@ -59,15 +56,18 @@ RUN pnpm install
 
 COPY ./ /app/
 
-ARG NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+# ARG NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 RUN pnpm run build
 
+EXPOSE 3000
+CMD ["pnpm", "start"]
+
 
 # Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
-FROM nginx:1
+# FROM nginx:1
 
-COPY --from=build-stage /app/dist/ /usr/share/nginx/html
+# COPY --from=build-stage /app/dist/ /usr/share/nginx/html
 
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-COPY ./nginx-backend-not-found.conf /etc/nginx/extra-conf.d/backend-not-found.conf
+# COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+# COPY ./nginx-backend-not-found.conf /etc/nginx/extra-conf.d/backend-not-found.conf

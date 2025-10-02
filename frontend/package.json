@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "type-check": "tsc --noEmit",
     "generate-client": "openapi-ts && tsx ./src/fix-streaming-types.ts"
   },
   "dependencies": {
