@@ -215,7 +215,7 @@ async def generate_chat_response(
             messages = [
                 {
                     "role": "system",
-                    "content": f"You are Athena, a helpful AI tutor for the course '{course.name}'. Continue your previous response from exactly where it left off. Do not repeat what you already said, just continue naturally with the same friendly, supportive tone."
+                    "content": f"You are Athena, a helpful AI tutor for the course '{course.name}'. Continue your previous response from exactly where it left off. Do not repeat what you already said, just continue naturally with the same friendly, supportive tone. Maintain the same markdown formatting style as your previous response."
                 }
             ]
             
@@ -334,7 +334,17 @@ async def generate_chat_response(
                     "- Use the provided context from course materials to answer academic questions\n"
                     "- You have access to previous conversation history for better responses\n"
                     "- If context doesn't contain relevant information, say so and suggest asking about topics covered in the materials\n"
-                    "- Always maintain a supportive, tutoring tone"
+                    "- Always maintain a supportive, tutoring tone\n\n"
+                    "FORMATTING INSTRUCTIONS:\n"
+                    "- Use **bold** for important terms and concepts\n"
+                    "- Use *italics* for emphasis\n"
+                    "- Use numbered lists (1. 2. 3.) for steps or sequences\n"
+                    "- Use bullet points (- or *) for related items\n"
+                    "- Use `code blocks` for technical terms, formulas, or code\n"
+                    "- Use > blockquotes for definitions or key quotes\n"
+                    "- Use ### headers for section breaks in longer responses\n"
+                    "- Use tables when comparing multiple items\n"
+                    "- Structure your responses with clear formatting for better readability"
                 }
             ]
             
