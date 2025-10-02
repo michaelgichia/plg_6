@@ -8,6 +8,8 @@ export default async function Page(props: {
   const params = await props.params
 
   const sessionId = params.sessionId
+  const courseId = params.id
+
 
   const result = await getQuizSession(sessionId)
 
@@ -18,7 +20,7 @@ export default async function Page(props: {
   return (
     <div className='min-h-screen p-6 border-r border-stone-200'>
       <div className='mx-auto max-w-7xl'>
-        <QuizForm sessionId={sessionId} />
+        <QuizForm sessionId={sessionId} courseId={courseId} />
       </div>
     </div>
   )

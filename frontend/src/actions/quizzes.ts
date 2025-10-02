@@ -153,8 +153,8 @@ export async function submitQuizSession(
         submissions: submissions,
         total_time_seconds: 60000,
       },
-      requestValidator: async () => { },
-      responseValidator: async () => { },
+      requestValidator: async () => {},
+      responseValidator: async () => {},
     });
 
     return {

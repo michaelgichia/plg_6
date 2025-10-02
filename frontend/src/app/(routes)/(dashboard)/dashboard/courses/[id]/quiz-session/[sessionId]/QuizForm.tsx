@@ -23,7 +23,7 @@ interface ActionState {
   error: any | null
 }
 
-export default function QuizForm({sessionId}: {sessionId: string}) {
+export default function QuizForm({sessionId, courseId}: {sessionId: string, courseId: string}) {
   const [isLoading, setIsLoading] = useState(false)
   const [session, setSession] = useState<QuizSessionPublicWithResults>()
   const router = useRouter()
@@ -44,8 +44,9 @@ export default function QuizForm({sessionId}: {sessionId: string}) {
 
   const handleOnSubmit = (_state: any, formData: FormData) => {
     submitQuizSession(state, formData)
-      .then(() => {
-        fetchQuizSession(id, sessionId)
+      .then(async (result) => {
+        await fetchQuizSession(courseId, sessionId);
+        return result;
       })
       .catch(() => {
         toast.error('Failed to delete document. Please try again.')
@@ -63,8 +64,8 @@ export default function QuizForm({sessionId}: {sessionId: string}) {
 
   useEffect(() => {
     setIsLoading(true)
-    fetchQuizSession(id, sessionId)
-  }, [id, sessionId])
+    fetchQuizSession(courseId, sessionId)
+  }, [courseId, sessionId])
 
   const resultsMap = useMemo(() => {
     if (!session) return {}
@@ -104,7 +105,7 @@ export default function QuizForm({sessionId}: {sessionId: string}) {
   }
 
   const handleOnBack = () => {
-    router.back()
+    router.push(`/dashboard/courses/${courseId}?tab=quiz`)
   }
 
   return (
