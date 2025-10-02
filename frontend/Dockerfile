@@ -49,6 +49,8 @@
 # Stage 0, "build-stage", based on Node.js, to build and compile the frontend
 FROM node:24 AS build-stage
 
+RUN corepack enable pnpm && corepack prepare pnpm@latest --activate
+
 WORKDIR /app
 
 COPY package*.json /app/
