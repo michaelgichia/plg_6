@@ -120,7 +120,7 @@ export default function QuizForm({
           {is_completed && (
             <div className='p-6 mb-8 rounded-lg bg-blue-50 border border-blue-200'>
               <h2 className='text-xl font-bold text-blue-800'>
-                Quiz Completed! 🎉
+                Quiz Completed!
               </h2>
               <p className='mt-2 text-blue-700'>
                 You answered {session.total_correct} out of{' '}
@@ -154,7 +154,7 @@ export default function QuizForm({
 
             return (
               <div
-                className={`flex flex-col gap-6 mb-8 p-4 border rounded-md ${itemClass} ${errorClass}`}
+                className={`flex flex-col gap-4 mb-8 p-4 border rounded-md ${itemClass} ${errorClass}`}
                 key={quiz.id}
               >
                 <p className={`text-lg ${questionTextStyle}`}>
@@ -193,7 +193,7 @@ export default function QuizForm({
                     }
 
                     return (
-                      <div className='flex gap-3 mb-4' key={choice.id}>
+                      <div className='flex gap-3 [&:not(:last-child)]:mb-4' key={choice.id}>
                         <Checkbox {...checkboxProps} />
                         <Label htmlFor={choice.text}>
                           <span className={labelClass}>{choice.text}</span>
@@ -204,7 +204,7 @@ export default function QuizForm({
                 </ul>
 
                 {isScored && (
-                  <div className='mt-2 pt-2 border-t border-gray-200'>
+                  <div className='pt-2 mt-2 border-t border-gray-200'>
                     <p
                       className={`text-sm font-semibold ${
                         result.is_correct ? 'text-green-600' : 'text-red-600'
@@ -214,13 +214,8 @@ export default function QuizForm({
                         ? 'Result: Correct'
                         : `Result: Incorrect (The correct answer was: ${result.correct_answer_text})`}
                     </p>
-                    <p className='text-xs text-gray-500 mt-1'>
-                      Time Taken: {result.time_spent_seconds.toFixed(2)} seconds
-                    </p>
                   </div>
                 )}
-
-                <Separator />
               </div>
             )
           })}
