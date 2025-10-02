@@ -19,7 +19,6 @@ export async function getChatHistory(courseId: string): Promise<Result<ChatPubli
       data: response.data ?? [],
     }
   } catch (err) {
-    console.log('Error fetching chat history:', err)
     return {
       ok: false,
       error: mapApiError(err),

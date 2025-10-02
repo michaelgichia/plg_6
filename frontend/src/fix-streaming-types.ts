@@ -8,7 +8,7 @@ const sdkFile = path.join(clientDir, 'sdk.gen.ts')
 
 if (fs.existsSync(sdkFile)) {
   let sdkContent = fs.readFileSync(sdkFile, 'utf-8')
-  
+
   // Only add responseType if not already present
   if (!sdkContent.includes("responseType: 'stream'")) {
     sdkContent = sdkContent.replace(
@@ -16,10 +16,8 @@ if (fs.existsSync(sdkFile)) {
       `$1
             responseType: 'stream',`
     )
-    
+
     fs.writeFileSync(sdkFile, sdkContent)
-    console.log('Added responseType: stream to ChatService')
   } else {
-    console.log('responseType: stream already present in ChatService')
   }
 }

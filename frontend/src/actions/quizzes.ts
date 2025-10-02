@@ -106,7 +106,6 @@ export async function startQuizSession(
   try {
     const courseId = formData.get('courseId') as string
     const difficultyLevel = formData.get('difficultyLevel') as DifficultyLevel
-    console.log("[difficultyLevel]", difficultyLevel)
 
     const response = await CoursesService.postApiV1CoursesByCourseIdQuizStart({
       path: { course_id: courseId },
@@ -114,7 +113,6 @@ export async function startQuizSession(
       responseValidator: async () => { },
     })
 
-    console.log("[response.data]", response.data)
     session = response.data[0];
   } catch (error) {
     return {
@@ -159,13 +157,11 @@ export async function submitQuizSession(
       responseValidator: async () => { },
     });
 
-    console.log("[response.data,]", response.data)
     return {
       ok: true,
       data: response.data,
     };
   } catch (error) {
-    console.log(error);
     return {
       ok: false,
       error: mapApiError(error),

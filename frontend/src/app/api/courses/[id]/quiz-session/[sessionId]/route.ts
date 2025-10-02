@@ -30,11 +30,10 @@ export async function GET(
   context: ContextParams,
 ): Promise<NextResponse> {
   try {
-    const {id, sessionId} = await context.params
-    console.log("[id, sessionId]", id, sessionId)
+    const {sessionId} = await context.params
+
     const response = await QuizSessionsService.getApiV1QuizSessionsById({
       path: {id: sessionId},
-      // Skip strict response Zod validation due to backend datetime format
       responseValidator: async (): Promise<void> => {},
     })
     return NextResponse.json(response.data)

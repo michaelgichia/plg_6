@@ -6,11 +6,12 @@ import {Button} from '@/components/ui/button'
 import {QuizSessionPublicWithResults, QuizAttemptPublic} from '@/client'
 import {Checkbox} from '@/components/ui/checkbox'
 import {Label} from '@/components/ui/label'
-import {Separator} from '@/components/ui/separator'
 import {submitQuizSession} from '@/actions/quizzes'
 import ErrorBox from '@/components/ui/ErrorBox'
 import {getQuizSession} from '@/lib/quizzes'
 import {toast} from 'sonner'
+import {useRouter} from 'next/navigation'
+import {ChevronLeft} from 'react-feather'
 
 const CORRECT_COLOR = 'bg-green-50 border-green-500'
 const INCORRECT_COLOR = 'bg-red-50 border-red-500'
@@ -22,15 +23,10 @@ interface ActionState {
   error: any | null
 }
 
-export default function QuizForm({
-  id,
-  sessionId,
-}: {
-  id: string
-  sessionId: string
-}) {
+export default function QuizForm({sessionId}: {sessionId: string}) {
   const [isLoading, setIsLoading] = useState(false)
   const [session, setSession] = useState<QuizSessionPublicWithResults>()
+  const router = useRouter()
 
   const fetchQuizSession = async (_id: string, _sessionId: string) => {
     try {
@@ -41,7 +37,6 @@ export default function QuizForm({
         toast.error('Failed to fetch course details. Please try again.')
       }
     } catch (error) {
-      console.error('Failed to fetch course:', error)
     } finally {
       setIsLoading(false)
     }
@@ -49,7 +44,7 @@ export default function QuizForm({
 
   const handleOnSubmit = (_state: any, formData: FormData) => {
     submitQuizSession(state, formData)
-      .then((result) => {
+      .then(() => {
         fetchQuizSession(id, sessionId)
       })
       .catch(() => {
@@ -65,8 +60,6 @@ export default function QuizForm({
       error: null,
     },
   )
-
-
 
   useEffect(() => {
     setIsLoading(true)
@@ -94,7 +87,6 @@ export default function QuizForm({
   if (!session) return null
   const {is_completed, quizzes} = session
 
-  console.log("[state]", state)
   const isQuizInError = (quizId: string) => {
     return state && state?.error && state?.error.field === `choice-${quizId}`
   }
@@ -109,6 +101,10 @@ export default function QuizForm({
         No quizzes found for this session.
       </p>
     )
+  }
+
+  const handleOnBack = () => {
+    router.back()
   }
 
   return (
@@ -193,7 +189,10 @@ export default function QuizForm({
                     }
 
                     return (
-                      <div className='flex gap-3 [&:not(:last-child)]:mb-4' key={choice.id}>
+                      <div
+                        className='flex gap-3 [&:not(:last-child)]:mb-4'
+                        key={choice.id}
+                      >
                         <Checkbox {...checkboxProps} />
                         <Label htmlFor={choice.text}>
                           <span className={labelClass}>{choice.text}</span>
@@ -220,18 +219,34 @@ export default function QuizForm({
             )
           })}
 
-          {state && !state.ok && state.error && state.error.code !== 'VALIDATION' && (
-            <ErrorBox error={state.error} />
-          )}
+          {state &&
+            !state.ok &&
+            state.error &&
+            state.error.code !== 'VALIDATION' && (
+              <ErrorBox error={state.error} />
+            )}
 
-          {state && !state.ok && state.error && state.error.field === 'submissions' && (
-            <ErrorBox error={state.error} />
-          )}
+          {state &&
+            !state.ok &&
+            state.error &&
+            state.error.field === 'submissions' && (
+              <ErrorBox error={state.error} />
+            )}
         </div>
 
-        {!is_completed && <Button type='submit'>Submit Answers</Button>}
+        <div className='flex gap-4'>
+          <Button
+            type='button'
+            variant='outline'
+            className='min-w-[120px]'
+            onClick={handleOnBack}
+          >
+            <ChevronLeft /> Back
+          </Button>
+          {!is_completed && <Button type='submit'>Submit Answers</Button>}
 
-        {is_completed && <Button disabled>Quiz Session Completed</Button>}
+          {is_completed && <Button disabled>Quiz Session Completed</Button>}
+        </div>
       </form>
     </>
   )

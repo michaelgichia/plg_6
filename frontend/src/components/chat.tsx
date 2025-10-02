@@ -33,7 +33,6 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
         }
       })
       .catch(error => {
-        console.error('Failed to fetch chat history:', error)
         setMessages([])
       })
   }, [courseId])
@@ -91,7 +90,7 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
           await new Promise(resolve => setTimeout(resolve, 50))
         }
       }
-      
+
       // Final update to ensure all content is displayed
       setMessages(prev =>
         prev.map(msg =>
@@ -101,7 +100,6 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
         )
       )
     } catch (error) {
-      console.error('Chat error:', error)
       setMessages(prev =>
         prev.map(msg =>
           msg.id === systemMessageId

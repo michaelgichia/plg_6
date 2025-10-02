@@ -56,7 +56,6 @@ export default function ProjectSettings() {
         toast.error('Failed to fetch course details. Please try again.')
       }
     } catch (error) {
-      console.error('Failed to fetch course:', error)
     } finally {
       setIsLoading(false)
     }
