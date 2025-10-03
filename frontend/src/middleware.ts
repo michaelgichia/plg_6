@@ -28,7 +28,6 @@ export function middleware(req: NextRequest) {
           return res
         }
       } catch (e) {
-        console.error('[middleware error]', e)
         const res = NextResponse.redirect(new URL('/login', req.url))
         res.cookies.delete('access_token')
         return res

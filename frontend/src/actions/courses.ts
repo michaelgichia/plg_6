@@ -3,7 +3,7 @@
 import {redirect} from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
-import {CoursePublic, CoursesService, CourseWithDocuments} from '@/client'
+import {CoursePublic, CoursesService, CourseWithDocuments, Course} from '@/client'
 import {zCourseCreate} from '@/client/zod.gen'
 
 import {mapApiError} from '@/lib/mapApiError'
@@ -13,7 +13,7 @@ import {Result} from '@/lib/result'
  * Fetch all courses.
  * Returns a Result<CoursePublic[]> that must be checked with `res.ok`.
  */
-export async function getCourses(): Promise<Result<CoursePublic[]>> {
+export async function getCourses(): Promise<Result<Course[]>> {
   try {
     const response = await CoursesService.getApiV1Courses({
       responseValidator: async () => {},

@@ -1,4 +1,5 @@
 import logging
+import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -121,3 +122,26 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+
+
+def clean_string(text):
+    # Replace newlines with a space.
+    text = re.sub(r"\n+", " ", text)
+
+    # Strip leading and trailing whitespace.
+    text = text.strip()
+
+    # Replace multiple spaces with a single space.
+    text = re.sub(r"\s+", " ", text)
+
+    # Add space after punctuation if missing, excluding the last character.
+    text = re.sub(r"([.,!?])([^\s.])", r"\1 \2", text)
+
+    # Split sentences while preserving punctuation.
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    text = " ".join(s.capitalize() for s in sentences if s)
+
+    # Convert to lower case.
+    text = text.lower()
+
+    return text
