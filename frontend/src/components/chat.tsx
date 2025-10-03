@@ -38,7 +38,7 @@ function MessageActions({
         onClick={() => onCopy(messageText, messageId)}
         size="sm"
         variant="ghost"
-        className="h-7 px-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+        className="h-7 px-2 text-muted-foreground hover:text-foreground hover:bg-muted"
       >
         {copiedMessageId === messageId ? (
           <Check className="h-3 w-3" />
@@ -52,7 +52,7 @@ function MessageActions({
           disabled={isLoading}
           size="sm"
           variant="ghost"
-          className="h-7 px-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700 disabled:opacity-50"
+          className="h-7 px-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-50"
         >
           <RotateCcw className="h-3 w-3" />
         </Button>
@@ -81,15 +81,39 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
   useEffect(() => {
     getChatHistory(courseId)
       .then(result => {
-        if (result.ok) {
+        if (result.ok && result.data.length > 0) {
+          console.log('Chat history loaded:', result.data.length, 'messages')
           setMessages(result.data)
         } else {
-          setMessages([])
+          console.log('No chat history found, should show greeting from backend')
+          // If backend didn't return a greeting, create one locally as fallback
+          if (!result.ok || result.data.length === 0) {
+            const fallbackGreeting: ChatPublic = {
+              id: 'athena-greeting',
+              message: "Hi! I'm **Athena**, your AI tutor. I'm ready to help you understand the course materials and answer any questions you have.\n\nI can help you with:\n- Explaining concepts from your course materials\n- Answering questions about specific topics\n- Creating summaries and study guides\n- Clarifying difficult content\n\nWhat would you like to learn about today?",
+              is_system: true,
+              course_id: courseId,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }
+            setMessages([fallbackGreeting])
+          } else {
+            setMessages(result.data)
+          }
         }
       })
       .catch(error => {
         console.error('Failed to fetch chat history:', error)
-        setMessages([])
+        // Show fallback greeting even on error
+        const fallbackGreeting: ChatPublic = {
+          id: 'athena-greeting-error',
+          message: "Hi! I'm **Athena**, your AI tutor. I'm ready to help you understand the course materials and answer any questions you have.\n\nWhat would you like to learn about today?",
+          is_system: true,
+          course_id: courseId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+        setMessages([fallbackGreeting])
       })
   }, [courseId])
 
@@ -234,10 +258,82 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
     if (messageIndex > 0) {
       const userMessage = messages[messageIndex - 1]
       if (userMessage && !userMessage.is_system) {
-        // Remove the current system response
+        // Remove the current system response only
         setMessages(prev => prev.filter(msg => msg.id !== messageId))
-        // Regenerate with the same user question
-        await handleChatRequest(userMessage.message, false)
+        
+        // Create new system message placeholder for regeneration
+        const newSystemMessageId = Date.now().toString() + '-system'
+        const systemMessage: ChatPublic = {
+          id: newSystemMessageId,
+          message: '',
+          is_system: true,
+          course_id: courseId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+        setMessages(prev => [...prev, systemMessage])
+        
+        // Start regeneration with loading states
+        setIsLoading(true)
+        setLoadingState('thinking')
+        
+        try {
+          // Progress through loading states
+          setLoadingState('searching')
+          await new Promise(resolve => setTimeout(resolve, 500))
+          setLoadingState('generating')
+
+          const stream = await createChatStream(courseId, userMessage.message, false)
+
+          if (!stream) {
+            throw new Error('No response stream received from server.')
+          }
+
+          let responseChunk = ''
+
+          for await (const chunk of readStreamAsText(stream)) {
+            if (chunk) {
+              responseChunk += chunk
+
+              // Check for truncation indicator
+              if (chunk.includes('[Response was truncated. Ask me to continue for more details.]')) {
+                setShowContinueButton(newSystemMessageId)
+              }
+
+              // Update the new system message
+              setMessages(prev =>
+                prev.map(msg =>
+                  msg.id === newSystemMessageId
+                    ? { ...msg, message: responseChunk }
+                    : msg
+                )
+              )
+
+              await new Promise(resolve => setTimeout(resolve, 50))
+            }
+          }
+          
+          // Final cleanup
+          setMessages(prev =>
+            prev.map(msg =>
+              msg.id === newSystemMessageId
+                ? { ...msg, message: responseChunk.trim() }
+                : msg
+            )
+          )
+        } catch (error) {
+          console.error('Regeneration error:', error)
+          setMessages(prev =>
+            prev.map(msg =>
+              msg.id === newSystemMessageId
+                ? { ...msg, message: 'Error regenerating response. Please try again.' }
+                : msg
+            )
+          )
+        } finally {
+          setIsLoading(false)
+          setLoadingState(null)
+        }
       }
     }
   }
@@ -264,20 +360,20 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
               {message.is_system ? (
                 <div className='flex items-start gap-3 max-w-4xl group'>
                   <Avatar className='h-8 w-8 mt-1 flex-shrink-0'>
-                    <AvatarFallback className='bg-slate-700 text-white text-xs'>
-                      CT
+                    <AvatarFallback className='bg-primary text-primary-foreground text-xs'>
+                      AT
                     </AvatarFallback>
                   </Avatar>
                   <div className='min-w-0 flex-1'>
-                    <div className='bg-slate-800 rounded-lg p-3 text-slate-100'>
+                    <div className='bg-card rounded-lg p-3 text-card-foreground border border-border'>
                       {message.message === '' ? (
                         <div className="flex items-center space-x-3">
                           <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.2s]"></div>
-                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.4s]"></div>
+                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.2s]"></div>
+                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.4s]"></div>
                           </div>
-                          <span className="text-slate-400 text-sm">
+                          <span className="text-muted-foreground text-sm">
                             {loadingState === 'thinking' && 'Athena is thinking...'}
                             {loadingState === 'searching' && 'Searching course materials...'}
                             {loadingState === 'generating' && 'Generating response...'}
@@ -290,24 +386,24 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
                             remarkPlugins={[remarkGfm]}
                             components={{
                               // Custom styling for markdown elements
-                              h1: (props: any) => <h1 className="text-xl font-bold mb-3 text-slate-100" {...props} />,
-                              h2: (props: any) => <h2 className="text-lg font-bold mb-2 text-slate-100" {...props} />,
-                              h3: (props: any) => <h3 className="text-base font-bold mb-2 text-slate-100" {...props} />,
-                              p: (props: any) => <p className="mb-2 text-slate-100 leading-relaxed" {...props} />,
-                              ul: (props: any) => <ul className="list-disc pl-4 mb-2 text-slate-100" {...props} />,
-                              ol: (props: any) => <ol className="list-decimal pl-4 mb-2 text-slate-100" {...props} />,
-                              li: (props: any) => <li className="mb-1 text-slate-100" {...props} />,
+                              h1: (props: any) => <h1 className="text-xl font-bold mb-3 text-card-foreground" {...props} />,
+                              h2: (props: any) => <h2 className="text-lg font-bold mb-2 text-card-foreground" {...props} />,
+                              h3: (props: any) => <h3 className="text-base font-bold mb-2 text-card-foreground" {...props} />,
+                              p: (props: any) => <p className="mb-2 text-card-foreground leading-relaxed" {...props} />,
+                              ul: (props: any) => <ul className="list-disc pl-4 mb-2 text-card-foreground" {...props} />,
+                              ol: (props: any) => <ol className="list-decimal pl-4 mb-2 text-card-foreground" {...props} />,
+                              li: (props: any) => <li className="mb-1 text-card-foreground" {...props} />,
                               code: ({ inline, ...props }: any) => 
                                 inline 
-                                  ? <code className="bg-slate-700 px-1 py-0.5 rounded text-sm font-mono text-slate-200" {...props} />
-                                  : <code className="block bg-slate-700 p-3 rounded text-sm font-mono text-slate-200 mb-2 overflow-x-auto" {...props} />,
-                              pre: (props: any) => <pre className="bg-slate-700 p-3 rounded mb-2 overflow-x-auto" {...props} />,
-                              blockquote: (props: any) => <blockquote className="border-l-4 border-blue-500 pl-4 italic text-slate-300 mb-2" {...props} />,
-                              strong: (props: any) => <strong className="font-bold text-slate-100" {...props} />,
-                              em: (props: any) => <em className="italic text-slate-200" {...props} />,
-                              table: (props: any) => <table className="w-full border-collapse border border-slate-600 mb-2" {...props} />,
-                              th: (props: any) => <th className="border border-slate-600 px-3 py-2 bg-slate-700 text-slate-100 font-bold" {...props} />,
-                              td: (props: any) => <td className="border border-slate-600 px-3 py-2 text-slate-100" {...props} />,
+                                  ? <code className="bg-muted px-1 py-0.5 rounded text-sm font-mono text-muted-foreground" {...props} />
+                                  : <code className="block bg-muted p-3 rounded text-sm font-mono text-muted-foreground mb-2 overflow-x-auto" {...props} />,
+                              pre: (props: any) => <pre className="bg-muted p-3 rounded mb-2 overflow-x-auto" {...props} />,
+                              blockquote: (props: any) => <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground mb-2" {...props} />,
+                              strong: (props: any) => <strong className="font-bold text-card-foreground" {...props} />,
+                              em: (props: any) => <em className="italic text-card-foreground" {...props} />,
+                              table: (props: any) => <table className="w-full border-collapse border border-border mb-2" {...props} />,
+                              th: (props: any) => <th className="border border-border px-3 py-2 bg-muted text-card-foreground font-bold" {...props} />,
+                              td: (props: any) => <td className="border border-border px-3 py-2 text-card-foreground" {...props} />,
                             }}
                           >
                             {message.message}
@@ -337,11 +433,11 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
                           disabled={isLoading}
                           size="sm"
                           variant="outline"
-                          className="bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600 hover:text-white"
+                          className="bg-card border-border text-card-foreground hover:bg-accent hover:text-accent-foreground"
                         >
                           {isLoading ? (
                             <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                              <div className="w-3 h-3 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin"></div>
                               <span>Continuing...</span>
                             </div>
                           ) : (
@@ -354,7 +450,7 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
                 </div>
               ) : (
                 <div className="group max-w-md">
-                  <div className='bg-blue-600 rounded-lg px-4 py-2 text-white'>
+                  <div className='bg-primary rounded-lg px-4 py-2 text-primary-foreground'>
                     <div className="whitespace-pre-wrap">{message.message}</div>
                   </div>
                   {/* User Message Actions */}
@@ -377,7 +473,7 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
       </div>
 
       {/* Chat Input */}
-      <div className='border-t border-slate-700 p-4'>
+      <div className='border-t border-border p-4'>
         <form onSubmit={handleSubmit} className='flex items-center gap-2'>
           <div className='flex-1 relative'>
             <Input
@@ -386,14 +482,14 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
               onKeyDown={handleKeyPress}
               placeholder='Ask about your course materials...'
               disabled={isLoading}
-              className='bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 pr-10'
+              className='bg-background border-border text-foreground placeholder:text-muted-foreground pr-10'
               maxLength={1000}
             />
             <Button
               type="button"
               size='sm'
               variant='ghost'
-              className='absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-slate-400 hover:text-white'
+              className='absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-muted-foreground hover:text-foreground'
               disabled={isLoading}
             >
               <Mic className='h-4 w-4' />
@@ -401,12 +497,12 @@ export default function ChatComponent({ courseId }: { courseId: string }) {
           </div>
           <Button
             type="submit"
-            className='bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]'
+            className='bg-primary hover:bg-primary/90 text-primary-foreground min-w-[100px]'
             disabled={isLoading || !input.trim()}
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
                 <span className="text-sm">
                   {loadingState === 'thinking' && 'Thinking'}
                   {loadingState === 'searching' && 'Searching'}
