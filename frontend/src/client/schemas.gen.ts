@@ -97,18 +97,87 @@ export const ChatPublicSchema = {
             format: 'uuid',
             title: 'Id'
         },
-        message: {
-            type: 'string',
-            title: 'Message'
-        },
         course_id: {
             type: 'string',
             format: 'uuid',
             title: 'Course Id'
         },
+        total_submitted: {
+            type: 'integer',
+            title: 'Total Submitted'
+        },
+        total_correct: {
+            type: 'integer',
+            title: 'Total Correct'
+        },
+        score_percentage: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Score Percentage'
+        },
+        is_completed: {
+            type: 'boolean',
+            title: 'Is Completed'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        message: {
+            type: 'string',
+            title: 'Message'
+        },
         is_system: {
             type: 'boolean',
             title: 'Is System'
+        }
+    },
+    type: 'object',
+    required: ['id', 'course_id', 'total_submitted', 'total_correct', 'is_completed', 'created_at', 'updated_at', 'message', 'is_system'],
+    title: 'ChatPublic'
+} as const;
+
+export const CourseSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 3,
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1020
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id'
         },
         created_at: {
             type: 'string',
@@ -122,8 +191,8 @@ export const ChatPublicSchema = {
         }
     },
     type: 'object',
-    required: ['id', 'message', 'course_id', 'is_system', 'created_at', 'updated_at'],
-    title: 'ChatPublic'
+    required: ['name', 'owner_id'],
+    title: 'Course'
 } as const;
 
 export const CourseCreateSchema = {
@@ -179,6 +248,13 @@ export const CoursePublicSchema = {
             ],
             title: 'Description'
         },
+        documents: {
+            items: {
+                '$ref': '#/components/schemas/DocumentPublic'
+            },
+            type: 'array',
+            title: 'Documents'
+        },
         created_at: {
             type: 'string',
             format: 'date-time',
@@ -188,17 +264,10 @@ export const CoursePublicSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Updated At'
-        },
-        documents: {
-            items: {
-                '$ref': '#/components/schemas/DocumentPublic'
-            },
-            type: 'array',
-            title: 'Documents'
         }
     },
     type: 'object',
-    required: ['id', 'owner_id', 'name', 'created_at', 'updated_at', 'documents'],
+    required: ['id', 'owner_id', 'name', 'documents', 'created_at', 'updated_at'],
     title: 'CoursePublic'
 } as const;
 
@@ -261,6 +330,14 @@ export const CourseWithDocumentsSchema = {
             ],
             title: 'Description'
         },
+        documents: {
+            items: {
+                '$ref': '#/components/schemas/DocumentPublic'
+            },
+            type: 'array',
+            title: 'Documents',
+            default: []
+        },
         created_at: {
             type: 'string',
             format: 'date-time',
@@ -270,14 +347,6 @@ export const CourseWithDocumentsSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Updated At'
-        },
-        documents: {
-            items: {
-                '$ref': '#/components/schemas/DocumentPublic'
-            },
-            type: 'array',
-            title: 'Documents',
-            default: []
         }
     },
     type: 'object',
@@ -302,6 +371,12 @@ export const CoursesPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'CoursesPublic'
+} as const;
+
+export const DifficultyLevelSchema = {
+    type: 'string',
+    enum: ['easy', 'medium', 'hard', 'expert', 'all'],
+    title: 'DifficultyLevel'
 } as const;
 
 export const DocumentSchema = {
@@ -375,21 +450,6 @@ export const DocumentPublicSchema = {
             format: 'uuid',
             title: 'Id'
         },
-        filename: {
-            type: 'string',
-            title: 'Filename'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
         course_id: {
             type: 'string',
             format: 'uuid',
@@ -406,12 +466,11 @@ export const DocumentPublicSchema = {
             title: 'Created At'
         },
         status: {
-            type: 'string',
-            title: 'Status'
+            '$ref': '#/components/schemas/DocumentStatus'
         }
     },
     type: 'object',
-    required: ['id', 'filename', 'course_id', 'updated_at', 'created_at', 'status'],
+    required: ['id', 'course_id', 'updated_at', 'created_at', 'status'],
     title: 'DocumentPublic'
 } as const;
 
@@ -433,6 +492,42 @@ export const HTTPValidationErrorSchema = {
     },
     type: 'object',
     title: 'HTTPValidationError'
+} as const;
+
+export const ItemSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Title'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id'
+        }
+    },
+    type: 'object',
+    required: ['title', 'owner_id'],
+    title: 'Item'
 } as const;
 
 export const ItemCreateSchema = {
@@ -533,7 +628,7 @@ export const ItemsPublicSchema = {
     properties: {
         data: {
             items: {
-                '$ref': '#/components/schemas/ItemPublic'
+                '$ref': '#/components/schemas/Item'
             },
             type: 'array',
             title: 'Data'
@@ -617,6 +712,357 @@ export const QAItemSchema = {
     type: 'object',
     required: ['question', 'answer'],
     title: 'QAItem'
+} as const;
+
+export const QuizAttemptPublicSchema = {
+    properties: {
+        quiz_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Quiz Id'
+        },
+        selected_answer_text: {
+            type: 'string',
+            title: 'Selected Answer Text'
+        },
+        is_correct: {
+            type: 'boolean',
+            title: 'Is Correct'
+        },
+        correct_answer_text: {
+            type: 'string',
+            title: 'Correct Answer Text'
+        },
+        time_spent_seconds: {
+            type: 'number',
+            title: 'Time Spent Seconds'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['quiz_id', 'selected_answer_text', 'is_correct', 'correct_answer_text', 'time_spent_seconds', 'created_at'],
+    title: 'QuizAttemptPublic',
+    description: `Public schema for a single QuizAttempt record.
+Used to return the full history/results when a session is complete.`
+} as const;
+
+export const QuizChoiceSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        text: {
+            type: 'string',
+            title: 'Text'
+        }
+    },
+    type: 'object',
+    required: ['id', 'text'],
+    title: 'QuizChoice'
+} as const;
+
+export const QuizPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        quiz_text: {
+            type: 'string',
+            title: 'Quiz Text'
+        },
+        choices: {
+            items: {
+                '$ref': '#/components/schemas/QuizChoice'
+            },
+            type: 'array',
+            title: 'Choices'
+        }
+    },
+    type: 'object',
+    required: ['id', 'quiz_text', 'choices'],
+    title: 'QuizPublic'
+} as const;
+
+export const QuizScoreSummarySchema = {
+    properties: {
+        total_submitted: {
+            type: 'integer',
+            title: 'Total Submitted'
+        },
+        total_correct: {
+            type: 'integer',
+            title: 'Total Correct'
+        },
+        score_percentage: {
+            type: 'number',
+            title: 'Score Percentage'
+        },
+        results: {
+            items: {
+                '$ref': '#/components/schemas/SingleQuizScore'
+            },
+            type: 'array',
+            title: 'Results'
+        }
+    },
+    type: 'object',
+    required: ['total_submitted', 'total_correct', 'score_percentage', 'results'],
+    title: 'QuizScoreSummary',
+    description: 'The overall score for the batch of submissions.'
+} as const;
+
+export const QuizSessionPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        total_submitted: {
+            type: 'integer',
+            title: 'Total Submitted'
+        },
+        total_correct: {
+            type: 'integer',
+            title: 'Total Correct'
+        },
+        score_percentage: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Score Percentage'
+        },
+        is_completed: {
+            type: 'boolean',
+            title: 'Is Completed'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'course_id', 'total_submitted', 'total_correct', 'is_completed', 'created_at', 'updated_at'],
+    title: 'QuizSessionPublic',
+    description: 'Public schema for a QuizSession.'
+} as const;
+
+export const QuizSessionPublicWithResultsSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        course_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Course Id'
+        },
+        total_submitted: {
+            type: 'integer',
+            title: 'Total Submitted'
+        },
+        total_correct: {
+            type: 'integer',
+            title: 'Total Correct'
+        },
+        score_percentage: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Score Percentage'
+        },
+        is_completed: {
+            type: 'boolean',
+            title: 'Is Completed'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        quizzes: {
+            items: {
+                '$ref': '#/components/schemas/QuizPublic'
+            },
+            type: 'array',
+            title: 'Quizzes'
+        },
+        results: {
+            items: {
+                '$ref': '#/components/schemas/QuizAttemptPublic'
+            },
+            type: 'array',
+            title: 'Results'
+        }
+    },
+    type: 'object',
+    required: ['id', 'course_id', 'total_submitted', 'total_correct', 'is_completed', 'created_at', 'updated_at'],
+    title: 'QuizSessionPublicWithResults',
+    description: `Expanded schema that includes quiz attempts (results)
+when the session is marked as completed.`
+} as const;
+
+export const QuizSessionsListSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/QuizSessionPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        }
+    },
+    type: 'object',
+    required: ['data'],
+    title: 'QuizSessionsList'
+} as const;
+
+export const QuizStatsSchema = {
+    properties: {
+        best_total_submitted: {
+            type: 'integer',
+            title: 'Best Total Submitted'
+        },
+        best_total_correct: {
+            type: 'integer',
+            title: 'Best Total Correct'
+        },
+        best_score_percentage: {
+            type: 'number',
+            title: 'Best Score Percentage'
+        },
+        average_score: {
+            type: 'number',
+            title: 'Average Score'
+        },
+        attempts: {
+            type: 'integer',
+            title: 'Attempts'
+        }
+    },
+    type: 'object',
+    required: ['best_total_submitted', 'best_total_correct', 'best_score_percentage', 'average_score', 'attempts'],
+    title: 'QuizStats'
+} as const;
+
+export const QuizSubmissionBatchSchema = {
+    properties: {
+        submissions: {
+            items: {
+                '$ref': '#/components/schemas/SingleQuizSubmission'
+            },
+            type: 'array',
+            title: 'Submissions'
+        },
+        total_time_seconds: {
+            type: 'number',
+            title: 'Total Time Seconds',
+            default: 0
+        }
+    },
+    type: 'object',
+    required: ['submissions'],
+    title: 'QuizSubmissionBatch',
+    description: 'Container for multiple quiz submissions.'
+} as const;
+
+export const QuizzesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/QuizPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'QuizzesPublic'
+} as const;
+
+export const SingleQuizScoreSchema = {
+    properties: {
+        quiz_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Quiz Id'
+        },
+        is_correct: {
+            type: 'boolean',
+            title: 'Is Correct'
+        },
+        correct_answer_text: {
+            type: 'string',
+            title: 'Correct Answer Text'
+        },
+        feedback: {
+            type: 'string',
+            title: 'Feedback'
+        }
+    },
+    type: 'object',
+    required: ['quiz_id', 'is_correct', 'correct_answer_text', 'feedback'],
+    title: 'SingleQuizScore',
+    description: 'The result for a single question.'
+} as const;
+
+export const SingleQuizSubmissionSchema = {
+    properties: {
+        quiz_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Quiz Id'
+        },
+        selected_answer_text: {
+            type: 'string',
+            title: 'Selected Answer Text'
+        }
+    },
+    type: 'object',
+    required: ['quiz_id', 'selected_answer_text'],
+    title: 'SingleQuizSubmission',
+    description: "The user's answer for one question."
 } as const;
 
 export const TokenSchema = {

@@ -34,3 +34,9 @@ repos:
 ci:
   autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
   autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
+
+exclude: |
+  (?x)^(
+      \.npm/.*       # ignore .npm folder
+      |backend/app/email-templates/build/.*
+  )$

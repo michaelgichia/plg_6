@@ -135,10 +135,10 @@ export default function SignUpPage() {
                           type='checkbox'
                           checked={field.value ?? false}
                           onChange={(e) => field.onChange(e.target.checked)}
-                          className='h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-zinc-300 rounded'
+                          className='h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-slate-300 rounded'
                         />
                       </FormControl>
-                      <FormLabel className='ml-2 text-sm text-zinc-700'>
+                      <FormLabel className='ml-2 text-sm text-slate-700'>
                         I agree to the terms & policy
                       </FormLabel>
                     </div>
@@ -163,12 +163,12 @@ export default function SignUpPage() {
             </form>
           </Form>
 
-          <div className='my-6 text-center text-sm text-zinc-500'>
+          <div className='my-6 text-center text-sm text-slate-500'>
             <span>Or</span>
           </div>
 
           <div className='text-center'>
-            <p className='text-sm text-zinc-600'>
+            <p className='text-sm text-slate-600'>
               Have an account?{' '}
               <Link
                 href='/login'

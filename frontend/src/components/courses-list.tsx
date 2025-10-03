@@ -91,10 +91,7 @@ export default function CoursesList({
       )}
 
       {filtered.length === 0 ? (
-        <div className='flex flex-col items-center justify-center py-12 w-full h-full'>
-          <p className='mb-4 text-lg text-muted-foreground'>
-            No courses found.
-          </p>
+        <div className='flex flex-col items-center justify-center py-12 w-full h-[calc(100vh-300px)]'>
           <Link
             className='px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition flex'
             href='/dashboard/courses/create'
@@ -102,6 +99,9 @@ export default function CoursesList({
             <Plus className='text-white text-sm' />
             <span className='text-white pl-6'>Add Course</span>
           </Link>
+          <p className='mt-4 text-lg text-muted-foreground'>
+            No courses found.
+          </p>
         </div>
       ) : (
         <div className='grid auto-rows-min gap-6 md:grid-cols-3 sm:grid-cols-3 lg:grid-cols-4'>

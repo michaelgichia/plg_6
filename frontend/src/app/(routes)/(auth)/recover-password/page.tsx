@@ -70,7 +70,7 @@ export default function RecoverPasswordPage() {
 
   if (isSubmitted) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-zinc-50 py-12 px-4 sm:px-6 lg:px-8'>
+      <div className='min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8'>
         <div className='max-w-md w-full space-y-8 text-center'>
           <div>
             <div className='mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-green-100'>
@@ -88,10 +88,10 @@ export default function RecoverPasswordPage() {
                 />
               </svg>
             </div>
-            <h2 className='mt-6 text-center text-3xl font-extrabold text-zinc-900'>
+            <h2 className='mt-6 text-center text-3xl font-extrabold text-slate-900'>
               Check your email
             </h2>
-            <p className='mt-2 text-center text-sm text-zinc-600'>
+            <p className='mt-2 text-center text-sm text-slate-600'>
               We&apos;ve sent a password recovery link to your email address.
             </p>
           </div>
@@ -114,7 +114,7 @@ export default function RecoverPasswordPage() {
       <div className='w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24'>
         <div className='max-w-md mx-auto w-full'>
           <h1 className='text-3xl font-bold mb-4'>Password Recovery</h1>
-          <p className='text-zinc-600 mb-10'>
+          <p className='text-slate-600 mb-10'>
             A password recovery email will be sent to the registered account.
           </p>
 
@@ -135,7 +135,7 @@ export default function RecoverPasswordPage() {
                 className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 transition-colors ${
                   emailError || error
                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                    : 'border-zinc-300 focus:ring-cyan-500 focus:border-cyan-500'
+                    : 'border-slate-300 focus:ring-cyan-500 focus:border-cyan-500'
                 }`}
               />
               {emailError && (

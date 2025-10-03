@@ -30,7 +30,7 @@ const PasswordInput: React.FC<
         className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 transition-colors ${
           error
             ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-            : 'border-zinc-300 focus:ring-cyan-500 focus:border-cyan-500'
+            : 'border-slate-300 focus:ring-cyan-500 focus:border-cyan-500'
         }`}
       />
       <button

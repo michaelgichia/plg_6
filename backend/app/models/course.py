@@ -33,9 +33,9 @@ class Course(CourseBase, table=True):
     )
 
     owner: User | None = Relationship(back_populates="courses")
-    documents: list["Document"] = Relationship(
+    documents: list["Document"] = Relationship(  # noqa: F821 # type: ignore
         back_populates="course",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
     chats: list["Chat"] = Relationship(back_populates="course")
 

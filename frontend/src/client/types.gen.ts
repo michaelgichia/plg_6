@@ -67,17 +67,25 @@ export type ChatPublic = {
      */
     id: string;
     /**
-     * Message
-     */
-    message: string;
-    /**
      * Course Id
      */
     course_id: string;
     /**
-     * Is System
+     * Total Submitted
      */
-    is_system: boolean;
+    total_submitted: number;
+    /**
+     * Total Correct
+     */
+    total_correct: number;
+    /**
+     * Score Percentage
+     */
+    score_percentage?: number | null;
+    /**
+     * Is Completed
+     */
+    is_completed: boolean;
     /**
      * Created At
      */
@@ -86,6 +94,44 @@ export type ChatPublic = {
      * Updated At
      */
     updated_at: string;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Is System
+     */
+    is_system: boolean;
+};
+
+/**
+ * Course
+ */
+export type Course = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Id
+     */
+    id?: string;
+    /**
+     * Owner Id
+     */
+    owner_id: string;
+    /**
+     * Created At
+     */
+    created_at?: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string;
 };
 
 /**
@@ -123,6 +169,10 @@ export type CoursePublic = {
      */
     description?: string | null;
     /**
+     * Documents
+     */
+    documents: Array<DocumentPublic>;
+    /**
      * Created At
      */
     created_at: string;
@@ -130,10 +180,6 @@ export type CoursePublic = {
      * Updated At
      */
     updated_at: string;
-    /**
-     * Documents
-     */
-    documents: Array<DocumentPublic>;
 };
 
 /**
@@ -171,6 +217,10 @@ export type CourseWithDocuments = {
      */
     description?: string | null;
     /**
+     * Documents
+     */
+    documents?: Array<DocumentPublic>;
+    /**
      * Created At
      */
     created_at: string;
@@ -178,10 +228,6 @@ export type CourseWithDocuments = {
      * Updated At
      */
     updated_at: string;
-    /**
-     * Documents
-     */
-    documents?: Array<DocumentPublic>;
 };
 
 /**
@@ -197,6 +243,11 @@ export type CoursesPublic = {
      */
     count: number;
 };
+
+/**
+ * DifficultyLevel
+ */
+export type DifficultyLevel = 'easy' | 'medium' | 'hard' | 'expert' | 'all';
 
 /**
  * Document
@@ -246,14 +297,6 @@ export type DocumentPublic = {
      */
     id: string;
     /**
-     * Filename
-     */
-    filename: string;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
      * Course Id
      */
     course_id: string;
@@ -265,10 +308,7 @@ export type DocumentPublic = {
      * Created At
      */
     created_at: string;
-    /**
-     * Status
-     */
-    status: string;
+    status: DocumentStatus;
 };
 
 /**
@@ -284,6 +324,28 @@ export type HttpValidationError = {
      * Detail
      */
     detail?: Array<ValidationError>;
+};
+
+/**
+ * Item
+ */
+export type Item = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Id
+     */
+    id?: string;
+    /**
+     * Owner Id
+     */
+    owner_id: string;
 };
 
 /**
@@ -343,7 +405,7 @@ export type ItemsPublic = {
     /**
      * Data
      */
-    data: Array<ItemPublic>;
+    data: Array<Item>;
     /**
      * Count
      */
@@ -408,6 +470,283 @@ export type QaItem = {
      * Answer
      */
     answer: string;
+};
+
+/**
+ * QuizAttemptPublic
+ * Public schema for a single QuizAttempt record.
+ * Used to return the full history/results when a session is complete.
+ */
+export type QuizAttemptPublic = {
+    /**
+     * Quiz Id
+     */
+    quiz_id: string;
+    /**
+     * Selected Answer Text
+     */
+    selected_answer_text: string;
+    /**
+     * Is Correct
+     */
+    is_correct: boolean;
+    /**
+     * Correct Answer Text
+     */
+    correct_answer_text: string;
+    /**
+     * Time Spent Seconds
+     */
+    time_spent_seconds: number;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * QuizChoice
+ */
+export type QuizChoice = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Text
+     */
+    text: string;
+};
+
+/**
+ * QuizPublic
+ */
+export type QuizPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Quiz Text
+     */
+    quiz_text: string;
+    /**
+     * Choices
+     */
+    choices: Array<QuizChoice>;
+};
+
+/**
+ * QuizScoreSummary
+ * The overall score for the batch of submissions.
+ */
+export type QuizScoreSummary = {
+    /**
+     * Total Submitted
+     */
+    total_submitted: number;
+    /**
+     * Total Correct
+     */
+    total_correct: number;
+    /**
+     * Score Percentage
+     */
+    score_percentage: number;
+    /**
+     * Results
+     */
+    results: Array<SingleQuizScore>;
+};
+
+/**
+ * QuizSessionPublic
+ * Public schema for a QuizSession.
+ */
+export type QuizSessionPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Total Submitted
+     */
+    total_submitted: number;
+    /**
+     * Total Correct
+     */
+    total_correct: number;
+    /**
+     * Score Percentage
+     */
+    score_percentage?: number | null;
+    /**
+     * Is Completed
+     */
+    is_completed: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+};
+
+/**
+ * QuizSessionPublicWithResults
+ * Expanded schema that includes quiz attempts (results)
+ * when the session is marked as completed.
+ */
+export type QuizSessionPublicWithResults = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Total Submitted
+     */
+    total_submitted: number;
+    /**
+     * Total Correct
+     */
+    total_correct: number;
+    /**
+     * Score Percentage
+     */
+    score_percentage?: number | null;
+    /**
+     * Is Completed
+     */
+    is_completed: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Quizzes
+     */
+    quizzes?: Array<QuizPublic>;
+    /**
+     * Results
+     */
+    results?: Array<QuizAttemptPublic>;
+};
+
+/**
+ * QuizSessionsList
+ */
+export type QuizSessionsList = {
+    /**
+     * Data
+     */
+    data: Array<QuizSessionPublic>;
+};
+
+/**
+ * QuizStats
+ */
+export type QuizStats = {
+    /**
+     * Best Total Submitted
+     */
+    best_total_submitted: number;
+    /**
+     * Best Total Correct
+     */
+    best_total_correct: number;
+    /**
+     * Best Score Percentage
+     */
+    best_score_percentage: number;
+    /**
+     * Average Score
+     */
+    average_score: number;
+    /**
+     * Attempts
+     */
+    attempts: number;
+};
+
+/**
+ * QuizSubmissionBatch
+ * Container for multiple quiz submissions.
+ */
+export type QuizSubmissionBatch = {
+    /**
+     * Submissions
+     */
+    submissions: Array<SingleQuizSubmission>;
+    /**
+     * Total Time Seconds
+     */
+    total_time_seconds?: number;
+};
+
+/**
+ * QuizzesPublic
+ */
+export type QuizzesPublic = {
+    /**
+     * Data
+     */
+    data: Array<QuizPublic>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * SingleQuizScore
+ * The result for a single question.
+ */
+export type SingleQuizScore = {
+    /**
+     * Quiz Id
+     */
+    quiz_id: string;
+    /**
+     * Is Correct
+     */
+    is_correct: boolean;
+    /**
+     * Correct Answer Text
+     */
+    correct_answer_text: string;
+    /**
+     * Feedback
+     */
+    feedback: string;
+};
+
+/**
+ * SingleQuizSubmission
+ * The user's answer for one question.
+ */
+export type SingleQuizSubmission = {
+    /**
+     * Quiz Id
+     */
+    quiz_id: string;
+    /**
+     * Selected Answer Text
+     */
+    selected_answer_text: string;
 };
 
 /**
@@ -1212,7 +1551,7 @@ export type PostApiV1CoursesResponses = {
     /**
      * Successful Response
      */
-    200: CoursePublic;
+    200: Course;
 };
 
 export type PostApiV1CoursesResponse = PostApiV1CoursesResponses[keyof PostApiV1CoursesResponses];
@@ -1307,13 +1646,13 @@ export type PutApiV1CoursesByIdResponses = {
 
 export type PutApiV1CoursesByIdResponse = PutApiV1CoursesByIdResponses[keyof PutApiV1CoursesByIdResponses];
 
-export type GetApiV1CoursesByCourseIdDocumentsData = {
+export type GetApiV1CoursesByIdDocumentsData = {
     body?: never;
     path: {
         /**
-         * Course Id
+         * Id
          */
-        course_id: string;
+        id: string;
     };
     query?: {
         /**
@@ -1325,19 +1664,19 @@ export type GetApiV1CoursesByCourseIdDocumentsData = {
          */
         limit?: number;
     };
-    url: '/api/v1/courses/{course_id}/documents';
+    url: '/api/v1/courses/{id}/documents';
 };
 
-export type GetApiV1CoursesByCourseIdDocumentsErrors = {
+export type GetApiV1CoursesByIdDocumentsErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetApiV1CoursesByCourseIdDocumentsError = GetApiV1CoursesByCourseIdDocumentsErrors[keyof GetApiV1CoursesByCourseIdDocumentsErrors];
+export type GetApiV1CoursesByIdDocumentsError = GetApiV1CoursesByIdDocumentsErrors[keyof GetApiV1CoursesByIdDocumentsErrors];
 
-export type GetApiV1CoursesByCourseIdDocumentsResponses = {
+export type GetApiV1CoursesByIdDocumentsResponses = {
     /**
      * Response Courses-List Documents
      * Successful Response
@@ -1347,9 +1686,138 @@ export type GetApiV1CoursesByCourseIdDocumentsResponses = {
     }>;
 };
 
-export type GetApiV1CoursesByCourseIdDocumentsResponse = GetApiV1CoursesByCourseIdDocumentsResponses[keyof GetApiV1CoursesByCourseIdDocumentsResponses];
+export type GetApiV1CoursesByIdDocumentsResponse = GetApiV1CoursesByIdDocumentsResponses[keyof GetApiV1CoursesByIdDocumentsResponses];
 
-export type GetApiV1CoursesByCourseIdFlashcardsData = {
+export type GetApiV1CoursesByIdQuizzesData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Order By
+         */
+        order_by?: 'created_at' | 'difficulty_level' | 'quiz_text';
+        difficulty?: DifficultyLevel;
+        /**
+         * Order Direction
+         */
+        order_direction?: 'asc' | 'desc';
+    };
+    url: '/api/v1/courses/{id}/quizzes';
+};
+
+export type GetApiV1CoursesByIdQuizzesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1CoursesByIdQuizzesError = GetApiV1CoursesByIdQuizzesErrors[keyof GetApiV1CoursesByIdQuizzesErrors];
+
+export type GetApiV1CoursesByIdQuizzesResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuizzesPublic;
+};
+
+export type GetApiV1CoursesByIdQuizzesResponse = GetApiV1CoursesByIdQuizzesResponses[keyof GetApiV1CoursesByIdQuizzesResponses];
+
+export type GetApiV1CoursesByIdAttemptsData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{id}/attempts';
+};
+
+export type GetApiV1CoursesByIdAttemptsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1CoursesByIdAttemptsError = GetApiV1CoursesByIdAttemptsErrors[keyof GetApiV1CoursesByIdAttemptsErrors];
+
+export type GetApiV1CoursesByIdAttemptsResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuizSessionsList;
+};
+
+export type GetApiV1CoursesByIdAttemptsResponse = GetApiV1CoursesByIdAttemptsResponses[keyof GetApiV1CoursesByIdAttemptsResponses];
+
+export type PostApiV1CoursesByCourseIdQuizStartData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Order By
+         */
+        order_by?: 'created_at' | 'difficulty_level' | 'quiz_text';
+        difficulty?: DifficultyLevel;
+        /**
+         * Order Direction
+         */
+        order_direction?: 'asc' | 'desc';
+    };
+    url: '/api/v1/courses/{course_id}/quiz/start';
+};
+
+export type PostApiV1CoursesByCourseIdQuizStartErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostApiV1CoursesByCourseIdQuizStartError = PostApiV1CoursesByCourseIdQuizStartErrors[keyof PostApiV1CoursesByCourseIdQuizStartErrors];
+
+export type PostApiV1CoursesByCourseIdQuizStartResponses = {
+    /**
+     * Response Courses-Start New Quiz Session
+     * Successful Response
+     */
+    200: [
+        QuizSessionPublic,
+        QuizzesPublic
+    ];
+};
+
+export type PostApiV1CoursesByCourseIdQuizStartResponse = PostApiV1CoursesByCourseIdQuizStartResponses[keyof PostApiV1CoursesByCourseIdQuizStartResponses];
+
+export type GetApiV1CoursesByCourseIdStatsData = {
     body?: never;
     path: {
         /**
@@ -1358,19 +1826,49 @@ export type GetApiV1CoursesByCourseIdFlashcardsData = {
         course_id: string;
     };
     query?: never;
-    url: '/api/v1/courses/{course_id}/flashcards';
+    url: '/api/v1/courses/{course_id}/stats';
 };
 
-export type GetApiV1CoursesByCourseIdFlashcardsErrors = {
+export type GetApiV1CoursesByCourseIdStatsErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetApiV1CoursesByCourseIdFlashcardsError = GetApiV1CoursesByCourseIdFlashcardsErrors[keyof GetApiV1CoursesByCourseIdFlashcardsErrors];
+export type GetApiV1CoursesByCourseIdStatsError = GetApiV1CoursesByCourseIdStatsErrors[keyof GetApiV1CoursesByCourseIdStatsErrors];
 
-export type GetApiV1CoursesByCourseIdFlashcardsResponses = {
+export type GetApiV1CoursesByCourseIdStatsResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuizStats;
+};
+
+export type GetApiV1CoursesByCourseIdStatsResponse = GetApiV1CoursesByCourseIdStatsResponses[keyof GetApiV1CoursesByCourseIdStatsResponses];
+
+export type GetApiV1CoursesByIdFlashcardsData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/courses/{id}/flashcards';
+};
+
+export type GetApiV1CoursesByIdFlashcardsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1CoursesByIdFlashcardsError = GetApiV1CoursesByIdFlashcardsErrors[keyof GetApiV1CoursesByIdFlashcardsErrors];
+
+export type GetApiV1CoursesByIdFlashcardsResponses = {
     /**
      * Response Courses-Generate Flashcards By Course Id
      * Successful Response
@@ -1378,7 +1876,7 @@ export type GetApiV1CoursesByCourseIdFlashcardsResponses = {
     200: Array<QaItem>;
 };
 
-export type GetApiV1CoursesByCourseIdFlashcardsResponse = GetApiV1CoursesByCourseIdFlashcardsResponses[keyof GetApiV1CoursesByCourseIdFlashcardsResponses];
+export type GetApiV1CoursesByIdFlashcardsResponse = GetApiV1CoursesByIdFlashcardsResponses[keyof GetApiV1CoursesByIdFlashcardsResponses];
 
 export type PostApiV1ChatByCourseIdStreamData = {
     body: ChatMessage;
@@ -1541,6 +2039,66 @@ export type GetApiV1DocumentsByIdResponses = {
 };
 
 export type GetApiV1DocumentsByIdResponse = GetApiV1DocumentsByIdResponses[keyof GetApiV1DocumentsByIdResponses];
+
+export type GetApiV1QuizSessionsByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Id
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/quiz-sessions/{id}';
+};
+
+export type GetApiV1QuizSessionsByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetApiV1QuizSessionsByIdError = GetApiV1QuizSessionsByIdErrors[keyof GetApiV1QuizSessionsByIdErrors];
+
+export type GetApiV1QuizSessionsByIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuizSessionPublicWithResults;
+};
+
+export type GetApiV1QuizSessionsByIdResponse = GetApiV1QuizSessionsByIdResponses[keyof GetApiV1QuizSessionsByIdResponses];
+
+export type PostApiV1QuizSessionsByIdScoreData = {
+    body: QuizSubmissionBatch;
+    path?: never;
+    query: {
+        /**
+         * Session Id
+         */
+        session_id: string;
+    };
+    url: '/api/v1/quiz-sessions/{id}/score';
+};
+
+export type PostApiV1QuizSessionsByIdScoreErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostApiV1QuizSessionsByIdScoreError = PostApiV1QuizSessionsByIdScoreErrors[keyof PostApiV1QuizSessionsByIdScoreErrors];
+
+export type PostApiV1QuizSessionsByIdScoreResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuizScoreSummary;
+};
+
+export type PostApiV1QuizSessionsByIdScoreResponse = PostApiV1QuizSessionsByIdScoreResponses[keyof PostApiV1QuizSessionsByIdScoreResponses];
 
 export type PostApiV1PrivateUsersData = {
     body: PrivateUserCreate;

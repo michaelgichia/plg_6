@@ -2,8 +2,9 @@
 
 import React from 'react'
 
-import {User, ChevronUp, Zap, Home, Settings, Plus} from 'react-feather'
+import { User, ChevronUp, Zap, Home, Plus } from 'react-feather'
 
+import { Button } from '@/components/ui/button'
 import {
   Sidebar,
   SidebarContent,
@@ -23,9 +24,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import {logout} from '@/actions/auth'
+import { logout } from '@/actions/auth'
 import Link from 'next/link'
-export function AppSidebar({displayName = 'User'}: {displayName?: string}) {
+import { ThemeToggle } from './theme-toggle'
+export function AppSidebar({ displayName = 'User' }: { displayName?: string }) {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -69,14 +71,10 @@ export function AppSidebar({displayName = 'User'}: {displayName?: string}) {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link href='/dashboard/courses/create'>
-                    <Plus />
-                    <span>Add Course</span>
-                  </Link>
-                </SidebarMenuButton>
-                <SidebarMenuButton asChild>
-                  <Link href='/dashboard/user-settings'>
-                    <Settings />
-                    <span>User Settings</span>
+                    <Button className='mt-4 mb-4'>
+                      <Plus />
+                      <span>Add Course</span>
+                    </Button>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -112,6 +110,9 @@ export function AppSidebar({displayName = 'User'}: {displayName?: string}) {
                       Sign out
                     </button>
                   </form>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <ThemeToggle />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

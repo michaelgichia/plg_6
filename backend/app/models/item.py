@@ -1,4 +1,5 @@
 import uuid
+from collections.abc import Sequence
 
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -37,5 +38,5 @@ class ItemPublic(ItemBase):
 
 
 class ItemsPublic(SQLModel):
-    data: list[ItemPublic]
+    data: Sequence[Item]
     count: int

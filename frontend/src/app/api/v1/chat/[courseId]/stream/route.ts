@@ -12,11 +12,14 @@ export async function POST(
     const response = await ChatService.postApiV1ChatByCourseIdStream({
       path: { course_id: courseId },
       body,
+      responseValidator: async () => {},
+      requestValidator: async () => {},
+      responseType: 'stream',
     })
 
     // Convert Node.js IncomingMessage to Web ReadableStream
     const nodeStream = response.data as any
-    
+
     if (!nodeStream || typeof nodeStream.pipe !== 'function') {
       throw new Error('Expected Node readable stream from ChatService')
     }
@@ -41,7 +44,7 @@ export async function POST(
         nodeStream.destroy()
       }
     })
-    
+
     return new Response(webStream, {
       headers: {
         'Content-Type': 'text/plain',
@@ -51,7 +54,6 @@ export async function POST(
       },
     })
   } catch (error) {
-    console.log('Stream error:', error)
     return Response.json({ error: 'Failed to stream response' }, { status: 500 })
   }
 }

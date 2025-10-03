@@ -1,4 +1,6 @@
+import { QuizSubmissionBatch, SingleQuizSubmission } from '@/client';
 import {z} from 'zod'
+import { KeysToCamelCase } from './common';
 
 export const signUpSchema = z
   .object({
@@ -23,3 +25,22 @@ export const signUpSchema = z
   })
 
 export type SignUpSchema = z.infer<typeof signUpSchema>
+
+export type SingleQuizSubmissionCamelCase = KeysToCamelCase<SingleQuizSubmission>;
+
+export type QuizSubmissionBatchCamelCase = KeysToCamelCase<QuizSubmissionBatch>;
+
+export interface RawSubmissionsData {
+  sessionId: string;
+  submissions: SingleQuizSubmission[];
+}
+
+export interface ValidationError {
+  ok: boolean,
+  error: {
+    code: 'VALIDATION',
+    type: string,
+    message: string,
+    field: string
+  },
+}
