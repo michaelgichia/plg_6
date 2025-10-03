@@ -254,7 +254,7 @@ async def generate_chat_response(
                 user_msg = Chat(**user_chat_data.model_dump())
                 session.add(user_msg)
                 session.commit()
-                
+
                 # Stream cached response with similarity indicator
                 similarity_note = f"*This question is similar to: \"{original_question[:100]}...\"*\n\n"
                 full_cached_response = similarity_note + cached_response
@@ -264,7 +264,7 @@ async def generate_chat_response(
                     yield char
                     # Small delay to simulate streaming
                     import asyncio
-                    await asyncio.sleep(0.01)
+                    await asyncio.sleep(0.005)  # Faster for cached responses
                 
                 # Save system message with cached response
                 system_chat_data = ChatCreate(
@@ -330,10 +330,12 @@ async def generate_chat_response(
                     "content": f"You are Athena, a helpful AI tutor for the course '{course.name}'. You are friendly, encouraging, and knowledgeable. Handle social interactions gracefully:\n\n"
                     "- Respond warmly to greetings: 'Hello!' → 'Hi there! How can I help you with your studies today?'\n"
                     "- Acknowledge thanks: 'Thank you!' → 'You're welcome! Any other questions about the course materials?'\n"
-                    "- For off-topic questions, politely redirect: 'I'm focused on helping with {course.name}. Is there something from the course materials I can explain?'\n"
+                    "- For off-topic questions (movies, sports, personal questions, current events, etc.), politely redirect: 'I'm focused on helping with your studies in {course.name}. Is there something from the course materials I can explain or help clarify?'\n"
                     "- Use the provided context from course materials to answer academic questions\n"
                     "- You have access to previous conversation history for better responses\n"
-                    "- If context doesn't contain relevant information, say so and suggest asking about topics covered in the materials\n"
+                    "- If the question is off-topic (movies, sports, personal preferences, current events), politely redirect to course content\n"
+                    "- If context doesn't contain relevant information for academic questions, say so and suggest asking about topics covered in the materials\n"
+                    "- For study skills questions (stress management, study tips), provide helpful advice while relating back to the course\n"
                     "- Always maintain a supportive, tutoring tone\n\n"
                     "FORMATTING INSTRUCTIONS:\n"
                     "- Use **bold** for important terms and concepts\n"
@@ -503,23 +505,28 @@ async def get_chat_history(
         .limit(limit)
     ).all()
 
-     # Generate Athena greeting if no messages exist
+    # Generate Athena greeting if no messages exist
     if not messages:
-        greeting_text = f"Hi! I'm Athena, your AI tutor for {course.name}. I'm ready to help you understand the course materials and answer any questions you have. What would you like to learn about today?"
-        
-        # Create and save greeting message
-        greeting_data = ChatCreate(
-            message=greeting_text,
-            is_system=True,
-            course_id=course_id,
-        )
-        greeting_msg = Chat(**greeting_data.model_dump())
-        session.add(greeting_msg)
-        session.commit()
-        session.refresh(greeting_msg)
-        
-        # Return greeting as first message
-        return [ChatPublic(**greeting_msg.model_dump())]
+        try:
+            greeting_text = f"Hi! I'm Athena, your AI tutor for **{course.name}**. I'm ready to help you understand the course materials and answer any questions you have.\n\nI can help you with:\n- Explaining concepts from your course materials\n- Answering questions about specific topics\n- Creating summaries and study guides\n- Clarifying difficult content\n\nWhat would you like to learn about today?"
+            
+            # Create and save greeting message
+            greeting_data = ChatCreate(
+                message=greeting_text,
+                is_system=True,
+                course_id=course_id,
+            )
+            greeting_msg = Chat(**greeting_data.model_dump())
+            session.add(greeting_msg)
+            session.commit()
+            session.refresh(greeting_msg)
+            
+            # Return greeting as first message
+            return [ChatPublic(**greeting_msg.model_dump())]
+        except Exception as e:
+            print(f"Error creating greeting message: {e}")
+            # If greeting creation fails, return empty list and let user start conversation
+            return []
 
     # Convert to ChatPublic
-    return [ChatPublic(**msg.model_dump()) for msg in messages] if messages else []
+    return [ChatPublic(**msg.model_dump()) for msg in messages]
