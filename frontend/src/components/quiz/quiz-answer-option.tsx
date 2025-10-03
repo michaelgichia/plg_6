@@ -17,7 +17,7 @@ export function QuizAnswerOption({
   result,
 }: QuizAnswerOptionProps) {
   let checkboxProps: Record<string, any> = {
-    id: choice.text, // Use text as ID for label htmlFor consistency
+    id: choice.text,
     value: choice.text,
     name: `choice-${quizId}`,
     disabled: isScored,
@@ -29,7 +29,6 @@ export function QuizAnswerOption({
     const isSelected = result.selected_answer_text === choice.text
     const isCorrectAnswer = result.correct_answer_text === choice.text
 
-    // Logic to prevent the uncontrolled input error on load
     if (isScored) {
         checkboxProps.checked = isSelected
     }

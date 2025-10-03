@@ -1,4 +1,3 @@
-// components/quizzes/QuizItem.tsx
 import { QuizAttemptPublic, QuizPublic } from '@/client'
 import { QuizAnswerOption } from './quiz-answer-option'
 

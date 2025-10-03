@@ -1,9 +1,9 @@
-// app/hooks/useQuizSession.ts
 import {useActionState, useEffect, useMemo, useState} from 'react'
 import {submitQuizSession} from '@/actions/quizzes'
 import {getQuizSession} from '@/lib/quizzes'
 import {toast} from 'sonner'
 import {QuizAttemptPublic, QuizSessionPublicWithResults} from '@/client'
+import { mapApiError } from '@/lib/mapApiError'
 
 interface ActionState {
   ok: boolean
@@ -16,7 +16,6 @@ export const useQuizSession = (courseId: string, sessionId: string) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [session, setSession] = useState<QuizSessionPublicWithResults | null>(null)
 
-  // Define colors here to be passed down, keeping them close to the presentation logic they influence
   const COLORS = {
       CORRECT: 'bg-green-50 border-green-500',
       INCORRECT: 'bg-red-50 border-red-500',
@@ -42,15 +41,14 @@ export const useQuizSession = (courseId: string, sessionId: string) => {
 
   const handleOnSubmit = (_state: any, formData: FormData) => {
     setIsSubmitting(true)
-    return submitQuizSession(_state, formData) // Call the original action
+    return submitQuizSession(_state, formData)
       .then(async (result) => {
-        // Refetch after successful submission to update results
         await fetchQuizSession()
         return result
       })
       .catch((e) => {
         toast.error('Failed to submit answers.')
-        return { ok: false, error: e.error || 'Submission failed' };
+        return { ok: false, error: mapApiError(e) };
       })
       .finally(() => {
         setIsSubmitting(false)
@@ -66,7 +64,6 @@ export const useQuizSession = (courseId: string, sessionId: string) => {
     fetchQuizSession()
   }, [courseId, sessionId])
 
-  // Memoize results into a map for faster lookup in the rendering layer
   const resultsMap = useMemo(() => {
     if (!session || !session.is_completed || !session.results) return {}
     return session.results.reduce((map, result) => {
