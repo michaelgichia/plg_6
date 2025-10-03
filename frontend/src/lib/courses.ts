@@ -1,10 +1,12 @@
+import { cache } from 'react';
+
 import {CourseWithDocuments} from '@/client'
 import {Result} from '@/lib/result'
 import {mapApiError} from '@/lib/mapApiError'
 
-export async function getCourse(
+const getCourseCached = cache(async (
   id: string,
-): Promise<Result<CourseWithDocuments>> {
+): Promise<Result<CourseWithDocuments>> => {
   try {
     const res = await fetch(`/api/courses/${id}`, {
       method: 'GET',
@@ -21,4 +23,6 @@ export async function getCourse(
       error: mapApiError(error),
     }
   }
-}
+});
+
+export { getCourseCached as getCourse };

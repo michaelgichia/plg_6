@@ -49,18 +49,31 @@ async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
             DifficultyLevel.HARD,
         ]:
             prompt = f"""
-            Generate a set of multiple-choice quizzes based on the following text.
-            Each quiz should be at '{difficulty_level}' difficulty.
+            1. Task context: You are an expert quiz question generator for educational content. Your goal is to create multiple-choice questions that thoroughly test a user's understanding of the provided text.
+            2. Tone context: The response must be professional, strictly formatted, and follow all JSON schema rules exactly.
+            3. Background data: The text provided below contains the source material for the quiz questions.
+            4. Detailed task description & rules:
+              - Generate between 5 and 10 multiple-choice quizzes for the provided text.
+              - Each quiz must be strictly at the '{difficulty_level}' difficulty level.
+              - **Each quiz must have exactly 4 choices** (one correct answer and three distractors).
+              - Ensure the **distraction choices are highly plausible**, requiring genuine understanding to be answered correctly. They should be related to the topic but demonstrably incorrect based on the text.
+              - All choices (correct and incorrect) should be **full, descriptive sentences or phrases**, not just single words.
+              - The primary output must be a single JSON object containing a property called 'quizzes'.
 
-            Each quiz object must include:
-              - quiz: string (the quiz question)
-              - correct_answer: string
-              - distraction_1: string
-              - distraction_2: string
-              - distraction_3: string
-              - topic: string (short topic or category)
+            5. Output Structure (JSON Schema Rules):
+            Each object in the 'quizzes' array must include the following fields:
 
-            Return only a JSON array of quiz objects.
+            - **quiz**: string (The multiple-choice question itself.)
+            - **correct_answer**: string (The text of the correct choice.)
+            - **distraction_1**: string (A plausible, incorrect choice.)
+            - **distraction_2**: string (A plausible, incorrect choice.)
+            - **distraction_3**: string (A plausible, incorrect choice.)
+            - **topic**: string (A short, 2-3 word category/topic for the quiz.)
+            - **feedback**: string (Specific, helpful explanation **for a user who selects an incorrect answer**. This should clarify why the correct answer is right based on the text.)
+
+            6. Output formatting:
+            Return only a single JSON object.
+
             Text:
             {concatenated_text}
             """
@@ -137,8 +150,8 @@ def score_quiz_batch(
 
         statement = (
             select(Quiz)
-            .where(Quiz.id.in_(submitted_ids))
-            .options(load_only(Quiz.id, Quiz.correct_answer))
+            .where(Quiz.id.in_(submitted_ids))  # type: ignore
+            .options(load_only(Quiz.id, Quiz.correct_answer))  # type: ignore
         )
 
         correct_answers_map: dict[uuid.UUID, str] = {
@@ -193,24 +206,24 @@ def score_quiz_batch(
             )
             db.add(attempt)
 
-        score_percentage = (
-            (total_correct / total_submitted) * 100 if total_submitted > 0 else 0.0
-        )
-
         quiz_session.total_submitted += total_submitted
         quiz_session.total_correct += total_correct
         quiz_session.total_time_seconds += submission_batch.total_time_seconds
+        overall_score_percentage = (
+            (quiz_session.total_correct / quiz_session.total_submitted) * 100
+            if quiz_session.total_submitted > 0
+            else 0.0
+        )
+        quiz_session.score_percentage = round(overall_score_percentage, 1)
         quiz_session.is_completed = True
 
         db.add(quiz_session)
         db.commit()
 
         return QuizScoreSummary(
-            total_submitted=quiz_session.total_submitted,  # Return updated cumulative totals
+            total_submitted=quiz_session.total_submitted,
             total_correct=quiz_session.total_correct,
-            score_percentage=round(
-                score_percentage, 2
-            ),  # Note: This percentage is for the BATCH, not the whole session
+            score_percentage=quiz_session.score_percentage,
             results=results,
         )
 
@@ -275,7 +288,7 @@ def fetch_and_format_quizzes(db: Session, quiz_ids: list[uuid.UUID]) -> QuizzesP
     if not quiz_ids:
         return QuizzesPublic(data=[], count=0)
 
-    statement = select(Quiz).where(Quiz.id.in_(quiz_ids)).order_by(Quiz.created_at)
+    statement = select(Quiz).where(Quiz.id.in_(quiz_ids)).order_by(Quiz.created_at)  # type: ignore
     quizzes = db.exec(statement).all()
     quiz_lookup = {quiz.id: quiz for quiz in quizzes}
 

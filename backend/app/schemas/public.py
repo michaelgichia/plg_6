@@ -72,7 +72,6 @@ class DifficultyLevel(StrEnum):
 
 
 class QuizChoice(PydanticBase):
-    # Note: Using uuid.UUID as the type for 'id' is good.
     id: uuid.UUID
     text: str
 

@@ -54,7 +54,6 @@ export async function POST(
       },
     })
   } catch (error) {
-    console.log('Stream error:', error)
     return Response.json({ error: 'Failed to stream response' }, { status: 500 })
   }
 }

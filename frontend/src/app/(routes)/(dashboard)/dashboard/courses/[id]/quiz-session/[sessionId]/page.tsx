@@ -6,7 +6,6 @@ export default async function Page(props: {
   params: {id: string; sessionId: string}
 }) {
   const params = await props.params
-  console.log({params})
 
   const sessionId = params.sessionId
   const courseId = params.id
@@ -18,13 +17,10 @@ export default async function Page(props: {
     return <ErrorBox error={result.error} />
   }
 
-  console.log({result})
-  // const quizzes = result.data.quizzes || []
-
   return (
     <div className='min-h-screen p-6 border-r border-stone-200'>
       <div className='mx-auto max-w-7xl'>
-        <QuizForm  sessionId={sessionId} courseId={courseId} />
+        <QuizForm sessionId={sessionId} courseId={courseId} />
       </div>
     </div>
   )

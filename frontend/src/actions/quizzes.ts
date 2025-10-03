@@ -2,6 +2,7 @@
 
 import {
   CoursesService,
+  DifficultyLevel,
   QuizPublic,
   QuizScoreSummary,
   QuizSessionPublic,
@@ -98,18 +99,20 @@ export async function getQuizStats(
  * Returns a Result<QuizSessionPublic> that must be checked with `res.ok`.
  */
 export async function startQuizSession(
-  _state: unknown,
-  formatData: FormData,
+  _state: any,
+  formData: FormData,
 ): Promise<Result<[QuizSessionPublic, QuizzesPublic]>> {
   let session;
   try {
-    const courseId = formatData.get('courseId') as string
+    const courseId = formData.get('courseId') as string
+    const difficultyLevel = formData.get('difficultyLevel') as DifficultyLevel
+
     const response = await CoursesService.postApiV1CoursesByCourseIdQuizStart({
       path: { course_id: courseId },
+      query: { difficulty: difficultyLevel },
       responseValidator: async () => { },
     })
 
-    console.log("[response.data]", response.data)
     session = response.data[0];
   } catch (error) {
     return {
@@ -133,7 +136,7 @@ export async function submitQuizSession(
   const rawData = extractRawSubmissions(formData);
   const validationResult = validateSubmissions(rawData);
 
-  for(const error of validationResult) {
+  for (const error of validationResult) {
     if (!error.ok) {
       return { ok: false, error: error.error } as Result<QuizScoreSummary>;
     }
@@ -150,17 +153,15 @@ export async function submitQuizSession(
         submissions: submissions,
         total_time_seconds: 60000,
       },
-      requestValidator: async () => { },
-      responseValidator: async () => { },
+      requestValidator: async () => {},
+      responseValidator: async () => {},
     });
 
-    console.log("[response.data,]", response.data)
     return {
       ok: true,
       data: response.data,
     };
   } catch (error) {
-    console.log(error);
     return {
       ok: false,
       error: mapApiError(error),
