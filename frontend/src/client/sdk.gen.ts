@@ -743,7 +743,6 @@ export class ChatService {
             requestValidator: async (data) => {
                 return await zPostApiV1ChatByCourseIdStreamData.parseAsync(data);
             },
-            responseType: 'stream',
             security: [
                 {
                     scheme: 'bearer',

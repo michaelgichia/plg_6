@@ -12,6 +12,9 @@ export async function POST(
     const response = await ChatService.postApiV1ChatByCourseIdStream({
       path: { course_id: courseId },
       body,
+      responseValidator: async () => {},
+      requestValidator: async () => {},
+      responseType: 'stream',
     })
 
     // Convert Node.js IncomingMessage to Web ReadableStream
