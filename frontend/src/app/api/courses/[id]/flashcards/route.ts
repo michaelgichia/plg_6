@@ -30,8 +30,8 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     const {id} = await context.params
-    const response = await CoursesService.getApiV1CoursesByCourseIdFlashcards({
-      path: {course_id: id},
+    const response = await CoursesService.getApiV1CoursesByIdFlashcards({
+      path: {id: id},
       // Skip strict response Zod validation due to backend datetime format
       responseValidator: async (): Promise<void> => {},
     })

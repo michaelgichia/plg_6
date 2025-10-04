@@ -1,21 +1,19 @@
 import {
-  GetApiV1CoursesByCourseIdFlashcardsResponses as FlashcardResponse
+  QaItem
 } from "@/client";
-import {Result} from '@/lib/result'
-import {mapApiError} from '@/lib/mapApiError'
+import { Result } from '@/lib/result'
+import { mapApiError } from '@/lib/mapApiError'
 
 export async function getFlashcards(
   id: string,
-): Promise<Result<FlashcardResponse>> {
+): Promise<Result<QaItem[]>> {
   try {
     const res = await fetch(`/api/courses/${id}/flashcards`, {
       method: 'GET',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
     })
-
-    if (!res.ok) throw new Error(`Failed to fetch course ${id} flashcards`)
-    return {ok: true, data: (await res.json()) as FlashcardResponse}
+    return { ok: true, data: (await res.json()) }
   } catch (error) {
     return {
       ok: false,
