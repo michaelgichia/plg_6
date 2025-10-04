@@ -17,7 +17,7 @@ import {deleteCourse} from '@/actions/courses'
 export default function DeleteCourse({
   courseId,
 }: {
-  courseId: string
+  courseId?: string
   className?: string
 }) {
   const [state, formData, isPending] = useActionState(deleteCourse, {
