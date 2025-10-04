@@ -6,8 +6,8 @@
   } from '@/components/ui/sidebar'
   import AppSidebar from '@/components/app-sidebar'
   import { client } from '@/client/client.gen'
-  import { UsersService } from '@/client'
   import { cookies } from 'next/headers'
+import { getMe } from '@/actions/users'
 
   export default async function DashboardLayout({
     children,
@@ -16,7 +16,7 @@
   }) {
     const cookieStore = await cookies()
     const token = cookieStore.get('access_token')?.value
-
+    let displayName = '';
     // Configure axios client per request
     client.setConfig({
       baseURL: process.env.NEXT_INTERNAL_BACKEND_BASE_URL ?? 'http://localhost:8000',
@@ -24,11 +24,13 @@
     })
 
     // fetch current user server-side for sidebar display
-    const me = await UsersService.getApiV1UsersMe()
-    const payload = me.data as { full_name?: string | null; email?: string | null }
-    const displayName = (payload.full_name && payload.full_name.trim().length > 0)
-      ? (payload.full_name as string)
-      : (payload.email ?? 'User')
+    const result = await getMe()
+    if(result.ok) {
+      const me = result.data
+      displayName = (me.full_name && me.full_name.trim().length > 0)
+        ? (me.full_name as string)
+        : (me.email ?? 'User')
+    }
 
     return (
       <SidebarProvider>

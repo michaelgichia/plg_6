@@ -27,7 +27,7 @@ export default function UserSettingsClient() {
   )
 
   useEffect(() => {
-    ;(async () => {
+    (async () => {
       const result = await getMe()
       if (result.ok) {
         setProfileDefaults({

@@ -2,8 +2,8 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { DeleteApiV1CoursesByIdData, DeleteApiV1CoursesByIdErrors, DeleteApiV1CoursesByIdResponses, DeleteApiV1DocumentsByIdData, DeleteApiV1DocumentsByIdErrors, DeleteApiV1DocumentsByIdResponses, DeleteApiV1ItemsByIdData, DeleteApiV1ItemsByIdErrors, DeleteApiV1ItemsByIdResponses, DeleteApiV1UsersByUserIdData, DeleteApiV1UsersByUserIdErrors, DeleteApiV1UsersByUserIdResponses, DeleteApiV1UsersMeData, DeleteApiV1UsersMeResponses, GetApiV1ChatByCourseIdHistoryData, GetApiV1ChatByCourseIdHistoryErrors, GetApiV1ChatByCourseIdHistoryResponses, GetApiV1CoursesByCourseIdDocumentsData, GetApiV1CoursesByCourseIdDocumentsErrors, GetApiV1CoursesByCourseIdDocumentsResponses, GetApiV1CoursesByCourseIdFlashcardsData, GetApiV1CoursesByCourseIdFlashcardsErrors, GetApiV1CoursesByCourseIdFlashcardsResponses, GetApiV1CoursesByIdData, GetApiV1CoursesByIdErrors, GetApiV1CoursesByIdResponses, GetApiV1CoursesData, GetApiV1CoursesErrors, GetApiV1CoursesResponses, GetApiV1DocumentsByIdData, GetApiV1DocumentsByIdErrors, GetApiV1DocumentsByIdResponses, GetApiV1ItemsByIdData, GetApiV1ItemsByIdErrors, GetApiV1ItemsByIdResponses, GetApiV1ItemsData, GetApiV1ItemsErrors, GetApiV1ItemsResponses, GetApiV1UsersByUserIdData, GetApiV1UsersByUserIdErrors, GetApiV1UsersByUserIdResponses, GetApiV1UsersData, GetApiV1UsersErrors, GetApiV1UsersMeData, GetApiV1UsersMeResponses, GetApiV1UsersResponses, GetApiV1UtilsHealthCheckData, GetApiV1UtilsHealthCheckResponses, PatchApiV1UsersByUserIdData, PatchApiV1UsersByUserIdErrors, PatchApiV1UsersByUserIdResponses, PatchApiV1UsersMeData, PatchApiV1UsersMeErrors, PatchApiV1UsersMePasswordData, PatchApiV1UsersMePasswordErrors, PatchApiV1UsersMePasswordResponses, PatchApiV1UsersMeResponses, PostApiV1ChatByCourseIdStreamData, PostApiV1ChatByCourseIdStreamErrors, PostApiV1ChatByCourseIdStreamResponses, PostApiV1CoursesData, PostApiV1CoursesErrors, PostApiV1CoursesResponses, PostApiV1DocumentsProcessData, PostApiV1DocumentsProcessErrors, PostApiV1DocumentsProcessResponses, PostApiV1ItemsData, PostApiV1ItemsErrors, PostApiV1ItemsResponses, PostApiV1LoginAccessTokenData, PostApiV1LoginAccessTokenErrors, PostApiV1LoginAccessTokenResponses, PostApiV1LoginTestTokenData, PostApiV1LoginTestTokenResponses, PostApiV1PasswordRecoveryByEmailData, PostApiV1PasswordRecoveryByEmailErrors, PostApiV1PasswordRecoveryByEmailResponses, PostApiV1PasswordRecoveryHtmlContentByEmailData, PostApiV1PasswordRecoveryHtmlContentByEmailErrors, PostApiV1PasswordRecoveryHtmlContentByEmailResponses, PostApiV1PrivateUsersData, PostApiV1PrivateUsersErrors, PostApiV1PrivateUsersResponses, PostApiV1ResetPasswordData, PostApiV1ResetPasswordErrors, PostApiV1ResetPasswordResponses, PostApiV1UsersData, PostApiV1UsersErrors, PostApiV1UsersResponses, PostApiV1UsersSignupData, PostApiV1UsersSignupErrors, PostApiV1UsersSignupResponses, PostApiV1UtilsTestEmailData, PostApiV1UtilsTestEmailErrors, PostApiV1UtilsTestEmailResponses, PutApiV1CoursesByIdData, PutApiV1CoursesByIdErrors, PutApiV1CoursesByIdResponses, PutApiV1ItemsByIdData, PutApiV1ItemsByIdErrors, PutApiV1ItemsByIdResponses } from './types.gen';
-import { zDeleteApiV1CoursesByIdData, zDeleteApiV1CoursesByIdResponse, zDeleteApiV1DocumentsByIdData, zDeleteApiV1ItemsByIdData, zDeleteApiV1ItemsByIdResponse, zDeleteApiV1UsersByUserIdData, zDeleteApiV1UsersByUserIdResponse, zDeleteApiV1UsersMeData, zDeleteApiV1UsersMeResponse, zGetApiV1ChatByCourseIdHistoryData, zGetApiV1ChatByCourseIdHistoryResponse, zGetApiV1CoursesByCourseIdDocumentsData, zGetApiV1CoursesByCourseIdDocumentsResponse, zGetApiV1CoursesByCourseIdFlashcardsData, zGetApiV1CoursesByCourseIdFlashcardsResponse, zGetApiV1CoursesByIdData, zGetApiV1CoursesByIdResponse, zGetApiV1CoursesData, zGetApiV1CoursesResponse, zGetApiV1DocumentsByIdData, zGetApiV1DocumentsByIdResponse, zGetApiV1ItemsByIdData, zGetApiV1ItemsByIdResponse, zGetApiV1ItemsData, zGetApiV1ItemsResponse, zGetApiV1UsersByUserIdData, zGetApiV1UsersByUserIdResponse, zGetApiV1UsersData, zGetApiV1UsersMeData, zGetApiV1UsersMeResponse, zGetApiV1UsersResponse, zGetApiV1UtilsHealthCheckData, zGetApiV1UtilsHealthCheckResponse, zPatchApiV1UsersByUserIdData, zPatchApiV1UsersByUserIdResponse, zPatchApiV1UsersMeData, zPatchApiV1UsersMePasswordData, zPatchApiV1UsersMePasswordResponse, zPatchApiV1UsersMeResponse, zPostApiV1ChatByCourseIdStreamData, zPostApiV1CoursesData, zPostApiV1CoursesResponse, zPostApiV1DocumentsProcessData, zPostApiV1ItemsData, zPostApiV1ItemsResponse, zPostApiV1LoginAccessTokenData, zPostApiV1LoginAccessTokenResponse, zPostApiV1LoginTestTokenData, zPostApiV1LoginTestTokenResponse, zPostApiV1PasswordRecoveryByEmailData, zPostApiV1PasswordRecoveryByEmailResponse, zPostApiV1PasswordRecoveryHtmlContentByEmailData, zPostApiV1PasswordRecoveryHtmlContentByEmailResponse, zPostApiV1PrivateUsersData, zPostApiV1PrivateUsersResponse, zPostApiV1ResetPasswordData, zPostApiV1ResetPasswordResponse, zPostApiV1UsersData, zPostApiV1UsersResponse, zPostApiV1UsersSignupData, zPostApiV1UsersSignupResponse, zPostApiV1UtilsTestEmailData, zPostApiV1UtilsTestEmailResponse, zPutApiV1CoursesByIdData, zPutApiV1CoursesByIdResponse, zPutApiV1ItemsByIdData, zPutApiV1ItemsByIdResponse } from './zod.gen';
+import type { DeleteApiV1CoursesByIdData, DeleteApiV1CoursesByIdErrors, DeleteApiV1CoursesByIdResponses, DeleteApiV1DocumentsByIdData, DeleteApiV1DocumentsByIdErrors, DeleteApiV1DocumentsByIdResponses, DeleteApiV1ItemsByIdData, DeleteApiV1ItemsByIdErrors, DeleteApiV1ItemsByIdResponses, DeleteApiV1UsersByUserIdData, DeleteApiV1UsersByUserIdErrors, DeleteApiV1UsersByUserIdResponses, DeleteApiV1UsersMeData, DeleteApiV1UsersMeResponses, GetApiV1ChatByCourseIdHistoryData, GetApiV1ChatByCourseIdHistoryErrors, GetApiV1ChatByCourseIdHistoryResponses, GetApiV1CoursesByCourseIdStatsData, GetApiV1CoursesByCourseIdStatsErrors, GetApiV1CoursesByCourseIdStatsResponses, GetApiV1CoursesByIdAttemptsData, GetApiV1CoursesByIdAttemptsErrors, GetApiV1CoursesByIdAttemptsResponses, GetApiV1CoursesByIdData, GetApiV1CoursesByIdDocumentsData, GetApiV1CoursesByIdDocumentsErrors, GetApiV1CoursesByIdDocumentsResponses, GetApiV1CoursesByIdErrors, GetApiV1CoursesByIdFlashcardsData, GetApiV1CoursesByIdFlashcardsErrors, GetApiV1CoursesByIdFlashcardsResponses, GetApiV1CoursesByIdQuizzesData, GetApiV1CoursesByIdQuizzesErrors, GetApiV1CoursesByIdQuizzesResponses, GetApiV1CoursesByIdResponses, GetApiV1CoursesData, GetApiV1CoursesErrors, GetApiV1CoursesResponses, GetApiV1DocumentsByIdData, GetApiV1DocumentsByIdErrors, GetApiV1DocumentsByIdResponses, GetApiV1ItemsByIdData, GetApiV1ItemsByIdErrors, GetApiV1ItemsByIdResponses, GetApiV1ItemsData, GetApiV1ItemsErrors, GetApiV1ItemsResponses, GetApiV1QuizSessionsByIdData, GetApiV1QuizSessionsByIdErrors, GetApiV1QuizSessionsByIdResponses, GetApiV1UsersByUserIdData, GetApiV1UsersByUserIdErrors, GetApiV1UsersByUserIdResponses, GetApiV1UsersData, GetApiV1UsersErrors, GetApiV1UsersMeData, GetApiV1UsersMeResponses, GetApiV1UsersResponses, GetApiV1UtilsHealthCheckData, GetApiV1UtilsHealthCheckResponses, PatchApiV1UsersByUserIdData, PatchApiV1UsersByUserIdErrors, PatchApiV1UsersByUserIdResponses, PatchApiV1UsersMeData, PatchApiV1UsersMeErrors, PatchApiV1UsersMePasswordData, PatchApiV1UsersMePasswordErrors, PatchApiV1UsersMePasswordResponses, PatchApiV1UsersMeResponses, PostApiV1ChatByCourseIdStreamData, PostApiV1ChatByCourseIdStreamErrors, PostApiV1ChatByCourseIdStreamResponses, PostApiV1CoursesByCourseIdQuizStartData, PostApiV1CoursesByCourseIdQuizStartErrors, PostApiV1CoursesByCourseIdQuizStartResponses, PostApiV1CoursesData, PostApiV1CoursesErrors, PostApiV1CoursesResponses, PostApiV1DocumentsProcessData, PostApiV1DocumentsProcessErrors, PostApiV1DocumentsProcessResponses, PostApiV1ItemsData, PostApiV1ItemsErrors, PostApiV1ItemsResponses, PostApiV1LoginAccessTokenData, PostApiV1LoginAccessTokenErrors, PostApiV1LoginAccessTokenResponses, PostApiV1LoginTestTokenData, PostApiV1LoginTestTokenResponses, PostApiV1PasswordRecoveryByEmailData, PostApiV1PasswordRecoveryByEmailErrors, PostApiV1PasswordRecoveryByEmailResponses, PostApiV1PasswordRecoveryHtmlContentByEmailData, PostApiV1PasswordRecoveryHtmlContentByEmailErrors, PostApiV1PasswordRecoveryHtmlContentByEmailResponses, PostApiV1PrivateUsersData, PostApiV1PrivateUsersErrors, PostApiV1PrivateUsersResponses, PostApiV1QuizSessionsByIdScoreData, PostApiV1QuizSessionsByIdScoreErrors, PostApiV1QuizSessionsByIdScoreResponses, PostApiV1ResetPasswordData, PostApiV1ResetPasswordErrors, PostApiV1ResetPasswordResponses, PostApiV1UsersData, PostApiV1UsersErrors, PostApiV1UsersResponses, PostApiV1UsersSignupData, PostApiV1UsersSignupErrors, PostApiV1UsersSignupResponses, PostApiV1UtilsTestEmailData, PostApiV1UtilsTestEmailErrors, PostApiV1UtilsTestEmailResponses, PutApiV1CoursesByIdData, PutApiV1CoursesByIdErrors, PutApiV1CoursesByIdResponses, PutApiV1ItemsByIdData, PutApiV1ItemsByIdErrors, PutApiV1ItemsByIdResponses } from './types.gen';
+import { zDeleteApiV1CoursesByIdData, zDeleteApiV1CoursesByIdResponse, zDeleteApiV1DocumentsByIdData, zDeleteApiV1ItemsByIdData, zDeleteApiV1ItemsByIdResponse, zDeleteApiV1UsersByUserIdData, zDeleteApiV1UsersByUserIdResponse, zDeleteApiV1UsersMeData, zDeleteApiV1UsersMeResponse, zGetApiV1ChatByCourseIdHistoryData, zGetApiV1ChatByCourseIdHistoryResponse, zGetApiV1CoursesByCourseIdStatsData, zGetApiV1CoursesByCourseIdStatsResponse, zGetApiV1CoursesByIdAttemptsData, zGetApiV1CoursesByIdAttemptsResponse, zGetApiV1CoursesByIdData, zGetApiV1CoursesByIdDocumentsData, zGetApiV1CoursesByIdDocumentsResponse, zGetApiV1CoursesByIdFlashcardsData, zGetApiV1CoursesByIdFlashcardsResponse, zGetApiV1CoursesByIdQuizzesData, zGetApiV1CoursesByIdQuizzesResponse, zGetApiV1CoursesByIdResponse, zGetApiV1CoursesData, zGetApiV1CoursesResponse, zGetApiV1DocumentsByIdData, zGetApiV1DocumentsByIdResponse, zGetApiV1ItemsByIdData, zGetApiV1ItemsByIdResponse, zGetApiV1ItemsData, zGetApiV1ItemsResponse, zGetApiV1QuizSessionsByIdData, zGetApiV1QuizSessionsByIdResponse, zGetApiV1UsersByUserIdData, zGetApiV1UsersByUserIdResponse, zGetApiV1UsersData, zGetApiV1UsersMeData, zGetApiV1UsersMeResponse, zGetApiV1UsersResponse, zGetApiV1UtilsHealthCheckData, zGetApiV1UtilsHealthCheckResponse, zPatchApiV1UsersByUserIdData, zPatchApiV1UsersByUserIdResponse, zPatchApiV1UsersMeData, zPatchApiV1UsersMePasswordData, zPatchApiV1UsersMePasswordResponse, zPatchApiV1UsersMeResponse, zPostApiV1ChatByCourseIdStreamData, zPostApiV1CoursesByCourseIdQuizStartData, zPostApiV1CoursesByCourseIdQuizStartResponse, zPostApiV1CoursesData, zPostApiV1CoursesResponse, zPostApiV1DocumentsProcessData, zPostApiV1ItemsData, zPostApiV1ItemsResponse, zPostApiV1LoginAccessTokenData, zPostApiV1LoginAccessTokenResponse, zPostApiV1LoginTestTokenData, zPostApiV1LoginTestTokenResponse, zPostApiV1PasswordRecoveryByEmailData, zPostApiV1PasswordRecoveryByEmailResponse, zPostApiV1PasswordRecoveryHtmlContentByEmailData, zPostApiV1PasswordRecoveryHtmlContentByEmailResponse, zPostApiV1PrivateUsersData, zPostApiV1PrivateUsersResponse, zPostApiV1QuizSessionsByIdScoreData, zPostApiV1QuizSessionsByIdScoreResponse, zPostApiV1ResetPasswordData, zPostApiV1ResetPasswordResponse, zPostApiV1UsersData, zPostApiV1UsersResponse, zPostApiV1UsersSignupData, zPostApiV1UsersSignupResponse, zPostApiV1UtilsTestEmailData, zPostApiV1UtilsTestEmailResponse, zPutApiV1CoursesByIdData, zPutApiV1CoursesByIdResponse, zPutApiV1ItemsByIdData, zPutApiV1ItemsByIdResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -564,7 +564,7 @@ export class ItemsService {
 export class CoursesService {
     /**
      * Read Courses
-     * Retrieve courses.
+     * Retrieve courses with pagination and user-based security filtering.
      */
     public static getApiV1Courses<ThrowOnError extends boolean = true>(options?: Options<GetApiV1CoursesData, ThrowOnError>) {
         return (options?.client ?? client).get<GetApiV1CoursesResponses, GetApiV1CoursesErrors, ThrowOnError>({
@@ -694,16 +694,115 @@ export class CoursesService {
      * List Documents
      * List documents for a specific course.
      */
-    public static getApiV1CoursesByCourseIdDocuments<ThrowOnError extends boolean = true>(options: Options<GetApiV1CoursesByCourseIdDocumentsData, ThrowOnError>) {
-        return (options.client ?? client).get<GetApiV1CoursesByCourseIdDocumentsResponses, GetApiV1CoursesByCourseIdDocumentsErrors, ThrowOnError>({
+    public static getApiV1CoursesByIdDocuments<ThrowOnError extends boolean = true>(options: Options<GetApiV1CoursesByIdDocumentsData, ThrowOnError>) {
+        return (options.client ?? client).get<GetApiV1CoursesByIdDocumentsResponses, GetApiV1CoursesByIdDocumentsErrors, ThrowOnError>({
             requestValidator: async (data) => {
-                return await zGetApiV1CoursesByCourseIdDocumentsData.parseAsync(data);
+                return await zGetApiV1CoursesByIdDocumentsData.parseAsync(data);
             },
             responseType: 'json',
             responseValidator: async (data) => {
-                return await zGetApiV1CoursesByCourseIdDocumentsResponse.parseAsync(data);
+                return await zGetApiV1CoursesByIdDocumentsResponse.parseAsync(data);
             },
-            url: '/api/v1/courses/{course_id}/documents',
+            url: '/api/v1/courses/{id}/documents',
+            ...options
+        });
+    }
+    
+    /**
+     * List Quizzes
+     * Fetches the first 10 Quiz objects related to a specific course,
+     * ensuring the course is owned by the current user.
+     */
+    public static getApiV1CoursesByIdQuizzes<ThrowOnError extends boolean = true>(options: Options<GetApiV1CoursesByIdQuizzesData, ThrowOnError>) {
+        return (options.client ?? client).get<GetApiV1CoursesByIdQuizzesResponses, GetApiV1CoursesByIdQuizzesErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1CoursesByIdQuizzesData.parseAsync(data);
+            },
+            responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1CoursesByIdQuizzesResponse.parseAsync(data);
+            },
+            security: [
+                {
+                    scheme: 'bearer',
+                    type: 'http'
+                }
+            ],
+            url: '/api/v1/courses/{id}/quizzes',
+            ...options
+        });
+    }
+    
+    /**
+     * Get Attempts Sessions
+     * Fetch all incomplete quiz sessions for a given course and user.
+     */
+    public static getApiV1CoursesByIdAttempts<ThrowOnError extends boolean = true>(options: Options<GetApiV1CoursesByIdAttemptsData, ThrowOnError>) {
+        return (options.client ?? client).get<GetApiV1CoursesByIdAttemptsResponses, GetApiV1CoursesByIdAttemptsErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1CoursesByIdAttemptsData.parseAsync(data);
+            },
+            responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1CoursesByIdAttemptsResponse.parseAsync(data);
+            },
+            security: [
+                {
+                    scheme: 'bearer',
+                    type: 'http'
+                }
+            ],
+            url: '/api/v1/courses/{id}/attempts',
+            ...options
+        });
+    }
+    
+    /**
+     * Start New Quiz Session
+     * Creates a new, immutable QuizSession, selects the initial set of questions,
+     * and returns the session details and the first batch of questions.
+     */
+    public static postApiV1CoursesByCourseIdQuizStart<ThrowOnError extends boolean = true>(options: Options<PostApiV1CoursesByCourseIdQuizStartData, ThrowOnError>) {
+        return (options.client ?? client).post<PostApiV1CoursesByCourseIdQuizStartResponses, PostApiV1CoursesByCourseIdQuizStartErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1CoursesByCourseIdQuizStartData.parseAsync(data);
+            },
+            responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1CoursesByCourseIdQuizStartResponse.parseAsync(data);
+            },
+            security: [
+                {
+                    scheme: 'bearer',
+                    type: 'http'
+                }
+            ],
+            url: '/api/v1/courses/{course_id}/quiz/start',
+            ...options
+        });
+    }
+    
+    /**
+     * Get Quiz Stats
+     * Fetches course statistics: overall average, total attempts, and the full
+     * details of the single best-scoring quiz session.
+     */
+    public static getApiV1CoursesByCourseIdStats<ThrowOnError extends boolean = true>(options: Options<GetApiV1CoursesByCourseIdStatsData, ThrowOnError>) {
+        return (options.client ?? client).get<GetApiV1CoursesByCourseIdStatsResponses, GetApiV1CoursesByCourseIdStatsErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1CoursesByCourseIdStatsData.parseAsync(data);
+            },
+            responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1CoursesByCourseIdStatsResponse.parseAsync(data);
+            },
+            security: [
+                {
+                    scheme: 'bearer',
+                    type: 'http'
+                }
+            ],
+            url: '/api/v1/courses/{course_id}/stats',
             ...options
         });
     }
@@ -712,14 +811,14 @@ export class CoursesService {
      * Generate Flashcards By Course Id
      * Generate flashcards via course ID
      */
-    public static getApiV1CoursesByCourseIdFlashcards<ThrowOnError extends boolean = true>(options: Options<GetApiV1CoursesByCourseIdFlashcardsData, ThrowOnError>) {
-        return (options.client ?? client).get<GetApiV1CoursesByCourseIdFlashcardsResponses, GetApiV1CoursesByCourseIdFlashcardsErrors, ThrowOnError>({
+    public static getApiV1CoursesByIdFlashcards<ThrowOnError extends boolean = true>(options: Options<GetApiV1CoursesByIdFlashcardsData, ThrowOnError>) {
+        return (options.client ?? client).get<GetApiV1CoursesByIdFlashcardsResponses, GetApiV1CoursesByIdFlashcardsErrors, ThrowOnError>({
             requestValidator: async (data) => {
-                return await zGetApiV1CoursesByCourseIdFlashcardsData.parseAsync(data);
+                return await zGetApiV1CoursesByIdFlashcardsData.parseAsync(data);
             },
             responseType: 'json',
             responseValidator: async (data) => {
-                return await zGetApiV1CoursesByCourseIdFlashcardsResponse.parseAsync(data);
+                return await zGetApiV1CoursesByIdFlashcardsResponse.parseAsync(data);
             },
             security: [
                 {
@@ -727,7 +826,7 @@ export class CoursesService {
                     type: 'http'
                 }
             ],
-            url: '/api/v1/courses/{course_id}/flashcards',
+            url: '/api/v1/courses/{id}/flashcards',
             ...options
         });
     }
@@ -846,6 +945,62 @@ export class DocumentsService {
             ],
             url: '/api/v1/documents/{id}',
             ...options
+        });
+    }
+}
+
+export class QuizSessionsService {
+    /**
+     * Get Quiz Session Optimized
+     * Retrieves a QuizSession, eagerly loading attempts ONLY if completed,
+     * or just the session and quizzes if in progress.
+     */
+    public static getApiV1QuizSessionsById<ThrowOnError extends boolean = true>(options: Options<GetApiV1QuizSessionsByIdData, ThrowOnError>) {
+        return (options.client ?? client).get<GetApiV1QuizSessionsByIdResponses, GetApiV1QuizSessionsByIdErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zGetApiV1QuizSessionsByIdData.parseAsync(data);
+            },
+            responseType: 'json',
+            responseValidator: async (data) => {
+                return await zGetApiV1QuizSessionsByIdResponse.parseAsync(data);
+            },
+            security: [
+                {
+                    scheme: 'bearer',
+                    type: 'http'
+                }
+            ],
+            url: '/api/v1/quiz-sessions/{id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Submit And Score Quiz Batch
+     * API endpoint to receive a batch of user answers and score a specific
+     * QuizSession identified by the session_id.
+     */
+    public static postApiV1QuizSessionsByIdScore<ThrowOnError extends boolean = true>(options: Options<PostApiV1QuizSessionsByIdScoreData, ThrowOnError>) {
+        return (options.client ?? client).post<PostApiV1QuizSessionsByIdScoreResponses, PostApiV1QuizSessionsByIdScoreErrors, ThrowOnError>({
+            requestValidator: async (data) => {
+                return await zPostApiV1QuizSessionsByIdScoreData.parseAsync(data);
+            },
+            responseType: 'json',
+            responseValidator: async (data) => {
+                return await zPostApiV1QuizSessionsByIdScoreResponse.parseAsync(data);
+            },
+            security: [
+                {
+                    scheme: 'bearer',
+                    type: 'http'
+                }
+            ],
+            url: '/api/v1/quiz-sessions/{id}/score',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
         });
     }
 }

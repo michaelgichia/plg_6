@@ -7,34 +7,34 @@ export default function FileCard({file}: {file: DocumentPublic}) {
   const onRemove = () => {}
 
   return (
-    <div className='inset-ring-1 inset-ring-zinc-300 rounded-lg p-4 flex items-center gap-3 relative mb-3'>
+    <div className='inset-ring-1 inset-ring-slate-300 rounded-lg p-4 flex items-center gap-3 relative mb-3'>
       {/* File Icon */}
       <div className='flex-shrink-0'>
-        <FileText className='w-5 h-5 text-zinc-700' />
+        <FileText className='w-5 h-5 text-slate-700' />
       </div>
 
       {/* File Info */}
       <div className='flex-1 min-w-0'>
-        <div className='text-zinc-900 text-sm font-medium truncate'>
+        <div className='text-slate-900 text-sm font-medium truncate'>
           {filename}
         </div>
 
         {/* Status and Progress */}
         {status === 'pending' && (
           <div className='flex items-center gap-2 mt-1'>
-            <Loader className='w-4 h-4 text-zinc-700 animate-spin' />
-            <span className='text-zinc-700 text-xs'>Uploading...</span>
+            <Loader className='w-4 h-4 text-slate-700 animate-spin' />
+            <span className='text-slate-700 text-xs'>Uploading...</span>
           </div>
         )}
 
         {status === 'processing' && (
           <div className='mt-2'>
             <div className='flex items-center justify-between mb-1'>
-              <span className='text-zinc-700 text-xs'>70%</span>
+              <span className='text-slate-700 text-xs'>70%</span>
             </div>
-            <div className='w-full bg-zinc-600 rounded-full h-1'>
+            <div className='w-full bg-slate-600 rounded-full h-1'>
               <div
-                className='bg-zinc-400 h-1 rounded-full transition-all duration-300 block'
+                className='bg-slate-400 h-1 rounded-full transition-all duration-300 block'
                 style={{width: `60%`}}
               />
             </div>
@@ -59,7 +59,7 @@ export default function FileCard({file}: {file: DocumentPublic}) {
       <div className='flex-shrink-0 flex items-center gap-2'>
         <button
           onClick={onRemove}
-          className='w-6 h-6 text-zinc-700 hover:text-zinc-900 transition-colors'
+          className='w-6 h-6 text-slate-700 hover:text-slate-900 transition-colors'
         >
           <X className='w-4 h-4' />
         </button>

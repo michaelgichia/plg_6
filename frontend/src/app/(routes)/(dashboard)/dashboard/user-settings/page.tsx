@@ -7,5 +7,3 @@ export default async function UserSettingsPage() {
     </div>
   )
 }
-
-

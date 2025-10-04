@@ -19,7 +19,10 @@ from sqlmodel import select
 from app.api.deps import CurrentUser, SessionDep
 from app.models.common import Message
 from app.models.course import Course
-from app.models.document import Document, DocumentStatus
+from app.models.document import Document
+from app.models.embeddings import Chunk
+from app.schemas.public import DocumentStatus
+from app.tasks import generate_quizzes_task
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 index_name = "developer-quickstart-py"
@@ -109,7 +112,7 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
     """Background task to parse, chunk, embed, and store PDF."""
     document = session.get(Document, document_id)
     if not document:
-        return  # Document record not found, nothing to do
+        return
 
     try:
         ensure_index_exists()
@@ -132,6 +135,18 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
             return
 
         chunks = chunk_text(full_text)
+
+        chunk_records = []
+        for chunk in chunks:
+            chunk_record = Chunk(
+                document_id=document_id,
+                text_content=chunk,
+                embedding_id=uuid.uuid4().hex,
+            )
+            session.add(chunk_record)
+            chunk_records.append(chunk_record)
+        session.commit()
+
         embeddings = []
         BATCH_SIZE = 50
         for i in range(0, len(chunks), BATCH_SIZE):
@@ -139,14 +154,37 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
             embeddings.extend(await embed_chunks(batch))
             await asyncio.sleep(0)
 
-        store_embeddings(
-            chunks, embeddings, str(document.course_id), str(document.id), index
-        )
+        vectors_to_upsert = []
+
+        for i, (record, embedding) in enumerate(
+            zip(chunk_records, embeddings, strict=False)
+        ):
+            embedding_uuid = str(uuid.uuid4())
+            record.embedding_id = embedding_uuid
+            _vector = {
+                "id": embedding_uuid,
+                "values": embedding,
+                "metadata": {
+                    "document_id": str(document_id),
+                    "chunk_id": str(record.id),
+                    "text": record.text_content,
+                    "chunk_index": i,
+                },
+            }
+            vectors_to_upsert.append(_vector)
+
+        session.commit()
+
+        index = pc.Index(index_name)
+        index.upsert(vectors=vectors_to_upsert)
+
         document.updated_at = datetime.now(timezone.utc)
         document.status = DocumentStatus.COMPLETED
         document.chunk_count = len(chunks)
         session.add(document)
         session.commit()
+
+        await generate_quizzes_task(document_id, session)
 
     except Exception as e:
         logger.error(f"[process_pdf_task] Error processing document: {e}")
@@ -168,7 +206,6 @@ async def handle_document_processing(
     tmp_path = os.path.join(tmp_dir, f"{document_id}_{file.filename}")
 
     try:
-        # Asynchronously read chunks from the UploadFile stream
         with open(tmp_path, "wb") as buffer:
             while True:
                 chunk = await file.read(1024)  # Read in 1KB chunks
@@ -176,12 +213,10 @@ async def handle_document_processing(
                     break
                 buffer.write(chunk)
 
-        # Pass the path of the saved file to the next background task
         await process_pdf_task(tmp_path, document_id, session)
 
     except Exception as e:
         logger.error(f"[handle_document_processing] Error processing document: {e}")
-        # Handle errors and update the document status
         document = session.get(Document, document_id)
         if document:
             document.status = DocumentStatus.FAILED
@@ -189,7 +224,6 @@ async def handle_document_processing(
             session.commit()
 
     finally:
-        # Clean up the temporary file and directory
         shutil.rmtree(tmp_dir)
 
 
@@ -224,29 +258,25 @@ async def process_multiple_documents(
                 detail=f"File '{file.filename}' exceeds the {MAX_FILE_SIZE_MB}MB size limit.",
             )
 
-        title_without_extension = os.path.splitext(file.filename)[0]
+        filename_str = file.filename if file.filename is not None else ""
+        title_without_extension = os.path.splitext(filename_str)[0]
 
-        # 1. Create a Document record in the database
         db_document = Document(
             title=title_without_extension,
-            filename=file.filename,
+            filename=filename_str,
             course_id=course_id,
         )
         session.add(db_document)
         session.commit()
         session.refresh(db_document)
 
-        # 2. Save the file to a temporary location within the request
         tmp_dir = tempfile.mkdtemp()
         tmp_path = os.path.join(tmp_dir, f"{db_document.id}_{file.filename}")
 
-        # The key change: Asynchronously read and write the file in the endpoint.
-        # This ensures the stream is consumed before the endpoint returns.
         async with aiofiles.open(tmp_path, "wb") as buffer:
             while chunk := await file.read(1024):
                 await buffer.write(chunk)
 
-        # 3. Add the background task, passing the path to the saved file.
         background_tasks.add_task(process_pdf_task, tmp_path, db_document.id, session)
 
         results.append(
@@ -281,14 +311,12 @@ def read_document(session: SessionDep, current_user: CurrentUser, id: uuid.UUID)
     return document
 
 
-# Background task for deleting embeddings
 def delete_embeddings_task(document_id: uuid.UUID):
     """Background task to delete embeddings from Pinecone."""
     try:
         if pc.has_index(index_name):
             index = pc.Index(index_name)
             index.delete(filter={"document_id": str(document_id)})
-            logger.info(f"Successfully deleted embeddings for document {document_id}")
     except Exception as e:
         logger.error(f"Failed to delete embeddings for document {document_id}: {e}")
 
@@ -298,12 +326,12 @@ def delete_document(
     session: SessionDep,
     current_user: CurrentUser,
     id: uuid.UUID,
-    background_tasks: BackgroundTasks,  # Inject BackgroundTasks
+    background_tasks: BackgroundTasks,
 ) -> Any:
     """Delete a document by its ID, ensuring the user has permissions."""
 
     document = session.exec(
-        select(Document).where(Document.id == id).options(selectinload(Document.course)) # type: ignore
+        select(Document).where(Document.id == id).options(selectinload(Document.course))  # type: ignore
     ).first()
 
     if not document:
@@ -312,7 +340,7 @@ def delete_document(
             detail="Document not found or you do not have permission to delete it.",
         )
 
-    if not current_user.is_superuser and (document.course.owner_id != current_user.id):
+    if not current_user.is_superuser and (document.course.owner_id != current_user.id):  # type: ignore
         raise HTTPException(
             status_code=403,
             detail="Not enough permissions to delete this document.",
@@ -323,7 +351,6 @@ def delete_document(
     session.delete(document)
     session.commit()
 
-    # 3. Return an immediate response
     return Message(
         message="Document deleted successfully. Embeddings are being removed in the background."
     )

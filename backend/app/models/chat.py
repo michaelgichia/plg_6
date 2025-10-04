@@ -24,10 +24,9 @@ class ChatUpdate(SQLModel):
   message: str | None = Field(default=None, max_length=8192)
 
 class Chat(ChatBase, table=True):
-  id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-  course_id: uuid.UUID = Field(foreign_key="course.id", ondelete="CASCADE")
-  course: "Course" = Relationship(back_populates="chats") # noqa: F821
-
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    course_id: uuid.UUID = Field(foreign_key="course.id", ondelete="CASCADE")
+    course: "Course" = Relationship(back_populates="chats")  # noqa: F821
 
 
 # Automatically update the updated_at field before update
