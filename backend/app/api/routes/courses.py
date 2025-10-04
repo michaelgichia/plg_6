@@ -432,7 +432,7 @@ def get_quiz_stats(
 
 @router.get("/{id}/flashcards", response_model=list[QAItem])
 async def generate_flashcards_by_course_id(
-    course_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+    id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ) -> list[QAItem]:
     """
     Generate flashcards for a specific course by retrieving relevant chunks and
@@ -440,9 +440,7 @@ async def generate_flashcards_by_course_id(
     """
 
     statement = (
-        select(Course)
-        .where(Course.id == course_id)
-        .options(selectinload(Course.owner_id))  # type: ignore
+        select(Course).where(Course.id == id).options(selectinload(Course.owner_id))  # type: ignore
     )
     course = session.exec(statement).first()
 
@@ -470,7 +468,7 @@ async def generate_flashcards_by_course_id(
 
     retriever = vector_store.as_retriever(
         search_type="similarity",
-        search_kwargs={"k": 5, "filter": {"course_id": str(course_id)}},
+        search_kwargs={"k": 5, "filter": {"course_id": str(id)}},
     )
 
     llm = ChatOpenAI(temperature=0.7, model=MODEL)

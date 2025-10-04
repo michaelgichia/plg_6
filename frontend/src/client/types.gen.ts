@@ -56,6 +56,10 @@ export type ChatMessage = {
      * Message
      */
     message: string;
+    /**
+     * Continue Response
+     */
+    continue_response?: boolean;
 };
 
 /**

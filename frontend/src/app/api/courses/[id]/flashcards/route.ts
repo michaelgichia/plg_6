@@ -23,11 +23,9 @@ export async function GET(
     const {id} = await context.params
     const response = await CoursesService.getApiV1CoursesByIdFlashcards({
       path: {id: id},
-      // Skip strict response Zod validation due to backend datetime format
       responseValidator: async (): Promise<void> => {},
     })
 
-    console.log("[Response]", response.data)
     return NextResponse.json(response.data)
   } catch (error) {
     const status: number = get(
