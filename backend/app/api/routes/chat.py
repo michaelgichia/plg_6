@@ -1,31 +1,29 @@
 import uuid
 from collections.abc import AsyncGenerator
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from sqlmodel import select
 
 from app.api.deps import CurrentUser, SessionDep
-from app.api.routes.documents import (
-    EMBEDDING_MODEL,
-    async_openai_client,
-    index_name,
-    pc,
-)
-from app.models.chat import Chat, ChatCreate
-from app.models.course import Course
 from app.schemas.public import ChatPublic
+from app.services.chat_service import handle_continuation, handle_regular_question
+from app.services.chat_db import verify_course_access, get_all_messages, create_greeting_if_needed
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 class ChatMessage(BaseModel):
     message: str
+    continue_response: bool = False  # Flag to continue previous response
 
-
-class Config:
-    schema_extra = {"example": {"message": "What is the main topic of the course?"}}
+    class Config:
+        schema_extra = {
+            "example": {
+                "message": "What is the main topic of the course?",
+                "continue_response": False
+            }
+        }
 
 
 async def generate_chat_response(
@@ -33,87 +31,23 @@ async def generate_chat_response(
     course_id: uuid.UUID,
     session: SessionDep,
     current_user: CurrentUser,
+    continue_response: bool = False,
 ) -> AsyncGenerator[str, None]:
+    """
+    Main chat response generator that delegates to appropriate service handlers
+    """
     try:
-        # Verify course exists and user has access
-        course = session.exec(select(Course).where(Course.id == course_id)).first()
-
-        if not course:
-            raise HTTPException(status_code=404, detail="Course not found")
-        if not current_user.is_superuser and (course.owner_id != current_user.id):
-            raise HTTPException(status_code=400, detail="Not enough permissions")
-
-        # Generate embedding for the question
-        embed_resp = await async_openai_client.embeddings.create(
-            input=[question],
-            model=EMBEDDING_MODEL,
-        )
-        question_embedding = embed_resp.data[0].embedding
-
-        # Query Pinecone for relevant chunks
-        index = pc.Index(index_name)
-        query_result = index.query(
-            vector=question_embedding,
-            filter={"course_id": str(course_id)},
-            top_k=5,
-            include_metadata=True,
-        )
-        contexts = [
-            match["metadata"]["text"]
-            for match in query_result["matches"]
-            if "metadata" in match and "text" in match["metadata"]
-        ]
-
-        if not contexts:
-            yield "Error: No relevant content found for this question"
-            return
-
-        context_str = "\n\n".join(contexts)
-
-        # Save user message using ChatCreate
-        user_chat_data = ChatCreate(
-            message=question,
-            is_system=False,
-            course_id=course_id,  # Now UUID
-        )
-        user_msg = Chat(**user_chat_data.model_dump())
-        session.add(user_msg)
-        session.commit()
-
-        # Stream response from OpenAI
-        completion = await async_openai_client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a helpful tutor. Use the provided context to answer the question. If the context doesn't contain relevant information, say so politely.",
-                },
-                {
-                    "role": "user",
-                    "content": f"Context:\n{context_str}\n\nQuestion: {question}",
-                },
-            ],
-            stream=True,
-            temperature=0.7,
-        )
-
-        full_response = ""
-        async for chunk in completion:
-            if chunk.choices[0].delta.content:
-                content = chunk.choices[0].delta.content
-                full_response += content
-                yield content
-
-        # Save system message using ChatCreate
-        system_chat_data = ChatCreate(
-            message=full_response,
-            is_system=True,
-            course_id=course_id,
-        )
-        system_msg = Chat(**system_chat_data.model_dump())
-        session.add(system_msg)
-        session.commit()
-
+        if continue_response:
+            # Delegate to continuation handler
+            async for chunk in handle_continuation(course_id, session, current_user):
+                yield chunk
+        else:
+            # Delegate to regular question handler
+            async for chunk in handle_regular_question(
+                question, course_id, session, current_user
+            ):
+                yield chunk
+    
     except Exception as e:
         yield f"Error: {str(e)}"
 
@@ -140,7 +74,7 @@ async def stream_chat(
 
     Args:
         course_id: UUID of the course
-        chat: Message to process
+        chat: Message to process with optional continuation flag
 
     Returns:
         Streaming response of AI-generated content
@@ -151,6 +85,7 @@ async def stream_chat(
             course_id,
             session,
             current_user,
+            chat.continue_response,
         ),
         media_type="text/plain",
         headers={
@@ -189,19 +124,19 @@ async def get_chat_history(
         List of chat messages ordered by creation date, empty list if none found
     """
     # Verify course exists and user has access
-    course = session.exec(select(Course).where(Course.id == course_id)).first()
+    course = verify_course_access(course_id, session, current_user)
+    
+    # Get existing messages
+    messages = get_all_messages(course_id, session, limit)
 
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-    if not current_user.is_superuser and (course.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
-
-    messages = session.exec(
-        select(Chat)
-        .where(Chat.course_id == course_id)  # Use UUID directly
-        .order_by(Chat.created_at.asc())
-        .limit(limit)
-    ).all()
+    # Generate Athena greeting if no messages exist
+    if not messages:
+        greeting = create_greeting_if_needed(course, session)
+        if greeting:
+            return [greeting]
+        else:
+            # If greeting creation fails, return empty list
+            return []
 
     # Convert to ChatPublic
-    return [ChatPublic(**msg.model_dump()) for msg in messages] if messages else []
+    return [ChatPublic(**msg.model_dump()) for msg in messages]

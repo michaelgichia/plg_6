@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "type-check": "tsc --noEmit",
     "generate-client": "openapi-ts"
   },
   "dependencies": {
@@ -41,6 +42,8 @@
     "react-dropzone": "^14.3.8",
     "react-feather": "^2.0.10",
     "react-hook-form": "^7.62.0",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "zod": "^4.1.8"
