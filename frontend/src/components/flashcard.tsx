@@ -41,7 +41,7 @@ export default function Flashcard({courseId}) {
   }
 
   return (
-    <div className='flex items-center flex-col'>
+    <div>
       <div className='mb-9'>
         <Button onClick={() => generateFlashcards()} disabled={loading}>
           {loading ? <Loader /> : null}
