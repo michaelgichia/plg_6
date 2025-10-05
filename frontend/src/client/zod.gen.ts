@@ -35,7 +35,8 @@ export const zBodyLoginLoginAccessToken = z.object({
  * ChatMessage
  */
 export const zChatMessage = z.object({
-    message: z.string()
+    message: z.string(),
+    continue_response: z.optional(z.boolean()).default(false)
 });
 
 /**

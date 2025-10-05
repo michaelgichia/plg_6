@@ -83,6 +83,11 @@ export const ChatMessageSchema = {
         message: {
             type: 'string',
             title: 'Message'
+        },
+        continue_response: {
+            type: 'boolean',
+            title: 'Continue Response',
+            default: false
         }
     },
     type: 'object',

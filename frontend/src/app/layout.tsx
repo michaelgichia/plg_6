@@ -19,7 +19,7 @@ const dmSansMono = DM_Mono({
 
 export const metadata: Metadata = {
   title: 'Athena',
-  description: 'Study Companion',
+  description: 'Athena',
 }
 
 export default async function RootLayout({
