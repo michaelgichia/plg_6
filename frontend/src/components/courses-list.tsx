@@ -14,13 +14,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {Calendar} from '@/components/ui/calendar'
-import { CourseWithOptionalDate, DatePreset } from '@/types/date'
+import { DatePreset } from '@/types/date'
 import { inPreset, parseDate } from '@/lib/date'
+import { Course } from '@/client'
 
 export default function CoursesList({
   courses,
 }: {
-  courses: CourseWithOptionalDate[]
+  courses: Course[]
 }) {
   const [query, setQuery] = useState('')
   const [datePreset, setDatePreset] = useState<DatePreset>('all')

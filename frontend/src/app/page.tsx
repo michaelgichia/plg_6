@@ -8,7 +8,7 @@ export default function Home() {
           {/* Header Section */}
           <div className='mb-12'>
             <h1 className='text-4xl font-bold text-slate-900 mb-4'>
-              Welcome to StudyCompanion
+              Welcome to Athena
             </h1>
             <p className='text-xl text-slate-600 max-w-2xl mx-auto'>
               Upload your study materials and transform them into interactive
@@ -68,7 +68,7 @@ export default function Home() {
           {/* Additional Info */}
           <div className='mt-12 text-center'>
             <p className='text-slate-500 text-sm'>
-              Join thousands of students already using StudyCompanion to enhance
+              Join thousands of students already using Athena to enhance
               their learning
             </p>
           </div>
