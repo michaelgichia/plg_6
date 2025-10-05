@@ -13,16 +13,7 @@ interface ErrorResponse {
 }
 
 /**
- * API Route Handler for fetching a single course by ID.
- *
- * WHY: This route proxies requests to the backend CoursesService to retrieve
- * detailed information about a specific course. It handles backend errors gracefully,
- * ensuring that frontend consumers receive meaningful error messages and status codes.
- * Skips strict Zod validation due to backend datetime format inconsistencies.
- *
- * @param _req - The incoming Next.js request object (unused).
- * @param context - Contains route parameters, specifically the course ID.
- * @returns NextResponse containing course data or an error response.
+ * Get flashcards
  */
 export async function GET(
   _req: NextRequest,
@@ -30,11 +21,11 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     const {id} = await context.params
-    const response = await CoursesService.getApiV1CoursesByCourseIdFlashcards({
-      path: {course_id: id},
-      // Skip strict response Zod validation due to backend datetime format
+    const response = await CoursesService.getApiV1CoursesByIdFlashcards({
+      path: {id: id},
       responseValidator: async (): Promise<void> => {},
     })
+
     return NextResponse.json(response.data)
   } catch (error) {
     const status: number = get(
@@ -44,7 +35,7 @@ export async function GET(
     )
     const body: ErrorResponse = get(
       error as Record<string, never>,
-      'response.data',
+      'response.data.detail',
       {
         detail: 'Internal Server Error',
       },
@@ -55,4 +46,5 @@ export async function GET(
 
 export const config = {
   runtime: 'nodejs',
+  maxDuration: 300,
 }
