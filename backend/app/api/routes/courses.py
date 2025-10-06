@@ -1,4 +1,3 @@
-import json
 import logging
 import uuid
 from collections.abc import Sequence
@@ -8,10 +7,6 @@ from random import shuffle
 from typing import Annotated, Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_pinecone import PineconeVectorStore
 from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import QueryableAttribute, selectinload
@@ -19,6 +14,7 @@ from sqlalchemy.sql import and_, text
 from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
+from app.llm_clients.openai_client import INDEX_NAME
 from app.models.common import Message
 from app.models.course import (
     Course,
@@ -42,14 +38,11 @@ from app.schemas.public import (
     QuizStats,
     QuizzesPublic,
 )
+from app.services.courses import generate_flashcards_from_text, get_retrieved_docs
 from app.tasks import (
     fetch_and_format_quizzes,
     select_quizzes_by_course_criteria,
 )
-
-INDEX_NAME = "developer-quickstart-py"
-MODEL = "gpt-4o-mini"
-EMBEDDINGS = OpenAIEmbeddings()
 
 
 class CourseWithDocuments(CoursePublic):
@@ -432,67 +425,52 @@ def get_quiz_stats(
 
 @router.get("/{id}/flashcards", response_model=list[QAItem])
 async def generate_flashcards_by_course_id(
-    id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+    id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
 ) -> list[QAItem]:
     """
-    Generate flashcards for a specific course by retrieving relevant chunks and
-    using an LLM to structure the content into Q&A items.
+    Generate flashcards for the most recent document associated with a course.
     """
 
     statement = (
-        select(Course).where(Course.id == id).options(selectinload(Course.owner_id))  # type: ignore
+        select(Course).where(Course.id == id).options(selectinload(Course.owner))
     )
     course = session.exec(statement).first()
 
     if not course:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Course not found")
+
+    if not current_user.is_superuser and course.owner_id != current_user.id:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Access denied")
+
+    latest_doc_stmt = (
+        select(Document)
+        .where(Document.course_id == id)
+        .order_by(Document.created_at.desc())
+        .limit(1)
+    )
+    document = session.exec(latest_doc_stmt).first()
+
+    if not document:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail="Course not found",
-        )
-
-    if not current_user.is_superuser and (course.owner_id != current_user.id):
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN,
-            detail="Not enough permissions to access this course.",
+            detail="No documents found for this course.",
         )
 
     try:
-        vector_store = PineconeVectorStore.from_existing_index(
-            index_name=INDEX_NAME, embedding=EMBEDDINGS, text_key="text"
+        retrieved_texts = await get_retrieved_docs(
+            document_id=document.id, index_name=INDEX_NAME, query=PROMPT
         )
-    except Exception as exc:
+    except ConnectionError as exc:
+        raise HTTPException(status_code=HTTPStatus.SERVICE_UNAVAILABLE, detail=str(exc))
+
+    if not retrieved_texts:
         raise HTTPException(
-            status_code=HTTPStatus.SERVICE_UNAVAILABLE,
-            detail="Vector store connection error: Index could not be retrieved.",
-        ) from exc
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="No relevant content found for flashcard generation.",
+        )
 
-    retriever = vector_store.as_retriever(
-        search_type="similarity",
-        search_kwargs={"k": 5, "filter": {"course_id": str(id)}},
-    )
+    flashcards = await generate_flashcards_from_text(retrieved_texts)
 
-    llm = ChatOpenAI(temperature=0.7, model=MODEL)
-
-    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
-    conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm, retriever=retriever, memory=memory, return_source_documents=True
-    )
-
-    try:
-        result = await conversation_chain.ainvoke({"question": PROMPT})
-        answer_json = json.loads(result["answer"])
-
-        return [QAItem.model_validate(item) for item in answer_json]
-
-    except json.JSONDecodeError as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_GATEWAY,
-            detail="AI model returned output in an invalid JSON format.",
-        ) from exc
-
-    except Exception as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred during flashcard generation.",
-        ) from exc
+    return flashcards

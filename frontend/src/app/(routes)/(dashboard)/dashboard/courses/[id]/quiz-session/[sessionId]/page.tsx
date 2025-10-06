@@ -13,6 +13,9 @@ export default async function Page(props: {
 
   const result = await getQuizSession(sessionId)
 
+  console.log(result)
+
+
   if (!result.ok) {
     return <ErrorBox error={result.error} />
   }

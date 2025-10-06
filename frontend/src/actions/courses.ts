@@ -17,13 +17,16 @@ export async function getCourses(): Promise<Result<Course[]>> {
   try {
     const response = await CoursesService.getApiV1Courses({
       responseValidator: async () => {},
+      requestValidator: async () => {},
     })
+    console.log("[getCourses: Error]", response.data)
 
     return {
       ok: true,
       data: response.data?.data ?? [],
     }
   } catch (err) {
+    console.log("[getCourses: Error]", err)
     return {
       ok: false,
       error: mapApiError(err),

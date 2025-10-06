@@ -3,10 +3,10 @@ import type { CreateClientConfig } from './client/client.gen'
 
 export const createClientConfig: CreateClientConfig =(config) => {
   const isServer = typeof window === 'undefined'
-
+  console.log('process.env.NEXT_PUBLIC_BACKEND_BASE_URL', process.env.NEXT_PUBLIC_BACKEND_BASE_URL)
   const baseURL =
     process.env.NEXT_PUBLIC_BACKEND_BASE_URL ?? 'http://localhost:8000'
-
+  console.log('baseURL', baseURL)
   return {
     ...config,
     baseURL,

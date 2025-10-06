@@ -5,6 +5,9 @@ import ErrorBox from '@/components/ui/ErrorBox'
 export default async function DashboardPage() {
   const result = await getCourses()
 
+  console.log("[DashboardPage]", result)
+
+
   if (!result.ok) {
     return <ErrorBox error={result.error} />
   }
