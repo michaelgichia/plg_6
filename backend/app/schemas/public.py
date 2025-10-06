@@ -196,10 +196,22 @@ class QuizSessionPublicWithResults(QuizSessionPublicWithQuizzes):
     results: list[QuizAttemptPublic] = Field(default_factory=list)
 
 
-class ChatPublic(QuizSessionPublic):
+class ChatPublic(PydanticBase):
     id: uuid.UUID
     message: str
     course_id: uuid.UUID
     is_system: bool
     created_at: datetime
     updated_at: datetime
+
+class ChatMessage(BaseModel):
+    message: str
+    continue_response: bool = False  # Flag to continue previous response
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "message": "What is the main topic of the course?",
+                "continue_response": False,
+            }
+        }
