@@ -92,7 +92,11 @@ export const ChatMessageSchema = {
     },
     type: 'object',
     required: ['message'],
-    title: 'ChatMessage'
+    title: 'ChatMessage',
+    example: {
+        continue_response: false,
+        message: 'What is the main topic of the course?'
+    }
 } as const;
 
 export const ChatPublicSchema = {
