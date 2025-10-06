@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getMe } from "@/actions/users";
+import { logout } from "@/actions/auth";
 
 export default async function Home() {
   const result = await getMe();
@@ -12,7 +13,7 @@ export default async function Home() {
       </div>
 
       {/* Minimal header with logo and Athena text */}
-      <header className="relative z-20 w-full flex items-center px-4 sm:px-12 py-4 sm:py-6 bg-transparent justify-start">
+      <header className="relative z-20 w-full flex items-center px-4 sm:px-12 py-4 sm:py-6 bg-transparent justify-between">
         <div className="flex items-center gap-2">
           <span className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg mr-2">
             <svg
@@ -29,6 +30,15 @@ export default async function Home() {
             Athena
           </span>
         </div>
+        {user && (
+            <button
+              type="submit"
+              onClick={logout}
+              className="ml-4 bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-700 transition"
+            >
+              Log out
+            </button>
+        )}
       </header>
 
       <section className="relative z-10 flex flex-col items-center justify-center text-center py-20 px-4 sm:px-8">
