@@ -29,6 +29,7 @@ from app.models.course import (
 from app.models.document import Document
 from app.models.embeddings import Chunk
 from app.models.quizzes import Quiz, QuizSession
+from app.prompts.flashcards import PROMPT
 from app.schemas.internal import QuizFilterParams
 from app.schemas.public import (
     CoursePublic,
@@ -49,12 +50,6 @@ from app.tasks import (
 INDEX_NAME = "developer-quickstart-py"
 MODEL = "gpt-4o-mini"
 EMBEDDINGS = OpenAIEmbeddings()
-PROMPT = """You are an assistant for question-answering tasks.
-Use the following retrieved context to generate as many as possible flashcard self-test questions (more than 20) in the JSON template provided below.
-Do not find questions outside the provided context, return an empty array if you can't find. Do not use any external knowledge or information not present in the context.
-
-template: [{"question": "the question", "answer": "the answer to the question"}]
-"""
 
 
 class CourseWithDocuments(CoursePublic):
@@ -322,8 +317,6 @@ def start_new_quiz_session(
             .limit(1)
         )
 
-        logger.info(f"Active session check: {active_session_check}")
-
         if session.exec(active_session_check).first():
             raise HTTPException(
                 status_code=400,
@@ -393,7 +386,7 @@ def get_quiz_stats(
             QuizSession.score_percentage,
         )
         .where(user_course_filter)
-        .order_by(desc(QuizSession.score_percentage))
+        .order_by(desc(QuizSession.score_percentage))  # type: ignore
         .limit(1)
     )
 
@@ -418,9 +411,11 @@ def get_quiz_stats(
     attempts, average_score = overall_results
 
     if best_session_stats:
-        best_total_submitted, best_total_correct, best_score_percentage = (
-            best_session_stats
-        )
+        (
+            best_total_submitted,
+            best_total_correct,
+            best_score_percentage,
+        ) = best_session_stats
     else:
         best_total_submitted = 0
         best_total_correct = 0
@@ -436,50 +431,68 @@ def get_quiz_stats(
 
 
 @router.get("/{id}/flashcards", response_model=list[QAItem])
-def generate_flashcards_by_course_id(
-    session: SessionDep, current_user: CurrentUser, id: uuid.UUID
+async def generate_flashcards_by_course_id(
+    id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ) -> list[QAItem]:
     """
-    Generate flashcards via course ID
+    Generate flashcards for a specific course by retrieving relevant chunks and
+    using an LLM to structure the content into Q&A items.
     """
+
     statement = (
-        select(Course).where(Course.id == id).options(selectinload(Course.documents))
+        select(Course).where(Course.id == id).options(selectinload(Course.owner_id))  # type: ignore
     )
     course = session.exec(statement).first()
+
     if not course:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail="Course not found",
         )
+
     if not current_user.is_superuser and (course.owner_id != current_user.id):
         raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN, detail="Not enough permissions"
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Not enough permissions to access this course.",
         )
-    # Connect to an existing Pinecone index
+
     try:
-        vectorstore = PineconeVectorStore.from_existing_index(
+        vector_store = PineconeVectorStore.from_existing_index(
             index_name=INDEX_NAME, embedding=EMBEDDINGS, text_key="text"
         )
-    except ValueError:
+    except Exception as exc:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="Document index can not be retrieved",
-        )
-    retriever = vectorstore.as_retriever(
+            status_code=HTTPStatus.SERVICE_UNAVAILABLE,
+            detail="Vector store connection error: Index could not be retrieved.",
+        ) from exc
+
+    retriever = vector_store.as_retriever(
         search_type="similarity",
-        search_kwargs={"k": 5},
-        filter={"course_id": course.id},
+        search_kwargs={"k": 5, "filter": {"course_id": str(id)}},
     )
-    llm = ChatOpenAI(temperature=0.7, model_name=MODEL)
-    memory = ConversationBufferMemory(memory_key="chat_history", return_meessage=True)
+
+    llm = ChatOpenAI(temperature=0.7, model=MODEL)
+
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+
     conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm, retriever=retriever, memory=memory
+        llm=llm, retriever=retriever, memory=memory, return_source_documents=True
     )
-    result = conversation_chain.invoke({"question": PROMPT})
+
     try:
-        return json.loads(result["answer"])
+        result = await conversation_chain.ainvoke({"question": PROMPT})
+        answer_json = json.loads(result["answer"])
+
+        return [QAItem.model_validate(item) for item in answer_json]
+
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_GATEWAY,
+            detail="AI model returned output in an invalid JSON format.",
+        ) from exc
+
     except Exception as exc:
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Flashcards could not be returned",
-        )
+            detail="An unexpected error occurred during flashcard generation.",
+        ) from exc

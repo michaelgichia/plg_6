@@ -45,7 +45,7 @@ export async function GET(
     )
     const body: ErrorResponse = get(
       error as Record<string, never>,
-      'response.data',
+      'response.data.detail',
       {
         detail: 'Internal Server Error',
       },

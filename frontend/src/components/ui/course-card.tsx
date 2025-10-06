@@ -11,14 +11,14 @@ import {
 } from '@/components/ui/card'
 import Link from 'next/link'
 import {formatDate} from '@/lib/date'
-import {CourseWithOptionalDate} from '@/types/date'
 import DeleteCourse from './delete-course'
+import { Course } from '@/client'
 
 export default function CourseCard({
   course,
   className,
 }: {
-  course: CourseWithOptionalDate
+  course: Course
   className?: string
 }) {
   const createdLabel = formatDate(course.created_at) ?? '-'

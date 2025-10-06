@@ -45,7 +45,7 @@ export function AppSidebar({ displayName = 'User' }: { displayName?: string }) {
                         <Zap className='size-4' />
                       </div>
                       <div className='flex flex-col gap-0.5 leading-none'>
-                        <span className='font-medium'>Study Companion</span>
+                        <span className='font-medium'>Athena</span>
                       </div>
                     </div>
                   </Link>
