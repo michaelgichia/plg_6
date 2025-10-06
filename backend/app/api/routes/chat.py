@@ -3,10 +3,9 @@ from collections.abc import AsyncGenerator
 
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 
 from app.api.deps import CurrentUser, SessionDep
-from app.schemas.public import ChatPublic
+from app.schemas.public import ChatPublic, ChatMessage
 from app.services.chat_db import (
     create_greeting_if_needed,
     get_all_messages,
@@ -15,20 +14,6 @@ from app.services.chat_db import (
 from app.services.chat_service import handle_continuation, handle_regular_question
 
 router = APIRouter(prefix="/chat", tags=["chat"])
-
-
-class ChatMessage(BaseModel):
-    message: str
-    continue_response: bool = False  # Flag to continue previous response
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "message": "What is the main topic of the course?",
-                "continue_response": False,
-            }
-        }
-
 
 async def generate_chat_response(
     question: str,

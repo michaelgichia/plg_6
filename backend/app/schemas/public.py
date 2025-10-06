@@ -203,3 +203,15 @@ class ChatPublic(PydanticBase):
     is_system: bool
     created_at: datetime
     updated_at: datetime
+
+class ChatMessage(BaseModel):
+    message: str
+    continue_response: bool = False  # Flag to continue previous response
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "message": "What is the main topic of the course?",
+                "continue_response": False,
+            }
+        }
