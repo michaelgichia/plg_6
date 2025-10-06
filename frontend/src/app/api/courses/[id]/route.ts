@@ -55,4 +55,5 @@ export async function GET(
 
 export const config = {
   runtime: 'nodejs',
+  maxDuration: 300,
 }

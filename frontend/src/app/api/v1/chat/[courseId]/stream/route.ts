@@ -12,8 +12,8 @@ export async function POST(
     const response = await ChatService.postApiV1ChatByCourseIdStream({
       path: { course_id: courseId },
       body,
-      responseValidator: async () => {},
-      requestValidator: async () => {},
+      responseValidator: async () => { },
+      requestValidator: async () => { },
       responseType: 'stream',
     })
 
@@ -56,4 +56,9 @@ export async function POST(
   } catch (error) {
     return Response.json({ error: 'Failed to stream response' }, { status: 500 })
   }
+}
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 300,
 }

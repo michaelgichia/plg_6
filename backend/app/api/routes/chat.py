@@ -7,8 +7,12 @@ from pydantic import BaseModel
 
 from app.api.deps import CurrentUser, SessionDep
 from app.schemas.public import ChatPublic
+from app.services.chat_db import (
+    create_greeting_if_needed,
+    get_all_messages,
+    verify_course_access,
+)
 from app.services.chat_service import handle_continuation, handle_regular_question
-from app.services.chat_db import verify_course_access, get_all_messages, create_greeting_if_needed
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -18,10 +22,10 @@ class ChatMessage(BaseModel):
     continue_response: bool = False  # Flag to continue previous response
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "message": "What is the main topic of the course?",
-                "continue_response": False
+                "continue_response": False,
             }
         }
 
@@ -47,7 +51,7 @@ async def generate_chat_response(
                 question, course_id, session, current_user
             ):
                 yield chunk
-    
+
     except Exception as e:
         yield f"Error: {str(e)}"
 
@@ -125,7 +129,7 @@ async def get_chat_history(
     """
     # Verify course exists and user has access
     course = verify_course_access(course_id, session, current_user)
-    
+
     # Get existing messages
     messages = get_all_messages(course_id, session, limit)
 
