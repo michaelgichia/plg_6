@@ -196,7 +196,7 @@ class QuizSessionPublicWithResults(QuizSessionPublicWithQuizzes):
     results: list[QuizAttemptPublic] = Field(default_factory=list)
 
 
-class ChatPublic(QuizSessionPublic):
+class ChatPublic(PydanticBase):
     id: uuid.UUID
     message: str
     course_id: uuid.UUID
