@@ -46,7 +46,10 @@ class QuizAttemptBase(SQLModel):
 
 class QuizSessionBase(SQLModel):
     user_id: uuid.UUID = Field(foreign_key="users.id")
-    course_id: uuid.UUID = Field(foreign_key="course.id")
+    course_id: uuid.UUID = Field(
+        foreign_key="course.id",
+        nullable=False,
+    )
     total_time_seconds: float = Field(default=0.0)
     total_submitted: int
     total_correct: int
@@ -74,6 +77,14 @@ class QuizSession(QuizSessionBase, table=True):
         sa_relationship=relationship(
             "QuizAttempt",
             back_populates="session",
+            lazy="selectin",
+        ),
+    )
+    course: "Course" = Relationship(
+        back_populates="quiz_sessions",
+        sa_relationship=relationship(
+            "Course",
+            back_populates="quiz_sessions",
             lazy="selectin",
         ),
     )

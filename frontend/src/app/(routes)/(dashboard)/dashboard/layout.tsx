@@ -19,7 +19,7 @@ import { getMe } from '@/actions/users'
     let displayName = '';
     // Configure axios client per request
     client.setConfig({
-      baseURL: process.env.NEXT_INTERNAL_BACKEND_BASE_URL as string,
+      baseURL: process.env.NEXT_PUBLIC_BACKEND_BASE_URL as string,
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
 
