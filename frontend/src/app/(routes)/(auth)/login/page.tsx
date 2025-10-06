@@ -34,7 +34,27 @@ export default function Login() {
   return (
     <div className='flex min-h-screen'>
       {/* Left side - Form */}
-      <div className='w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24'>
+      <div className='w-full lg:w-1/2 flex flex-col justify-between px-8 md:px-16 lg:px-24'>
+        <section className='relative z-20 w-full flex items-center px-4 sm:px-12 py-4 sm:py-6 bg-transparent justify-between'>
+          <div className='flex items-center gap-2'>
+            <Link href='/' className='flex items-center gap-2'>
+              <span className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg mr-2'>
+                <svg
+                  className='size-4'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2'
+                  viewBox='0 0 24 24'
+                >
+                  <path d='M13 2L3 14h9l-1 8L21 10h-9l1-8z' />
+                </svg>
+              </span>
+              <span className='font-medium text-lg sm:text-xl tracking-tight text-slate-900 dark:text-white'>
+                Athena
+              </span>
+            </Link>
+          </div>
+        </section>
         <div className='max-w-md mx-auto w-full'>
           <h1 className='text-3xl font-bold mb-10'>Welcome Back</h1>
           <form action={formAction} className='space-y-6'>
@@ -62,10 +82,12 @@ export default function Login() {
                 name='password'
                 onBlur={handleBlur}
                 error={errors?.password || null}
-                label="Password"
+                label='Password'
               />
               {state && !state?.ok && (
-                <div className='text-red-500 text-sm'>{state?.error?.message}</div>
+                <div className='text-red-500 text-sm'>
+                  {state?.error?.message}
+                </div>
               )}
             </div>
 
@@ -98,6 +120,7 @@ export default function Login() {
             </p>
           </div>
         </div>
+        <section>{/* Do not delete */}</section>
       </div>
 
       {/* Right side - Image */}
