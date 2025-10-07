@@ -1,7 +1,6 @@
 .DS_Store
 htmlcov
 .env
-*.env
 .env*
 /.idea/
 frontend/.*

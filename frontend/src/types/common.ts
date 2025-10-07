@@ -18,3 +18,9 @@ export type CamelCase<S extends string> = S extends `${infer T}_${infer U}`
 export type KeysToCamelCase<T> = {
   [K in keyof T as CamelCase<string & K>]: T[K]
 };
+
+
+export type PathParams<Path extends string> =
+  Path extends `${infer Before}[${infer Param}]${infer After}`
+    ? { [K in Param]: string } & PathParams<Before> & PathParams<After>
+    : {};

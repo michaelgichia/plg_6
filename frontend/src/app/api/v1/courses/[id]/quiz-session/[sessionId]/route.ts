@@ -1,13 +1,8 @@
 import {type NextRequest, NextResponse} from 'next/server'
-import {QuizSessionsService} from '@/client'
-import {get} from '@/utils'
 
-interface ContextParams {
-  params: {
-    sessionId: string
-    id: string
-  }
-}
+import {get} from '@/utils'
+import {QuizSessionPublicWithResults, QuizSessionsService} from '@/client'
+import API_ROUTES from '@/services/url-services'
 
 interface ErrorResponse {
   detail: string
@@ -27,30 +22,37 @@ interface ErrorResponse {
  */
 export async function GET(
   _req: NextRequest,
-  context: ContextParams,
-): Promise<NextResponse> {
+  ctx: RouteContext<typeof API_ROUTES.QUIZ_SESSION_BY_ID>,
+): Promise<NextResponse<QuizSessionPublicWithResults | ErrorResponse>> {
   try {
-    const {sessionId} = await context.params
+    const { sessionId } = await ctx.params
 
     const response = await QuizSessionsService.getApiV1QuizSessionsById({
-      path: {id: sessionId},
-      responseValidator: async (): Promise<void> => {},
+      path: { id: sessionId },
+      responseValidator: async (): Promise<void> => { },
     })
-    return NextResponse.json(response.data)
+
+    const sessionData: QuizSessionPublicWithResults = response.data as QuizSessionPublicWithResults
+
+    return NextResponse.json(sessionData)
   } catch (error) {
+    const clientError = error as Record<string, never>
+
     const status: number = get(
-      error as Record<string, never>,
+      clientError,
       'response.status',
       500,
     )
-    const body: ErrorResponse = get(
-      error as Record<string, never>,
+
+    const detail: string = get(
+      clientError,
       'response.data.detail',
-      {
-        detail: 'Internal Server Error',
-      },
+      'Internal Server Error',
     )
-    return NextResponse.json(body, {status})
+
+    const body: ErrorResponse = { detail }
+
+    return NextResponse.json(body, { status })
   }
 }
 

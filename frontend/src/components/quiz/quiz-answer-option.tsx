@@ -1,4 +1,3 @@
-// components/quizzes/QuizAnswerOption.tsx
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { QuizAttemptPublic } from '@/client'
@@ -7,7 +6,7 @@ interface QuizAnswerOptionProps {
   choice: { id: string; text: string }
   quizId: string
   isScored: boolean
-  result: QuizAttemptPublic | undefined
+  result: QuizAttemptPublic
 }
 
 export function QuizAnswerOption({
