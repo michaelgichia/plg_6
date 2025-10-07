@@ -809,8 +809,7 @@ export class CoursesService {
     
     /**
      * Generate Flashcards By Course Id
-     * Generate flashcards for a specific course by retrieving relevant chunks and
-     * using an LLM to structure the content into Q&A items.
+     * Generate flashcards for the most recent document associated with a course.
      */
     public static getApiV1CoursesByIdFlashcards<ThrowOnError extends boolean = true>(options: Options<GetApiV1CoursesByIdFlashcardsData, ThrowOnError>) {
         return (options.client ?? client).get<GetApiV1CoursesByIdFlashcardsResponses, GetApiV1CoursesByIdFlashcardsErrors, ThrowOnError>({
