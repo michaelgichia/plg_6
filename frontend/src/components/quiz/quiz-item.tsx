@@ -4,7 +4,7 @@ import { QuizAnswerOption } from './quiz-answer-option'
 interface QuizItemProps {
   quiz: QuizPublic
   isCompleted: boolean
-  result: QuizAttemptPublic | undefined
+  result: QuizAttemptPublic
   resultsMap: Record<string, QuizAttemptPublic>
   getErrorMessage: (quizId: string) => string | null
   COLORS: { CORRECT: string; INCORRECT: string; DEFAULT: string }
@@ -17,7 +17,7 @@ export function QuizItem({
   getErrorMessage,
   COLORS,
 }: QuizItemProps) {
-  const isScored = isCompleted && result
+  const isScored = isCompleted
   const errorMessage = getErrorMessage(quiz.id)
 
   let itemClass = COLORS.DEFAULT

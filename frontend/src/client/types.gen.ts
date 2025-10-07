@@ -71,25 +71,17 @@ export type ChatPublic = {
      */
     id: string;
     /**
+     * Message
+     */
+    message: string;
+    /**
      * Course Id
      */
     course_id: string;
     /**
-     * Total Submitted
+     * Is System
      */
-    total_submitted: number;
-    /**
-     * Total Correct
-     */
-    total_correct: number;
-    /**
-     * Score Percentage
-     */
-    score_percentage?: number | null;
-    /**
-     * Is Completed
-     */
-    is_completed: boolean;
+    is_system: boolean;
     /**
      * Created At
      */
@@ -98,14 +90,6 @@ export type ChatPublic = {
      * Updated At
      */
     updated_at: string;
-    /**
-     * Message
-     */
-    message: string;
-    /**
-     * Is System
-     */
-    is_system: boolean;
 };
 
 /**
