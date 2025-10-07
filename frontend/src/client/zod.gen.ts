@@ -44,18 +44,11 @@ export const zChatMessage = z.object({
  */
 export const zChatPublic = z.object({
     id: z.uuid(),
-    course_id: z.uuid(),
-    total_submitted: z.int(),
-    total_correct: z.int(),
-    score_percentage: z.optional(z.union([
-        z.number(),
-        z.null()
-    ])),
-    is_completed: z.boolean(),
-    created_at: z.iso.datetime(),
-    updated_at: z.iso.datetime(),
     message: z.string(),
-    is_system: z.boolean()
+    course_id: z.uuid(),
+    is_system: z.boolean(),
+    created_at: z.iso.datetime(),
+    updated_at: z.iso.datetime()
 });
 
 /**

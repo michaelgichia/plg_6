@@ -1,12 +1,9 @@
-import {type NextRequest, NextResponse} from 'next/server'
-import {CoursesService} from '@/client'
-import {get} from '@/utils'
+import { type NextRequest, NextResponse } from 'next/server'
 
-interface ContextParams {
-  params: {
-    id: string
-  }
-}
+import { API_ROUTES } from "@/services/url-services"
+import { CoursesService, CourseWithDocuments } from '@/client'
+import { get } from '@/utils'
+
 
 interface ErrorResponse {
   detail: string
@@ -26,30 +23,34 @@ interface ErrorResponse {
  */
 export async function GET(
   _req: NextRequest,
-  context: ContextParams,
-): Promise<NextResponse> {
+  ctx: RouteContext<typeof API_ROUTES.GET_COURSE_BY_ID>,
+): Promise<NextResponse<CourseWithDocuments | ErrorResponse>> {
   try {
-    const {id} = await context.params
+    const { id } = await ctx.params
+
     const response = await CoursesService.getApiV1CoursesById({
-      path: {id},
-      // Skip strict response Zod validation due to backend datetime format
+      path: { id },
       responseValidator: async (): Promise<void> => {},
+      requestValidator: async (): Promise<void> => {},
     })
-    return NextResponse.json(response.data)
+
+    const courseData = response.data
+
+    return NextResponse.json(courseData)
   } catch (error) {
-    const status: number = get(
-      error as Record<string, never>,
-      'response.status',
-      500,
-    )
-    const body: ErrorResponse = get(
-      error as Record<string, never>,
+    const clientError = error as Record<string, never>
+
+    const status: number = get(clientError, 'response.status', 500)
+
+    const detail: string = get(
+      clientError,
       'response.data.detail',
-      {
-        detail: 'Internal Server Error',
-      },
+      'Internal Server Error',
     )
-    return NextResponse.json(body, {status})
+
+    const body: ErrorResponse = { detail }
+
+    return NextResponse.json(body, { status })
   }
 }
 

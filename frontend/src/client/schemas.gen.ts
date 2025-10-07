@@ -106,33 +106,18 @@ export const ChatPublicSchema = {
             format: 'uuid',
             title: 'Id'
         },
+        message: {
+            type: 'string',
+            title: 'Message'
+        },
         course_id: {
             type: 'string',
             format: 'uuid',
             title: 'Course Id'
         },
-        total_submitted: {
-            type: 'integer',
-            title: 'Total Submitted'
-        },
-        total_correct: {
-            type: 'integer',
-            title: 'Total Correct'
-        },
-        score_percentage: {
-            anyOf: [
-                {
-                    type: 'number'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Score Percentage'
-        },
-        is_completed: {
+        is_system: {
             type: 'boolean',
-            title: 'Is Completed'
+            title: 'Is System'
         },
         created_at: {
             type: 'string',
@@ -143,18 +128,10 @@ export const ChatPublicSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Updated At'
-        },
-        message: {
-            type: 'string',
-            title: 'Message'
-        },
-        is_system: {
-            type: 'boolean',
-            title: 'Is System'
         }
     },
     type: 'object',
-    required: ['id', 'course_id', 'total_submitted', 'total_correct', 'is_completed', 'created_at', 'updated_at', 'message', 'is_system'],
+    required: ['id', 'message', 'course_id', 'is_system', 'created_at', 'updated_at'],
     title: 'ChatPublic'
 } as const;
 

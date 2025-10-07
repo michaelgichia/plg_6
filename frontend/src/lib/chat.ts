@@ -1,5 +1,9 @@
+import API_ROUTES, { buildApiPath } from '@/services/url-services'
+
 export const createChatStream = async (courseId: string, message: string, continueResponse: boolean = false) => {
-  const response = await fetch(`/api/v1/chat/${courseId}/stream`, {
+  const apiUrl = buildApiPath(API_ROUTES.CHAT, { id: courseId })
+
+  const response = await fetch(apiUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message, continue_response: continueResponse }),
