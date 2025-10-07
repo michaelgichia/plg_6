@@ -108,7 +108,9 @@ def store_embeddings(
     index.upsert(vectors)
 
 
-async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: SessionDep):
+async def process_pdf_task(
+    file_path: str, document_id: uuid.UUID, course_id: uuid.UUID, session: SessionDep
+):
     """Background task to parse, chunk, embed, and store PDF."""
     document = session.get(Document, document_id)
     if not document:
@@ -165,6 +167,7 @@ async def process_pdf_task(file_path: str, document_id: uuid.UUID, session: Sess
                 "id": embedding_uuid,
                 "values": embedding,
                 "metadata": {
+                    "course_id": str(course_id),
                     "document_id": str(document_id),
                     "chunk_id": str(record.id),
                     "text": record.text_content,
@@ -277,7 +280,9 @@ async def process_multiple_documents(
             while chunk := await file.read(1024):
                 await buffer.write(chunk)
 
-        background_tasks.add_task(process_pdf_task, tmp_path, db_document.id, session)
+        background_tasks.add_task(
+            process_pdf_task, tmp_path, db_document.id, db_document.course_id, session
+        )
 
         results.append(
             {
