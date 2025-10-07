@@ -1,7 +1,12 @@
-import { NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 import { ChatService } from '@/client'
 import API_ROUTES from '@/services/url-services';
+import { get } from '@/utils';
+
+interface ErrorResponse {
+  detail: string
+}
 
 export async function POST(
   request: NextRequest,
@@ -57,11 +62,23 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('Failed to set up chat stream:', error);
-    return Response.json(
-      { detail: 'Failed to initiate or proxy chat stream' },
-      { status: 500 }
+    const clientError = error as Record<string, never>
+
+    const status: number = get(
+      clientError,
+      'response.status',
+      500,
     );
+
+    const detail: string = get(
+      clientError,
+      'response.data.detail',
+      'Internal Server Error',
+    );
+
+    const body: ErrorResponse = { detail };
+
+    return NextResponse.json(body, { status });
   }
 }
 

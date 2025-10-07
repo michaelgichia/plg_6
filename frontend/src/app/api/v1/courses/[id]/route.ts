@@ -28,8 +28,6 @@ export async function GET(
   try {
     const { id } = await ctx.params
 
-    console.log("[This is the ID]", id)
-
     const response = await CoursesService.getApiV1CoursesById({
       path: { id },
       responseValidator: async (): Promise<void> => {},
@@ -40,7 +38,6 @@ export async function GET(
 
     return NextResponse.json(courseData)
   } catch (error) {
-    console.log("Error on the route", error)
     const clientError = error as Record<string, never>
 
     const status: number = get(clientError, 'response.status', 500)
