@@ -2,7 +2,7 @@ import {FileText, X, Loader, AlertCircle} from 'react-feather'
 import {DocumentPublic} from '@/client'
 
 export default function FileCard({file}: {file: DocumentPublic}) {
-  const {filename, status} = file
+  const {title, status} = file
 
   const onRemove = () => {}
 
@@ -16,7 +16,7 @@ export default function FileCard({file}: {file: DocumentPublic}) {
       {/* File Info */}
       <div className='flex-1 min-w-0'>
         <div className='text-slate-900 text-sm font-medium truncate'>
-          {filename}
+          {title}
         </div>
 
         {/* Status and Progress */}

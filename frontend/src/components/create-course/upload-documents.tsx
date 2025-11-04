@@ -10,8 +10,10 @@ import {CourseWithDocuments} from '@/client'
 import FileCard from '@/components/ui/file-card'
 import {getCourse} from '@/lib/courses'
 import UploadComponent from '@/components/upload-component'
-import { mapApiError } from '@/lib/mapApiError'
-import { toast } from 'sonner'
+import {mapApiError} from '@/lib/mapApiError'
+import {toast} from 'sonner'
+import {parseISO} from 'date-fns'
+import {parse} from 'path'
 
 export default function UploadDocuments({courseId}: {courseId: string}) {
   const [course, setCourse] = useState<CourseWithDocuments>()
@@ -43,11 +45,20 @@ export default function UploadDocuments({courseId}: {courseId: string}) {
     router.replace(`/dashboard/courses/${courseId}?tab=chat`)
   }
 
-  const isDisabled = !(course?.documents ?? []).some(doc => doc.status === "completed");
-  const documents = course?.documents ?? []
+  const isEmpty = (course?.documents ?? []).length === 0
+  const isDisabled = !(course?.documents ?? []).some(
+    (doc) => doc.status === 'completed',
+  )
+  const documents = (course?.documents ?? []).sort((a, b) =>
+    parseISO(a.updated_at).getMilliseconds() <
+    parseISO(b.updated_at).getMilliseconds()
+      ? 1
+      : -1,
+  )
+
   return (
     <div className='space-y-2'>
-      {(
+      {
         <>
           <UploadComponent courseId={courseId} />
 
@@ -61,12 +72,15 @@ export default function UploadDocuments({courseId}: {courseId: string}) {
           )}
 
           <div className='flex justify-end mt-8'>
-            <Button onClick={handleRedirect} disabled={isDisabled}>
-              {isDisabled? "Uploading..." : "Complete" } <ChevronRight />
+            <Button onClick={handleRedirect} disabled={isEmpty || isDisabled}>
+              {isEmpty && 'Upload Documents'}
+              {!isEmpty && isDisabled && 'Uploading...'}
+              {!isEmpty && !isDisabled && 'Complete'}
+              <ChevronRight />
             </Button>
           </div>
         </>
-      )}
+      }
     </div>
   )
 }

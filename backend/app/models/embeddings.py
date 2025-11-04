@@ -1,6 +1,9 @@
 import uuid
-from typing import TYPE_CHECKING
+from datetime import datetime, timezone
 
+from typing import TYPE_CHECKING
+from app.models.course import Course
+from sqlalchemy import text
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -31,4 +34,14 @@ class Chunk(ChunkBase, table=True):
     document: "Document" = Relationship(back_populates="chunks")
     quizzes: list["Quiz"] = Relationship(
         back_populates="chunk", sa_relationship_kwargs={"cascade": "delete"}
+    )
+    course_id: uuid.UUID = Field(foreign_key="course.id", nullable=False)
+    course: Course | None = Relationship(back_populates="chunks")
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")},
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")},
     )

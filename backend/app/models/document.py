@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
+from app.models.quizzes import Quiz
 from sqlalchemy import text
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -27,6 +28,14 @@ class Document(DocumentBase, table=True):
     filename: str
     status: DocumentStatus = Field(default=DocumentStatus.PENDING)
 
+    course: Course | None = Relationship(back_populates="documents")
+    chunks: list[Chunk] = Relationship(
+        back_populates="document", sa_relationship_kwargs={"cascade": "delete"}
+    )
+    quizzes: list[Quiz] = Relationship(
+        back_populates="document", sa_relationship_kwargs={"cascade": "delete"}
+    )
+
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")},
@@ -34,9 +43,4 @@ class Document(DocumentBase, table=True):
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")},
-    )
-
-    course: Course | None = Relationship(back_populates="documents")
-    chunks: list[Chunk] = Relationship(
-        back_populates="document", sa_relationship_kwargs={"cascade": "delete"}
     )

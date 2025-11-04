@@ -37,12 +37,9 @@ def get_quiz_session_optimized(
     or just the session and quizzes if in progress.
     """
     try:
-        # 1. Fetch QuizSession and Eagerly Load Attempts
         statement = (
             select(QuizSession)
             .where(QuizSession.user_id == current_user.id, QuizSession.id == id)
-            # 🎯 OPTIMIZATION: Use selectinload to fetch the related 'attempts'
-            # This issues a second, efficient query to grab ALL attempts for this session.
             .options(selectinload(QuizSession.attempts))  # type: ignore
         )
         quiz_session = session.exec(statement).first()
@@ -50,21 +47,14 @@ def get_quiz_session_optimized(
         if not quiz_session:
             raise HTTPException(status_code=404, detail="Quiz session not found")
 
-        # Security check (already in WHERE clause, but kept for clarity)
         if quiz_session.user_id != current_user.id:
             raise HTTPException(status_code=403, detail="Forbidden")
 
-        # 2. Fetch Quizzes (Still requires a separate query based on ID list)
         quiz_uuids = [uuid.UUID(q_id) for q_id in quiz_session.quiz_ids_json]
         quizzes_to_show = fetch_and_format_quizzes(session, quiz_uuids)
 
-        # 3. Construct the Response
-
-        # 🎯 Conditional Data Population (No extra query needed here!)
         results_data = []
         if quiz_session.is_completed and quiz_session.attempts:
-            # The 'attempts' attribute is already populated by selectinload.
-            # We convert the ORM objects directly to the public schema.
             results_data = [
                 QuizAttemptPublic.model_validate(a) for a in quiz_session.attempts
             ]

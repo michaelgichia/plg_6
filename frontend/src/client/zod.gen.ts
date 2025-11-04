@@ -95,7 +95,9 @@ export const zDocumentPublic = z.object({
     course_id: z.uuid(),
     updated_at: z.iso.datetime(),
     created_at: z.iso.datetime(),
-    status: zDocumentStatus
+    status: zDocumentStatus,
+    filename: z.string(),
+    title: z.string()
 });
 
 /**
@@ -306,7 +308,11 @@ export const zQuizAttemptPublic = z.object({
     is_correct: z.boolean(),
     correct_answer_text: z.string(),
     time_spent_seconds: z.number(),
-    created_at: z.iso.datetime()
+    created_at: z.iso.datetime(),
+    feedback: z.optional(z.union([
+        z.string(),
+        z.null()
+    ]))
 });
 
 /**

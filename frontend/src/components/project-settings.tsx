@@ -10,11 +10,20 @@ import {Input} from '@/components/ui/input'
 import {Label} from '@/components/ui/label'
 import {Textarea} from '@/components/ui/textarea'
 
-import {CourseWithDocuments} from '@/client'
+import {CourseWithDocuments, DocumentPublic} from '@/client'
 import {getCourse} from '@/lib/courses'
 import {deleteDocument} from '@/actions/documents'
 import {IState} from '@/types/common'
 import UploadComponent from '@/components/upload-component'
+import { format } from 'date-fns'
+
+function sortDocuments(documents: DocumentPublic[]): DocumentPublic[] {
+  return documents.sort((a, b) => {
+    const dateA = new Date(a.updated_at)
+    const dateB = new Date(b.updated_at)
+    return dateB.getTime() - dateA.getTime()
+  })
+}
 
 export default function ProjectSettings() {
   const [isLoading, setIsLoading] = useState(false)
@@ -138,7 +147,7 @@ export default function ProjectSettings() {
                 </div>
               ) : (
                 <>
-                  {(course?.documents ?? []).map((doc) => (
+                  {sortDocuments((course?.documents ?? [])).map((doc) => (
                     <div
                       key={doc.id}
                       className='flex items-center justify-between p-3 bg-muted rounded-lg border border-border'
@@ -147,10 +156,10 @@ export default function ProjectSettings() {
                         <FileText className='h-5 w-5 text-muted-foreground' />
                         <div>
                           <div className='text-sm font-medium text-foreground mb-2'>
-                            {doc.filename}
+                            {doc.title}
                           </div>
                           <div className='text-xs text-muted-foreground'>
-                            Updated on {doc.updated_at}
+                            Updated on {format(doc.updated_at, 'hh:mm a, dd MMM yy')}
                           </div>
                         </div>
                       </div>

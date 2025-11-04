@@ -1,8 +1,10 @@
+import asyncio
 import json
 import logging
 import random
 import uuid
 
+import tiktoken
 from fastapi import HTTPException
 from sqlalchemy import and_
 from sqlalchemy.orm import load_only, selectinload
@@ -10,10 +12,9 @@ from sqlmodel import Session, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models.course import Course
-from app.models.document import Document
 from app.models.embeddings import Chunk
 from app.models.quizzes import Quiz, QuizAttempt, QuizSession
-from app.prompts.quizzes import get_quiz_prompt
+from app.prompts.quizzes import get_quiz_prompt, get_quizzes_generation_prompt
 from app.schemas.public import (
     DifficultyLevel,
     QuizChoice,
@@ -28,91 +29,111 @@ from app.utils import clean_string
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+MAX_PROMPT_TOKENS = 25000
+ENCODER = tiktoken.encoding_for_model("gpt-4o")
 
-async def generate_quizzes_task(document_id: uuid.UUID, session: SessionDep):
-    """
-    Background task to generate a bank of quiz questions from a document.
-    """
+
+def get_token_count(text: str) -> int:
+    """Helper function to count tokens using tiktoken."""
+    return len(ENCODER.encode(text))
+
+
+async def generate_quizzes_task(
+    document_id: uuid.UUID, course_id: uuid.UUID, session: SessionDep
+):
     try:
-        statement = select(Chunk).where(Chunk.document_id == document_id)
-        chunks = session.exec(statement).all()
+        statement = select(Chunk).where(Chunk.course_id == course_id)
+        all_chunks = session.exec(statement).all()
 
-        if not chunks:
+        if not all_chunks:
             logger.warning(f"No chunks found for document {document_id}")
             return
 
-        concatenated_text = " ".join([chunk.text_content for chunk in chunks])
+        # We will track which chunks have been processed
+        unprocessed_chunks = list(all_chunks)
 
         for difficulty_level in [
             DifficultyLevel.EASY,
             DifficultyLevel.MEDIUM,
             DifficultyLevel.HARD,
         ]:
-            prompt = f"""
-            1. Task context: You are an expert quiz question generator for educational content. Your goal is to create multiple-choice questions that thoroughly test a user's understanding of the provided text.
-            2. Tone context: The response must be professional, strictly formatted, and follow all JSON schema rules exactly.
-            3. Background data: The text provided below contains the source material for the quiz questions.
-            4. Detailed task description & rules:
-              - Generate between 5 and 10 multiple-choice quizzes for the provided text.
-              - Each quiz must be strictly at the '{difficulty_level}' difficulty level.
-              - **Each quiz must have exactly 4 choices** (one correct answer and three distractors).
-              - Ensure the **distraction choices are highly plausible**, requiring genuine understanding to be answered correctly. They should be related to the topic but demonstrably incorrect based on the text.
-              - All choices (correct and incorrect) should be **full, descriptive sentences or phrases**, not just single words.
-              - The primary output must be a single JSON object containing a property called 'quizzes'.
+            while unprocessed_chunks:
+                current_batch_chunks = []
+                batch_text_content = ""
+                current_token_count = 0
 
-            5. Output Structure (JSON Schema Rules):
-            Each object in the 'quizzes' array must include the following fields:
+                i = 0
+                while i < len(unprocessed_chunks):
+                    chunk = unprocessed_chunks[i]
+                    chunk_token_count = get_token_count(chunk.text_content)
 
-            - **quiz**: string (The multiple-choice question itself.)
-            - **correct_answer**: string (The text of the correct choice.)
-            - **distraction_1**: string (A plausible, incorrect choice.)
-            - **distraction_2**: string (A plausible, incorrect choice.)
-            - **distraction_3**: string (A plausible, incorrect choice.)
-            - **topic**: string (A short, 2-3 word category/topic for the quiz.)
-            - **feedback**: string (Specific, helpful explanation **for a user who selects an incorrect answer**. This should clarify why the correct answer is right based on the text.)
+                    if current_token_count + chunk_token_count < MAX_PROMPT_TOKENS:
+                        current_token_count += chunk_token_count
+                        batch_text_content += chunk.text_content + "\n\n"
+                        current_batch_chunks.append(chunk)
+                        i += 1
+                    else:
+                        break  # Batch is full, stop adding chunks
 
-            6. Output formatting:
-            Return only a single JSON object.
+                # Remove processed chunks from the front of the list
+                unprocessed_chunks = unprocessed_chunks[i:]
 
-            Text:
-            {concatenated_text}
-            """
-
-            response = await get_quiz_prompt(prompt)
-
-            try:
-                raw_content = response.choices[0].message.content
-                parsed = json.loads(raw_content)
-                quiz_list = parsed.get("quizzes", [])
-                if not isinstance(quiz_list, list):
+                if not current_batch_chunks:
+                    # Should only happen if the first chunk is larger than MAX_PROMPT_TOKENS
                     logger.error(
-                        f"LLM did not return 'quizzes' as a list for document {document_id}. Got: {type(quiz_list)}"
+                        "A single chunk exceeds the maximum prompt token limit."
+                    )
+                    break
+
+                prompt = get_quizzes_generation_prompt(
+                    batch_text_content, difficulty_level
+                )
+
+                response = await get_quiz_prompt(prompt)
+
+                try:
+                    raw_content = response.choices[0].message.content
+                    parsed = json.loads(raw_content)
+                    quiz_list = parsed.get("quizzes", [])
+
+                    if not isinstance(quiz_list, list):
+                        logger.error(
+                            f"LLM did not return 'quizzes' as a list for batch. Got: {type(quiz_list)}"
+                        )
+                        continue
+                except json.JSONDecodeError as e:
+                    logger.error(
+                        f"Failed to parse LLM response for batch: {e}. Raw content: {raw_content[:200]}..."
                     )
                     continue
-            except json.JSONDecodeError as e:
-                logger.error(
-                    f"Failed to parse LLM response for document {document_id}: {e}. Raw content: {raw_content[:200]}..."
-                )
-                continue
 
-            for q_data in quiz_list:
-                if not isinstance(q_data, dict):
-                    logger.warning(f"Skipping malformed item in quiz list: {q_data}")
-                    continue
+                # 4. Save the generated quizzes to the database
+                for q_data in quiz_list:
+                    if not isinstance(q_data, dict):
+                        logger.warning(
+                            f"Skipping malformed item in quiz list: {q_data}"
+                        )
+                        continue
 
-                new_quiz = Quiz(
-                    chunk_id=chunks[0].id,
-                    difficulty_level=difficulty_level,
-                    quiz_text=q_data["quiz"],
-                    correct_answer=clean_string(q_data["correct_answer"]),
-                    distraction_1=clean_string(q_data["distraction_1"]),
-                    distraction_2=clean_string(q_data["distraction_2"]),
-                    distraction_3=clean_string(q_data["distraction_3"]),
-                    topic=clean_string(q_data["topic"]),
-                )
-                session.add(new_quiz)
+                    new_quiz = Quiz(
+                        chunk_id=current_batch_chunks[0].id,
+                        correct_answer=clean_string(q_data["correct_answer"]),
+                        course_id=course_id,
+                        difficulty_level=difficulty_level,
+                        distraction_1=clean_string(q_data["distraction_1"]),
+                        distraction_2=clean_string(q_data["distraction_2"]),
+                        distraction_3=clean_string(q_data["distraction_3"]),
+                        document_id=document_id,
+                        feedback=clean_string(q_data["feedback"]),
+                        quiz_text=q_data["quiz"],
+                        topic=clean_string(q_data["topic"]),
+                    )
+                    session.add(new_quiz)
 
-            session.commit()
+                session.commit()
+                await asyncio.sleep(15)
+
+            unprocessed_chunks = list(all_chunks)
 
     except Exception as e:
         logger.error(f"Error generating quizzes for document {document_id}: {e}")
@@ -149,11 +170,17 @@ def score_quiz_batch(
         statement = (
             select(Quiz)
             .where(Quiz.id.in_(submitted_ids))  # type: ignore
-            .options(load_only(Quiz.id, Quiz.correct_answer))  # type: ignore
+            .options(load_only(Quiz.id, Quiz.correct_answer, Quiz.feedback))  # type: ignore
         )
 
+        quizzes = db.exec(statement).all()
+
         correct_answers_map: dict[uuid.UUID, str] = {
-            q.id: q.correct_answer.strip() for q in db.exec(statement).all()
+            q.id: q.correct_answer.strip() for q in quizzes
+        }
+
+        feedback_map: dict[uuid.UUID, str] = {
+            q.id: (q.feedback or "").strip() for q in quizzes
         }
 
         missing_ids = set(submitted_ids) - set(correct_answers_map.keys())
@@ -181,9 +208,8 @@ def score_quiz_batch(
 
             if is_correct:
                 total_correct += 1
-                feedback = "Correct! Well done."
-            else:
-                feedback = "Incorrect. Review the material."
+
+            feedback = feedback_map[submitted_quiz_id]
 
             results.append(
                 SingleQuizScore(
@@ -201,6 +227,7 @@ def score_quiz_batch(
                 selected_answer_text=submitted_text,
                 is_correct=is_correct,
                 correct_answer_text=correct_text,
+                feedback=feedback,
             )
             db.add(attempt)
 
@@ -334,16 +361,34 @@ def select_quizzes_by_course_criteria(
     Selects a set of Quizzes for a specific course and difficulty level,
     ensuring the user owns the course. This is used for NEW sessions.
     """
-    statement = (
+    quiz_attempts_statement = (
+        select(QuizAttempt)
+        .join(Quiz)
+        .where(
+            Quiz.course_id == course_id,  # type: ignore
+            Quiz.difficulty_level == difficulty,  # type: ignore
+            QuizAttempt.is_correct == True,  # noqa: E712
+        )
+        .options(load_only(QuizAttempt.quiz_id))  # type: ignore
+    )
+
+    quiz_attempts_raw = db.exec(quiz_attempts_statement).all()
+
+    logger.info(f"Quiz attempts: {quiz_attempts_raw}")
+
+    quizzes_statement = (
         select(Quiz)
-        .join(Chunk, Quiz.chunk_id == Chunk.id)  # type: ignore
-        .join(Document, Chunk.document_id == Document.id)  # type: ignore
-        .join(Course, Document.course_id == Course.id)  # type: ignore
+        .join(Course)
         .where(
             and_(
-                Course.id == course_id,  # type: ignore
+                Quiz.course_id == course_id,  # type: ignore
                 Course.owner_id == current_user.id,  # type: ignore
                 Quiz.difficulty_level == difficulty,  # type: ignore
+            )
+        )
+        .filter(
+            Quiz.id.not_in(
+                [attempt.quiz_id for attempt in quiz_attempts_raw]  # type: ignore
             )
         )
         .options(selectinload(Quiz.chunk))  # type: ignore[arg-type]
@@ -351,7 +396,7 @@ def select_quizzes_by_course_criteria(
         .limit(limit)
     )
 
-    quizzes_raw = db.exec(statement).all()
+    quizzes_raw = db.exec(quizzes_statement).all()
     # Ensure only Quiz objects are returned
     quizzes: list[Quiz] = [r[0] if isinstance(r, tuple) else r for r in quizzes_raw]
     return quizzes

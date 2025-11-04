@@ -60,13 +60,13 @@ export function QuizItem({
       {isScored && (
         <div className='pt-2 mt-2 border-t border-gray-200'>
           <p
-            className={`text-sm font-semibold ${
+            className={`text-sm font-semibold capitalize ${
               result.is_correct ? 'text-green-600' : 'text-red-600'
             }`}
           >
             {result.is_correct
               ? 'Result: Correct'
-              : `Result: Incorrect (The correct answer was: ${result.correct_answer_text})`}
+              : `Feedback: ${result.feedback?.toLocaleLowerCase()}`}
           </p>
         </div>
       )}

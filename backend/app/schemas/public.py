@@ -41,6 +41,8 @@ class DocumentPublic(PydanticBase):
     updated_at: datetime
     created_at: datetime
     status: DocumentStatus
+    filename: str
+    title: str
 
 
 class CoursePublic(PydanticBase):
@@ -48,7 +50,7 @@ class CoursePublic(PydanticBase):
     owner_id: uuid.UUID
     name: str
     description: str | None = None
-    documents: list[DocumentPublic]
+    documents: Sequence[DocumentPublic]
     created_at: datetime
     updated_at: datetime
 
@@ -181,6 +183,7 @@ class QuizAttemptPublic(PydanticBase):
     correct_answer_text: str
     time_spent_seconds: float
     created_at: datetime
+    feedback: str | None = None
 
 
 class QuizSessionPublicWithQuizzes(QuizSessionPublic):
@@ -203,6 +206,7 @@ class ChatPublic(PydanticBase):
     is_system: bool
     created_at: datetime
     updated_at: datetime
+
 
 class ChatMessage(BaseModel):
     message: str

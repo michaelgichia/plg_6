@@ -297,6 +297,14 @@ export type DocumentPublic = {
      */
     created_at: string;
     status: DocumentStatus;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Title
+     */
+    title: string;
 };
 
 /**
@@ -490,6 +498,10 @@ export type QuizAttemptPublic = {
      * Created At
      */
     created_at: string;
+    /**
+     * Feedback
+     */
+    feedback?: string | null;
 };
 
 /**
